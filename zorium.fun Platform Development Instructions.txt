@@ -1,0 +1,627 @@
+zorium.fun Platform Development Instructions
+🎯 Platform Concept
+Build an NFT marketplace on Zora Network with integrated social features where users can create, mint, and promote NFTs using ETH for transactions and ZORIUM (ZRM) token for additional features.
+📋 Implementation Requirements
+1. Home Page Development
+
+Create hero section:
+
+Design compelling tagline for the platform
+Implement "Connect Wallet" button with Web3 integration
+Add animated background or visual elements
+
+
+Build Featured NFTs section:
+
+Create carousel/grid for NFTs promoted with ZORIUM tokens
+Implement promotion duration tracking
+Add "Promoted" badge overlay
+
+
+Develop activity feed:
+
+Show NFTs from followed users
+Implement fallback to show random NFTs for new users
+Add infinite scroll functionality
+
+
+Add category navigation:
+
+Create category buttons: Art, Photography, Videos, GIFs, Music
+Implement category filtering
+
+
+Display platform statistics:
+
+Total NFTs created
+Active users count
+Trading volume (24h, 7d, 30d)
+
+
+
+2. Explore Page Implementation
+
+Create filter system:
+
+Category dropdown
+Price range slider (min/max in ETH)
+Date picker for creation date
+Mint count range
+
+
+Implement sorting options:
+
+Newest first
+Most popular (by mints)
+Price (low to high, high to low)
+
+
+Build search functionality:
+
+Real-time search by NFT name
+Search by creator name
+Tag-based search
+Implement search suggestions
+
+
+Design NFT grid layout:
+
+Responsive grid with preview cards
+Lazy loading for images
+Hover effects showing basic info
+
+
+Add pagination or infinite scroll
+
+3. Trending Page Development
+
+Create time period tabs:
+
+5 minutes
+1 hour
+24 hours
+7 days
+
+
+Build Top 10 NFT displays:
+
+Fetch and display NFTs by mint count per period
+Show rank numbers (#1-#10)
+
+
+Add statistics for each NFT:
+
+Total mints in period
+Unique minters count
+Total volume
+Percentage change
+
+
+Implement trend charts:
+
+Mini sparkline graphs showing mint activity
+Use Chart.js or similar library
+
+
+
+4. Create NFT Page
+
+Build media upload interface:
+
+Drag & drop zone
+File type validation (image/video/gif)
+Size limit enforcement (100MB)
+Upload progress indicator
+
+
+Create metadata form:
+
+NFT name field (required)
+Description textarea (optional)
+Collection name with autocomplete (required)
+Tags input with suggestions
+
+
+Implement mint settings:
+
+Price input (ETH) with 0.000111 default
+Mint duration picker (default: unlimited)
+Max supply setting (optional)
+
+
+Add preview functionality:
+
+Real-time preview as user fills form
+Show how NFT will appear in marketplace
+
+
+Display gas fee estimation:
+
+Calculate and show estimated gas costs
+Update dynamically based on network conditions
+
+
+
+5. User Profile Development
+
+Create profile header:
+
+Avatar upload functionality
+Username/ENS display
+Bio text area
+Social media links
+Follow/Unfollow button
+
+
+Implement tabbed interface:
+
+Created NFTs tab with management tools
+Minted NFTs collection display
+Collections overview
+Activity history timeline
+
+
+Add user statistics:
+
+Total NFTs created
+Total mints received
+Earnings calculator
+Follower/Following counts
+
+
+Build sharing functionality:
+
+Copy profile link button
+Social media share options
+
+
+
+6. Collections Feature
+
+Create collections list view:
+
+Grid/list toggle
+Collection cover images
+NFT count per collection
+
+
+Build collection creation flow:
+
+Collection name input
+Description field
+Cover image upload
+Privacy settings
+
+
+Implement collection management:
+
+Add/remove NFTs interface
+Reorder NFTs
+Edit collection details
+
+
+Display collection analytics:
+
+Total volume
+Number of NFTs
+Unique holders
+
+
+
+7. Notifications System
+
+Create notification types:
+
+"Your NFT was minted" alerts
+New follower notifications
+New NFT from followed users
+System announcements
+
+
+Build notification interface:
+
+Bell icon with unread count
+Dropdown/page with notification list
+Time stamps (relative time)
+
+
+Implement filtering:
+
+Filter by notification type
+Show only unread
+
+
+Add notification actions:
+
+Mark as read/unread
+Delete notifications
+Settings shortcut
+
+
+
+8. Settings Page
+
+Profile settings section:
+
+Edit username
+Update bio
+Change avatar
+Manage social links
+
+
+Privacy controls:
+
+Profile visibility toggle
+NFT visibility options
+Activity sharing preferences
+
+
+Notification preferences:
+
+Email notification toggles
+In-app notification settings
+Frequency options
+
+
+Wallet management:
+
+View connected wallets
+Add/remove wallets
+Set primary wallet
+
+
+Language selector:
+
+Implement i18n support
+Language dropdown
+
+
+
+9. NFT Detail Page
+
+Create media viewer:
+
+Full-screen view option
+Zoom functionality for images
+Video player controls
+
+
+Display NFT information:
+
+Title, description, creator
+Collection link
+Creation date
+Token ID
+
+
+Build mint interface:
+
+Prominent mint button
+Fee breakdown display:
+
+Creator fee: 0.000055 ETH
+First minter reward: 0.000011 ETH
+Referral fee: 0.000022 ETH (if applicable)
+Platform fee: 0.000022 ETH
+
+
+
+
+Implement referral system:
+
+Generate referral links
+Auto-append wallet address to URL
+Copy link functionality
+
+
+Add statistics section:
+
+Total mints counter
+Unique owners count
+Price history (if variable)
+
+
+Create activity feed:
+
+Mint history with timestamps
+User addresses (truncated)
+Transaction links
+
+
+
+10. ZORIUM Promotion System
+
+Build featured section interface:
+
+Slot selection grid
+Duration picker (hours/days)
+Preview of featured placement
+
+
+Create boost options:
+
+Search ranking boost
+Category page priority
+Homepage visibility
+
+
+Implement cost calculator:
+
+Real-time ZRM cost calculation
+Duration-based pricing
+Available balance display
+
+
+Add promotion analytics:
+
+Views gained
+Mints during promotion
+ROI calculator
+
+
+
+🔧 Additional Features Implementation
+1. Gamification System
+
+Create achievement system:
+
+Design badges (First Mint, 100 Mints, Creator badges)
+Achievement progress tracking
+Badge showcase on profile
+
+
+Build user ranking:
+
+Point system based on activity
+Leaderboard page
+Rank display on profiles
+
+
+Implement daily rewards:
+
+Check-in system
+ZRM token rewards
+Streak bonuses
+
+
+
+2. Analytics Dashboard
+
+Create creator dashboard:
+
+Revenue charts (daily/weekly/monthly)
+Mint activity graphs
+Popular NFTs ranking
+
+
+Build demographic insights:
+
+Geographic distribution (if available)
+Time-based activity patterns
+Referral source tracking
+
+
+
+3. Auction System
+
+Implement auction creation:
+
+Starting price setting
+Duration picker
+Reserve price option
+
+
+Build bidding interface:
+
+Current bid display
+Bid history
+Auto-bid functionality
+
+
+Create auction completion:
+
+Automatic winner selection
+Payment processing
+NFT transfer
+
+
+
+4. Collaboration Features
+
+Enable co-creation:
+
+Multiple creator addresses
+Revenue split configuration
+Approval workflow
+
+
+Implement royalty distribution:
+
+Automatic split calculations
+On-chain royalty enforcement
+
+
+
+5. Responsive Design
+
+Implement mobile-first approach:
+
+Breakpoints: 320px, 768px, 1024px, 1440px
+Touch-friendly interfaces
+Swipe gestures for galleries
+
+
+Optimize for tablets:
+
+Adjusted grid layouts
+Proper spacing
+
+
+Create PWA features:
+
+Service worker implementation
+Offline capability for viewed content
+Add to home screen prompt
+
+
+
+6. Developer API
+
+Build RESTful API:
+
+NFT data endpoints
+User profile endpoints
+Collection endpoints
+
+
+Create documentation:
+
+API reference
+Code examples
+Rate limiting info
+
+
+Develop embedding widgets:
+
+NFT embed code generator
+Collection showcase widget
+
+
+
+💼 Technical Implementation
+Smart Contract Development:
+
+Create Factory Contract:
+
+NFT creation logic
+Metadata storage references
+Access control
+
+
+Build Royalty Distribution:
+
+Automatic fee splitting
+Withdrawal functions
+Balance tracking
+
+
+Implement ZORIUM Integration:
+
+Token approval handling
+Promotion payment logic
+Refund mechanisms
+
+
+
+Backend Architecture:
+
+Set up authentication:
+
+Email verification system
+Wallet signature verification
+JWT token management
+
+
+Configure media storage:
+
+IPFS integration for decentralization
+Backup to Arweave
+CDN setup for fast delivery
+
+
+Create blockchain indexer:
+
+Event listening service
+Database synchronization
+Real-time updates
+
+
+Build API layer:
+
+GraphQL or REST endpoints
+WebSocket for real-time features
+Caching strategy
+
+
+
+Frontend Development:
+
+Set up Next.js project:
+
+TypeScript configuration
+Tailwind CSS setup
+Component library selection
+
+
+Implement Web3 integration:
+
+Wagmi hooks setup
+Wallet connection flow
+Transaction handling
+
+
+Create responsive layouts:
+
+Mobile-first CSS
+Flexible grid systems
+Optimized images
+
+
+Add PWA capabilities:
+
+Manifest file
+Service worker
+Offline fallbacks
+
+
+
+🛡️ Security & Moderation Implementation
+Security Measures:
+
+Implement email verification:
+
+Confirmation email flow
+Resend functionality
+Expiry handling
+
+
+Add rate limiting:
+
+API request limits
+Upload restrictions
+Mint frequency caps
+
+
+Create anti-spam system:
+
+Behavior pattern detection
+Blacklist management
+Report functionality
+
+
+
+Content Moderation:
+
+Set up AI moderation:
+
+Image classification API
+Text content filtering
+Automated flagging
+
+
+Build manual review:
+
+Moderation dashboard
+Approval/rejection flow
+User appeals process
+
+
+Implement wash trading prevention:
+
+Pattern detection algorithms
+Account relationship mapping
+Suspicious activity alerts
+
+
+
+This comprehensive instruction set provides a complete roadmap for developing the zorium.fun platform with all necessary features and considerations for a successful NFT marketplace on Zora Network.

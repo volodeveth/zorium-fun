@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background: #0a0a0a !important;
+  color: #ffffff !important;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Force dark theme */
+body * {
+  background-color: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+@layer components {
+  .glass-effect {
+    background: rgba(26, 26, 26, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .nft-card {
+    @apply bg-background-secondary rounded-xl border border-border overflow-hidden transition-all duration-300 hover:scale-105 hover:border-purple-primary/50;
+  }
+
+  .btn-primary {
+    @apply bg-purple-primary hover:bg-purple-hover text-white font-medium px-6 py-3 rounded-lg transition-colors duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-background-secondary hover:bg-background-tertiary text-text-primary border border-border font-medium px-6 py-3 rounded-lg transition-colors duration-200;
+  }
+}

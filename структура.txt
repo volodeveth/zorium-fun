@@ -1,0 +1,346 @@
+zorium.fun/
+│
+├── frontend/                    # Next.js frontend application
+│   ├── public/                  # Static assets
+│   │   ├── images/
+│   │   │   ├── logo.svg
+│   │   │   ├── favicon.ico
+│   │   │   └── og-image.png
+│   │   ├── fonts/
+│   │   └── manifest.json        # PWA manifest
+│   │
+│   ├── src/
+│   │   ├── app/                 # Next.js 13+ app directory
+│   │   │   ├── layout.tsx       # Root layout
+│   │   │   ├── page.tsx         # Home page
+│   │   │   ├── globals.css      # Global styles
+│   │   │   ├── providers.tsx    # App providers wrapper
+│   │   │   │
+│   │   │   ├── explore/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── trending/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── create/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── profile/
+│   │   │   │   ├── [address]/
+│   │   │   │   │   └── page.tsx
+│   │   │   │   └── settings/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── collections/
+│   │   │   │   ├── page.tsx
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── nft/
+│   │   │   │   └── [id]/
+│   │   │   │       └── page.tsx
+│   │   │   │
+│   │   │   ├── notifications/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── promote/
+│   │   │   │   └── page.tsx
+│   │   │   │
+│   │   │   ├── api/             # API routes
+│   │   │   │   ├── auth/
+│   │   │   │   │   ├── verify/
+│   │   │   │   │   │   └── route.ts
+│   │   │   │   │   └── session/
+│   │   │   │   │       └── route.ts
+│   │   │   │   │
+│   │   │   │   ├── upload/
+│   │   │   │   │   └── route.ts
+│   │   │   │   │
+│   │   │   │   ├── search/
+│   │   │   │   │   └── route.ts
+│   │   │   │   │
+│   │   │   │   └── analytics/
+│   │   │   │       └── route.ts
+│   │   │   │
+│   │   │   └── (auth)/          # Auth grouped routes
+│   │   │       └── login/
+│   │   │           └── page.tsx
+│   │   │
+│   │   ├── components/
+│   │   │   ├── layout/
+│   │   │   │   ├── Header.tsx
+│   │   │   │   ├── Footer.tsx
+│   │   │   │   ├── Navigation.tsx
+│   │   │   │   ├── MobileMenu.tsx
+│   │   │   │   └── Sidebar.tsx
+│   │   │   │
+│   │   │   ├── web3/
+│   │   │   │   ├── ConnectWallet.tsx
+│   │   │   │   ├── WalletModal.tsx
+│   │   │   │   ├── TransactionModal.tsx
+│   │   │   │   └── NetworkSwitch.tsx
+│   │   │   │
+│   │   │   ├── nft/
+│   │   │   │   ├── NFTCard.tsx
+│   │   │   │   ├── NFTGrid.tsx
+│   │   │   │   ├── NFTDetail.tsx
+│   │   │   │   ├── MintButton.tsx
+│   │   │   │   └── NFTStats.tsx
+│   │   │   │
+│   │   │   ├── create/
+│   │   │   │   ├── MediaUpload.tsx
+│   │   │   │   ├── MetadataForm.tsx
+│   │   │   │   ├── MintSettings.tsx
+│   │   │   │   ├── CollectionSelect.tsx
+│   │   │   │   └── CreatePreview.tsx
+│   │   │   │
+│   │   │   ├── profile/
+│   │   │   │   ├── ProfileHeader.tsx
+│   │   │   │   ├── ProfileTabs.tsx
+│   │   │   │   ├── ProfileStats.tsx
+│   │   │   │   ├── FollowButton.tsx
+│   │   │   │   └── EditProfile.tsx
+│   │   │   │
+│   │   │   ├── explore/
+│   │   │   │   ├── FilterPanel.tsx
+│   │   │   │   ├── SearchBar.tsx
+│   │   │   │   ├── SortDropdown.tsx
+│   │   │   │   └── CategoryFilter.tsx
+│   │   │   │
+│   │   │   ├── trending/
+│   │   │   │   ├── TrendingTabs.tsx
+│   │   │   │   ├── TrendingList.tsx
+│   │   │   │   └── TrendChart.tsx
+│   │   │   │
+│   │   │   ├── notifications/
+│   │   │   │   ├── NotificationBell.tsx
+│   │   │   │   ├── NotificationList.tsx
+│   │   │   │   └── NotificationItem.tsx
+│   │   │   │
+│   │   │   ├── promotion/
+│   │   │   │   ├── PromotionForm.tsx
+│   │   │   │   ├── CostCalculator.tsx
+│   │   │   │   └── PromotionStats.tsx
+│   │   │   │
+│   │   │   ├── common/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Dropdown.tsx
+│   │   │   │   ├── Tabs.tsx
+│   │   │   │   ├── Toast.tsx
+│   │   │   │   ├── Loader.tsx
+│   │   │   │   ├── Pagination.tsx
+│   │   │   │   └── InfiniteScroll.tsx
+│   │   │   │
+│   │   │   └── analytics/
+│   │   │       ├── RevenueChart.tsx
+│   │   │       ├── ActivityGraph.tsx
+│   │   │       └── DemographicsChart.tsx
+│   │   │
+│   │   ├── hooks/
+│   │   │   ├── useAuth.ts
+│   │   │   ├── useWeb3.ts
+│   │   │   ├── useContract.ts
+│   │   │   ├── useIPFS.ts
+│   │   │   ├── useNotifications.ts
+│   │   │   ├── useSearch.ts
+│   │   │   ├── useInfiniteScroll.ts
+│   │   │   ├── useDebounce.ts
+│   │   │   └── useMediaUpload.ts
+│   │   │
+│   │   ├── lib/
+│   │   │   ├── web3/
+│   │   │   │   ├── config.ts
+│   │   │   │   ├── contracts.ts
+│   │   │   │   ├── providers.ts
+│   │   │   │   └── wagmi.ts
+│   │   │   │
+│   │   │   ├── api/
+│   │   │   │   ├── client.ts
+│   │   │   │   ├── endpoints.ts
+│   │   │   │   └── fetcher.ts
+│   │   │   │
+│   │   │   ├── utils/
+│   │   │   │   ├── format.ts
+│   │   │   │   ├── validation.ts
+│   │   │   │   ├── constants.ts
+│   │   │   │   └── helpers.ts
+│   │   │   │
+│   │   │   ├── ipfs/
+│   │   │   │   ├── client.ts
+│   │   │   │   └── upload.ts
+│   │   │   │
+│   │   │   └── email/
+│   │   │       └── templates.ts
+│   │   │
+│   │   ├── store/
+│   │   │   ├── slices/
+│   │   │   │   ├── authSlice.ts
+│   │   │   │   ├── web3Slice.ts
+│   │   │   │   ├── nftSlice.ts
+│   │   │   │   ├── notificationSlice.ts
+│   │   │   │   └── uiSlice.ts
+│   │   │   │
+│   │   │   └── index.ts
+│   │   │
+│   │   ├── types/
+│   │   │   ├── nft.ts
+│   │   │   ├── user.ts
+│   │   │   ├── collection.ts
+│   │   │   ├── transaction.ts
+│   │   │   └── api.ts
+│   │   │
+│   │   └── styles/
+│   │       ├── components/
+│   │       └── utilities/
+│   │
+│   ├── .env.local
+│   ├── .env.example
+│   ├── next.config.js
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── README.md
+│
+├── backend/                     # Node.js backend
+│   ├── src/
+│   │   ├── controllers/
+│   │   │   ├── authController.ts
+│   │   │   ├── nftController.ts
+│   │   │   ├── userController.ts
+│   │   │   ├── collectionController.ts
+│   │   │   ├── searchController.ts
+│   │   │   ├── analyticsController.ts
+│   │   │   └── notificationController.ts
+│   │   │
+│   │   ├── services/
+│   │   │   ├── authService.ts
+│   │   │   ├── emailService.ts
+│   │   │   ├── ipfsService.ts
+│   │   │   ├── blockchainService.ts
+│   │   │   ├── indexerService.ts
+│   │   │   ├── cacheService.ts
+│   │   │   └── moderationService.ts
+│   │   │
+│   │   ├── models/
+│   │   │   ├── User.ts
+│   │   │   ├── NFT.ts
+│   │   │   ├── Collection.ts
+│   │   │   ├── Transaction.ts
+│   │   │   ├── Notification.ts
+│   │   │   └── Promotion.ts
+│   │   │
+│   │   ├── routes/
+│   │   │   ├── auth.ts
+│   │   │   ├── nft.ts
+│   │   │   ├── user.ts
+│   │   │   ├── collection.ts
+│   │   │   ├── search.ts
+│   │   │   └── analytics.ts
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── auth.ts
+│   │   │   ├── validation.ts
+│   │   │   ├── rateLimiter.ts
+│   │   │   ├── errorHandler.ts
+│   │   │   └── cors.ts
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── logger.ts
+│   │   │   ├── validators.ts
+│   │   │   ├── helpers.ts
+│   │   │   └── constants.ts
+│   │   │
+│   │   ├── config/
+│   │   │   ├── database.ts
+│   │   │   ├── redis.ts
+│   │   │   ├── web3.ts
+│   │   │   └── ipfs.ts
+│   │   │
+│   │   ├── jobs/
+│   │   │   ├── syncBlockchain.ts
+│   │   │   ├── processMedia.ts
+│   │   │   ├── sendNotifications.ts
+│   │   │   └── updateAnalytics.ts
+│   │   │
+│   │   └── app.ts
+│   │
+│   ├── tests/
+│   │   ├── unit/
+│   │   ├── integration/
+│   │   └── e2e/
+│   │
+│   ├── .env
+│   ├── .env.example
+│   ├── tsconfig.json
+│   ├── package.json
+│   └── README.md
+│
+├── smart-contracts/             # Solidity contracts
+│   ├── contracts/
+│   │   ├── ZoriumNFTFactory.sol
+│   │   ├── ZoriumNFT.sol
+│   │   ├── RoyaltyDistributor.sol
+│   │   ├── ZoriumPromotion.sol
+│   │   └── interfaces/
+│   │       ├── IZoriumNFT.sol
+│   │       └── IRoyaltyDistributor.sol
+│   │
+│   ├── scripts/
+│   │   ├── deploy.ts
+│   │   ├── verify.ts
+│   │   └── upgrade.ts
+│   │
+│   ├── test/
+│   │   ├── ZoriumNFTFactory.test.ts
+│   │   ├── RoyaltyDistributor.test.ts
+│   │   └── helpers/
+│   │
+│   ├── hardhat.config.ts
+│   ├── .env
+│   ├── .env.example
+│   ├── package.json
+│   └── README.md
+│
+├── database/                    # Database schemas
+│   ├── migrations/
+│   │   └── [timestamp]_initial_schema.sql
+│   │
+│   ├── seeds/
+│   │   └── initial_data.sql
+│   │
+│   └── schema.sql
+│
+├── scripts/                     # Utility scripts
+│   ├── setup.sh
+│   ├── deploy.sh
+│   └── backup.sh
+│
+├── docs/                        # Documentation
+│   ├── API.md
+│   ├── SMART_CONTRACTS.md
+│   ├── DEPLOYMENT.md
+│   └── USER_GUIDE.md
+│
+├── .github/                     # GitHub Actions
+│   └── workflows/
+│       ├── ci.yml
+│       ├── deploy-frontend.yml
+│       └── deploy-backend.yml
+│
+├── docker/                      # Docker configuration
+│   ├── frontend/
+│   │   └── Dockerfile
+│   ├── backend/
+│   │   └── Dockerfile
+│   └── docker-compose.yml
+│
+├── nginx/                       # Nginx configuration
+│   └── default.conf
+│
+├── .gitignore
+├── .prettierrc
+├── .eslintrc.json
+├── LICENSE
+└── README.md

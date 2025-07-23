@@ -17,7 +17,7 @@ export default function UserProfileDropdown({ address }: UserProfileDropdownProp
   
   const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address: address as `0x${string}` })
-  const { data: ensAvatar } = useEnsAvatar({ name: ensName })
+  const { data: ensAvatar } = useEnsAvatar({ name: ensName || undefined })
 
   // Close dropdown when clicking outside
   useEffect(() => {

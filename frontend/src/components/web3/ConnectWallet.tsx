@@ -3,6 +3,7 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useEnsName } from 'wagmi'
 import { Wallet, ChevronDown } from 'lucide-react'
+import UserProfileDropdown from '@/components/layout/UserProfileDropdown'
 
 export default function ConnectWallet() {
   const { address, isConnecting, isDisconnected } = useAccount()
@@ -93,17 +94,8 @@ export default function ConnectWallet() {
                     <ChevronDown size={14} />
                   </button>
 
-                  {/* Account Button */}
-                  <button
-                    onClick={openAccountModal}
-                    type="button"
-                    className="btn-primary flex items-center gap-2"
-                  >
-                    <div className="w-4 h-4 rounded-full bg-green-400"></div>
-                    {ensName || `${account.address.slice(0, 6)}...${account.address.slice(-4)}`}
-                    {account.displayBalance ? ` (${account.displayBalance})` : ''}
-                    <ChevronDown size={14} />
-                  </button>
+                  {/* User Profile Dropdown */}
+                  <UserProfileDropdown address={account.address} />
                 </div>
               )
             })()}

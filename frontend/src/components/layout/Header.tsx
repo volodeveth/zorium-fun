@@ -4,9 +4,11 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X, Bell, Search } from 'lucide-react'
 import ConnectWallet from '@/components/web3/ConnectWallet'
+import SearchModal from '@/components/common/SearchModal'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
 
   return (
     <header className="sticky top-0 z-50 glass-effect">
@@ -38,7 +40,11 @@ export default function Header() {
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
             {/* Search */}
-            <button className="p-2 text-text-secondary hover:text-text-primary transition-colors">
+            <button 
+              onClick={() => setIsSearchModalOpen(true)}
+              className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+              title="Search"
+            >
               <Search size={20} />
             </button>
             
@@ -81,6 +87,12 @@ export default function Header() {
           </div>
         )}
       </div>
+
+      {/* Search Modal */}
+      <SearchModal 
+        isOpen={isSearchModalOpen} 
+        onClose={() => setIsSearchModalOpen(false)} 
+      />
     </header>
   )
 }

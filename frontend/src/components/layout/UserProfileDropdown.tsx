@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAccount, useEnsName, useEnsAvatar } from 'wagmi'
+import { useAccount, useEnsName, useEnsAvatar, useDisconnect } from 'wagmi'
 import { User, Settings, LogOut, Copy, Check } from 'lucide-react'
 
 interface UserProfileDropdownProps {
@@ -15,7 +15,7 @@ export default function UserProfileDropdown({ address }: UserProfileDropdownProp
   const dropdownRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
   
-  const { disconnect } = useAccount()
+  const { disconnect } = useDisconnect()
   const { data: ensName } = useEnsName({ address: address as `0x${string}` })
   const { data: ensAvatar } = useEnsAvatar({ name: ensName })
 

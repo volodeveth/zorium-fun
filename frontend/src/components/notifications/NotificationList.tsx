@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { CheckAll, Filter, Trash2 } from 'lucide-react'
+import { Check, Filter, Trash2 } from 'lucide-react'
 import NotificationItem, { NotificationData } from './NotificationItem'
 import Button from '@/components/common/Button'
 
@@ -132,7 +132,7 @@ export default function NotificationList({ className = '' }: NotificationListPro
     return (
       <div className={`text-center py-12 ${className}`}>
         <div className="w-16 h-16 bg-background-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckAll size={24} className="text-text-secondary" />
+          <Check size={24} className="text-text-secondary" />
         </div>
         <h3 className="text-text-primary font-medium mb-2">All caught up!</h3>
         <p className="text-text-secondary">No notifications to show</p>
@@ -187,7 +187,7 @@ export default function NotificationList({ className = '' }: NotificationListPro
               size="sm"
               className="flex items-center gap-2"
             >
-              <CheckAll size={16} />
+              <Check size={16} />
               Mark all read
             </Button>
           )}

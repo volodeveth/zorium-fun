@@ -34,9 +34,26 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
               <h1 className="text-3xl font-bold text-text-primary mb-2">
                 {profile.username}
               </h1>
-              <p className="text-text-secondary mb-2">
+              <p className="text-text-secondary mb-3">
                 {profile.address} " ZORIUM (ZRM)
               </p>
+              
+              {/* Followers/Following counts at top */}
+              <div className="flex gap-6 mb-4">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {profile.followers.toLocaleString()}
+                  </div>
+                  <div className="text-text-secondary text-sm">Followers</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-text-primary">
+                    {profile.following.toLocaleString()}
+                  </div>
+                  <div className="text-text-secondary text-sm">Following</div>
+                </div>
+              </div>
+              
               <p className="text-text-secondary max-w-2xl">
                 {profile.bio}
               </p>
@@ -58,19 +75,7 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-text-primary">
-                {profile.followers.toLocaleString()}
-              </div>
-              <div className="text-text-secondary text-sm">Followers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-text-primary">
-                {profile.following.toLocaleString()}
-              </div>
-              <div className="text-text-secondary text-sm">Following</div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="text-2xl font-bold text-text-primary">
                 {profile.nftsCreated}

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Edit, ExternalLink, Copy, Share } from 'lucide-react'
+import { Edit, ExternalLink } from 'lucide-react'
 import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileTabs from '@/components/profile/ProfileTabs'
 import NFTCard from '@/components/nft/NFTCard'
@@ -91,8 +91,7 @@ export default function ProfilePage({ params }: { params: { address: string } })
           stats={{
             created: mockNFTs.length,
             minted: mockMintedNFTs.length,
-            collections: 3,
-            referrals: 12
+            collections: 3
           }}
         />
 
@@ -199,60 +198,6 @@ export default function ProfilePage({ params }: { params: { address: string } })
             </motion.div>
           )}
 
-          {activeTab === 'referrals' && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-text-primary">Referral Program</h2>
-                <div className="text-text-secondary">
-                  12 referrals " 2.4 ETH earned
-                </div>
-              </div>
-              
-              <div className="bg-background-secondary rounded-xl border border-border p-6 mb-6">
-                <h3 className="text-text-primary font-semibold mb-4">Your Referral Link</h3>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value="https://zorium.fun/ref/0x123...abc"
-                    readOnly
-                    className="flex-1 bg-background-tertiary border border-border rounded-lg px-4 py-2 text-text-primary"
-                  />
-                  <button className="btn-secondary">
-                    <Copy size={16} />
-                  </button>
-                  <button className="btn-secondary">
-                    <Share size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-background-secondary rounded-xl border border-border p-6">
-                <h3 className="text-text-primary font-semibold mb-4">Referral Stats</h3>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-text-primary">12</div>
-                    <div className="text-text-secondary text-sm">Total Referrals</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-text-primary">2.4</div>
-                    <div className="text-text-secondary text-sm">ETH Earned</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-text-primary">45</div>
-                    <div className="text-text-secondary text-sm">NFTs Minted</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-text-primary">8</div>
-                    <div className="text-text-secondary text-sm">Active This Month</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
         </div>
       </div>
     </div>

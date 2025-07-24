@@ -5,7 +5,6 @@ interface ProfileTabsProps {
     created: number
     minted: number
     collections: number
-    referrals: number
   }
 }
 
@@ -13,8 +12,7 @@ export default function ProfileTabs({ activeTab, setActiveTab, stats }: ProfileT
   const tabs = [
     { id: 'created', label: 'Created', count: stats.created },
     { id: 'minted', label: 'Minted', count: stats.minted },
-    { id: 'collections', label: 'Collections', count: stats.collections },
-    { id: 'referrals', label: 'Referrals', count: stats.referrals }
+    { id: 'collections', label: 'Collections', count: stats.collections }
   ]
 
   return (

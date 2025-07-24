@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Heart, Share2, Flag, Eye, TrendingUp, Clock, User, Info, MessageCircle, Zap, ShoppingCart, Tag } from 'lucide-react'
+import { Heart, Share2, Flag, Eye, TrendingUp, Clock, User, Info, MessageCircle, Zap, ShoppingCart, Tag, Users, Image } from 'lucide-react'
 import Button from '@/components/common/Button'
 import { useParams } from 'next/navigation'
 
@@ -63,13 +63,26 @@ interface Comment {
   content: string
   timestamp: string
   isOwner?: boolean
+  isHolder?: boolean
+}
+
+interface Holder {
+  id: string
+  user: {
+    address: string
+    username: string
+    avatar?: string
+  }
+  quantity: number
+  firstMintDate: string
+  lastActivity: string
 }
 
 export default function NFTDetail() {
   const params = useParams()
   const nftId = params.id as string
   
-  const [activeTab, setActiveTab] = useState<'details' | 'activity' | 'comments'>('details')
+  const [activeTab, setActiveTab] = useState<'comments' | 'holders' | 'activity' | 'details'>('comments')
   const [mintQuantity, setMintQuantity] = useState(1)
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(0)
@@ -77,6 +90,8 @@ export default function NFTDetail() {
   const [showSellModal, setShowSellModal] = useState(false)
   const [sellPrice, setSellPrice] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [currentUserAddress, setCurrentUserAddress] = useState('0x1111...2222')
+  const [userHasNFT, setUserHasNFT] = useState(true) // Mock: user has minted this NFT
 
   // Mock data - in real app, this would come from API
   const [nftData, setNftData] = useState<NFTData>({
@@ -140,7 +155,53 @@ export default function NFTDetail() {
       id: "1",
       user: { address: "0xdef...123", username: "artlover", avatar: "/avatars/user1.jpg" },
       content: "Amazing work! The colors are absolutely stunning 🎨",
-      timestamp: "2024-01-20T12:00:00Z"
+      timestamp: "2024-01-20T12:00:00Z",
+      isHolder: true
+    },
+    {
+      id: "2",
+      user: { address: "0xabcd...efgh", username: "collector1" },
+      content: "Just minted 5 copies! Love this piece 🚀",
+      timestamp: "2024-01-21T08:15:00Z",
+      isHolder: true
+    }
+  ])
+
+  const [holders] = useState<Holder[]>([
+    {
+      id: "1",
+      user: { address: "0xdef...123", username: "artlover", avatar: "/avatars/user1.jpg" },
+      quantity: 12,
+      firstMintDate: "2024-01-16T14:20:00Z",
+      lastActivity: "2024-01-20T10:30:00Z"
+    },
+    {
+      id: "2",
+      user: { address: "0xabcd...efgh", username: "collector1" },
+      quantity: 8,
+      firstMintDate: "2024-01-17T09:15:00Z",
+      lastActivity: "2024-01-21T08:15:00Z"
+    },
+    {
+      id: "3",
+      user: { address: "0x9876...5432", username: "trader2" },
+      quantity: 5,
+      firstMintDate: "2024-01-18T16:45:00Z",
+      lastActivity: "2024-01-19T15:30:00Z"
+    },
+    {
+      id: "4",
+      user: { address: "0x1111...2222", username: "currentuser" },
+      quantity: 3,
+      firstMintDate: "2024-01-19T11:00:00Z",
+      lastActivity: "2024-01-22T14:20:00Z"
+    },
+    {
+      id: "5",
+      user: { address: "0x5555...6666", username: "nftfan" },
+      quantity: 2,
+      firstMintDate: "2024-01-20T13:30:00Z",
+      lastActivity: "2024-01-20T13:30:00Z"
     }
   ])
 
@@ -179,14 +240,15 @@ export default function NFTDetail() {
   }
 
   const handleAddComment = () => {
-    if (!newComment.trim()) return
+    if (!newComment.trim() || !userHasNFT) return
     
     const comment: Comment = {
       id: Date.now().toString(),
-      user: { address: "0x1111...2222", username: "currentuser" },
+      user: { address: currentUserAddress, username: "currentuser" },
       content: newComment,
       timestamp: new Date().toISOString(),
-      isOwner: true
+      isOwner: true,
+      isHolder: true
     }
     
     setComments(prev => [comment, ...prev])
@@ -346,9 +408,10 @@ export default function NFTDetail() {
           <div className="border-b border-border">
             <div className="flex">
               {[
-                { id: 'details', label: 'Details', icon: Info },
+                { id: 'comments', label: 'Comments', icon: MessageCircle },
+                { id: 'holders', label: 'Holders', icon: Users },
                 { id: 'activity', label: 'Activity', icon: TrendingUp },
-                { id: 'comments', label: 'Comments', icon: MessageCircle }
+                { id: 'details', label: 'Details', icon: Info }
               ].map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
@@ -367,47 +430,122 @@ export default function NFTDetail() {
           </div>
 
           <div className="p-6">
-            {activeTab === 'details' && (
+            {activeTab === 'comments' && (
               <div className="space-y-6">
-                {/* Attributes */}
-                <div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-4">Attributes</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {nftData.attributes.map((attr, index) => (
-                      <div key={index} className="bg-background-tertiary rounded-lg p-4 text-center">
-                        <div className="text-purple-primary text-sm font-medium mb-1">{attr.trait_type}</div>
-                        <div className="text-text-primary font-semibold">{attr.value}</div>
+                {/* Add Comment */}
+                {userHasNFT ? (
+                  <div className="bg-background-tertiary rounded-lg p-4">
+                    <div className="flex gap-3">
+                      <div className="w-10 h-10 bg-purple-primary/20 rounded-full flex items-center justify-center">
+                        <User size={16} className="text-purple-primary" />
                       </div>
-                    ))}
+                      <div className="flex-1">
+                        <textarea
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          placeholder="Share your thoughts about this NFT..."
+                          className="w-full bg-background-primary border border-border rounded-lg p-3 text-text-primary placeholder-text-secondary resize-none focus:outline-none focus:ring-2 focus:ring-purple-primary"
+                          rows={3}
+                        />
+                        <div className="flex justify-end mt-3">
+                          <Button
+                            onClick={handleAddComment}
+                            disabled={!newComment.trim()}
+                            size="sm"
+                          >
+                            Post Comment
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="bg-background-tertiary rounded-lg p-6 text-center">
+                    <MessageCircle size={32} className="text-text-secondary mx-auto mb-3" />
+                    <h3 className="text-lg font-semibold text-text-primary mb-2">Only Holders Can Comment</h3>
+                    <p className="text-text-secondary mb-4">You need to mint this NFT to leave a comment</p>
+                    <Button onClick={handleMint} leftIcon={<Zap size={16} />}>
+                      Mint to Comment
+                    </Button>
+                  </div>
+                )}
 
-                {/* Technical Details */}
-                <div>
-                  <h3 className="text-lg font-semibold text-text-primary mb-4">Technical Details</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Contract Address</span>
-                      <span className="text-text-primary font-mono text-sm">{nftData.contractAddress}</span>
+                {/* Comments List */}
+                <div className="space-y-4">
+                  {comments.length > 0 ? (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="flex gap-3">
+                        <div className="w-10 h-10 bg-purple-primary/20 rounded-full flex items-center justify-center">
+                          <User size={16} className="text-purple-primary" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-text-primary font-medium">@{comment.user.username}</span>
+                            {comment.isHolder && (
+                              <span className="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full border border-green-500/30">
+                                Holder
+                              </span>
+                            )}
+                            {comment.isOwner && (
+                              <span className="bg-purple-primary text-white text-xs px-2 py-0.5 rounded-full">You</span>
+                            )}
+                            <span className="text-text-secondary text-sm">{formatTimeAgo(comment.timestamp)}</span>
+                          </div>
+                          <p className="text-text-primary">{comment.content}</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <MessageCircle size={32} className="text-text-secondary mx-auto mb-3" />
+                      <p className="text-text-secondary">No comments yet. Be the first to mint and comment!</p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Token ID</span>
-                      <span className="text-text-primary">{nftData.tokenId}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Blockchain</span>
-                      <span className="text-text-primary">{nftData.blockchain}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Token Standard</span>
-                      <span className="text-text-primary">{nftData.tokenStandard}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-text-secondary">Royalties</span>
-                      <span className="text-text-primary">{nftData.royalties}</span>
-                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'holders' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-text-primary">Top Holders</h3>
+                  <div className="text-text-secondary text-sm">
+                    {holders.reduce((total, holder) => total + holder.quantity, 0)} total owned
                   </div>
                 </div>
+                
+                {holders.map((holder, index) => (
+                  <div key={holder.id} className="flex items-center justify-between p-4 bg-background-tertiary rounded-lg hover:bg-background-tertiary/80 transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="text-text-secondary font-mono text-sm w-6">
+                        #{index + 1}
+                      </div>
+                      <div className="w-10 h-10 bg-purple-primary/20 rounded-full flex items-center justify-center">
+                        <User size={16} className="text-purple-primary" />
+                      </div>
+                      <div>
+                        <div className="text-text-primary font-medium">@{holder.user.username}</div>
+                        <div className="text-text-secondary text-sm flex items-center gap-2">
+                          <Clock size={12} />
+                          First mint: {formatTimeAgo(holder.firstMintDate)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-text-primary font-bold text-lg">{holder.quantity}</div>
+                      <div className="text-text-secondary text-sm">
+                        {((holder.quantity / nftData.mintedSupply) * 100).toFixed(1)}%
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {holders.length === 0 && (
+                  <div className="text-center py-8">
+                    <Users size={32} className="text-text-secondary mx-auto mb-3" />
+                    <p className="text-text-secondary">No holders yet. Be the first to mint!</p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -444,57 +582,53 @@ export default function NFTDetail() {
               </div>
             )}
 
-            {activeTab === 'comments' && (
+            {activeTab === 'details' && (
               <div className="space-y-6">
-                {/* Add Comment */}
-                <div className="bg-background-tertiary rounded-lg p-4">
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 bg-purple-primary/20 rounded-full flex items-center justify-center">
-                      <User size={16} className="text-purple-primary" />
+                {/* Attributes */}
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary mb-4">Attributes</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {nftData.attributes.map((attr, index) => (
+                      <div key={index} className="bg-background-tertiary rounded-lg p-4 text-center">
+                        <div className="text-purple-primary text-sm font-medium mb-1">{attr.trait_type}</div>
+                        <div className="text-text-primary font-semibold">{attr.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Technical Details */}
+                <div>
+                  <h3 className="text-lg font-semibold text-text-primary mb-4">Technical Details</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Created</span>
+                      <span className="text-text-primary">{new Date(nftData.createdAt).toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}</span>
                     </div>
-                    <div className="flex-1">
-                      <textarea
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Leave a comment about this NFT..."
-                        className="w-full bg-background-primary border border-border rounded-lg p-3 text-text-primary placeholder-text-secondary resize-none focus:outline-none focus:ring-2 focus:ring-purple-primary"
-                        rows={3}
-                      />
-                      <div className="flex justify-end mt-3">
-                        <Button
-                          onClick={handleAddComment}
-                          disabled={!newComment.trim()}
-                          size="sm"
-                        >
-                          Post Comment
-                        </Button>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Contract Address</span>
+                      <span className="text-text-primary font-mono text-sm">{nftData.contractAddress}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Chain</span>
+                      <span className="text-text-primary">{nftData.blockchain}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Media</span>
+                      <div className="flex items-center gap-2 text-text-primary">
+                        <Image size={16} />
+                        <span>Image (PNG)</span>
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Comments List */}
-                <div className="space-y-4">
-                  {comments.map((comment) => (
-                    <div key={comment.id} className="flex gap-3">
-                      <div className="w-10 h-10 bg-purple-primary/20 rounded-full flex items-center justify-center">
-                        <User size={16} className="text-purple-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-text-primary font-medium">@{comment.user.username}</span>
-                          {comment.isOwner && (
-                            <span className="bg-purple-primary text-white text-xs px-2 py-0.5 rounded-full">You</span>
-                          )}
-                          <span className="text-text-secondary text-sm">{formatTimeAgo(comment.timestamp)}</span>
-                        </div>
-                        <p className="text-text-primary">{comment.content}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
+
           </div>
         </div>
       </div>

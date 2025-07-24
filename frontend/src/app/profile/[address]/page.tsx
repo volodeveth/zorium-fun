@@ -6,6 +6,7 @@ import { Edit, ExternalLink } from 'lucide-react'
 import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileTabs from '@/components/profile/ProfileTabs'
 import NFTCard from '@/components/nft/NFTCard'
+import NFTManageModal from '@/components/nft/NFTManageModal'
 
 const mockProfile = {
   address: '0x123...abc',
@@ -74,6 +75,18 @@ const mockMintedNFTs = [
 
 export default function ProfilePage({ params }: { params: { address: string } }) {
   const [activeTab, setActiveTab] = useState('created')
+  const [selectedNFT, setSelectedNFT] = useState<any>(null)
+  const [isManageModalOpen, setIsManageModalOpen] = useState(false)
+  const [nfts, setNfts] = useState(mockNFTs)
+
+  const handleEditNFT = (nft: any) => {
+    setSelectedNFT(nft)
+    setIsManageModalOpen(true)
+  }
+
+  const handleUpdateNFT = (updatedNFT: any) => {
+    setNfts(prev => prev.map(nft => nft.id === updatedNFT.id ? updatedNFT : nft))
+  }
 
   return (
     <div className="min-h-screen py-8">
@@ -90,7 +103,7 @@ export default function ProfilePage({ params }: { params: { address: string } })
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           stats={{
-            created: mockNFTs.length,
+            created: nfts.length,
             minted: mockMintedNFTs.length,
             collections: 3
           }}
@@ -106,22 +119,22 @@ export default function ProfilePage({ params }: { params: { address: string } })
             >
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-text-primary">Created NFTs</h2>
-                <button className="btn-primary">
-                  <Edit size={16} className="mr-2" />
-                  Manage NFTs
-                </button>
               </div>
               
-              {mockNFTs.length > 0 ? (
+              {nfts.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {mockNFTs.map((nft, index) => (
+                  {nfts.map((nft, index) => (
                     <motion.div
                       key={nft.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * index }}
                     >
-                      <NFTCard nft={nft} />
+                      <NFTCard 
+                        nft={nft} 
+                        showEditButton={true}
+                        onEdit={handleEditNFT}
+                      />
                     </motion.div>
                   ))}
                 </div>
@@ -200,6 +213,19 @@ export default function ProfilePage({ params }: { params: { address: string } })
           )}
 
         </div>
+        
+        {/* NFT Management Modal */}
+        {selectedNFT && (
+          <NFTManageModal
+            isOpen={isManageModalOpen}
+            onClose={() => {
+              setIsManageModalOpen(false)
+              setSelectedNFT(null)
+            }}
+            nft={selectedNFT}
+            onUpdate={handleUpdateNFT}
+          />
+        )}
       </div>
     </div>
   )

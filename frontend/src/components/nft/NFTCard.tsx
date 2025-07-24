@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Heart, ExternalLink } from 'lucide-react'
+import { Heart, ExternalLink, Edit } from 'lucide-react'
 import UserLink from '@/components/common/UserLink'
 
 interface NFT {
@@ -16,9 +16,11 @@ interface NFT {
 
 interface NFTCardProps {
   nft: NFT
+  showEditButton?: boolean
+  onEdit?: (nft: NFT) => void
 }
 
-export default function NFTCard({ nft }: NFTCardProps) {
+export default function NFTCard({ nft, showEditButton = false, onEdit }: NFTCardProps) {
   return (
     <div className="nft-card group">
       {/* Image */}
@@ -36,13 +38,27 @@ export default function NFTCard({ nft }: NFTCardProps) {
         
         {/* Actions on hover */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-          <Link 
-            href={`/nft/${nft.id}`}
-            className="bg-purple-primary hover:bg-purple-hover text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-          >
-            <ExternalLink size={16} />
-            View NFT
-          </Link>
+          <div className="flex gap-2">
+            <Link 
+              href={`/nft/${nft.id}`}
+              className="bg-purple-primary hover:bg-purple-hover text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+            >
+              <ExternalLink size={16} />
+              View NFT
+            </Link>
+            {showEditButton && onEdit && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  onEdit(nft)
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <Edit size={16} />
+                Manage
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

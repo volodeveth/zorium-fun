@@ -79,7 +79,11 @@ export default function ProfilePage({ params }: { params: { address: string } })
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Profile Header */}
-        <ProfileHeader profile={mockProfile} isOwnProfile={true} />
+        <ProfileHeader 
+          profile={mockProfile} 
+          isOwnProfile={true} 
+          currentUserId="current-user-id"
+        />
 
         {/* Profile Tabs */}
         <ProfileTabs 

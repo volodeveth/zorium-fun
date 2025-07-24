@@ -1,4 +1,6 @@
-import { Share, Settings, UserPlus } from 'lucide-react'
+import Link from 'next/link'
+import { useState } from 'react'
+import { Share, Settings, UserPlus, UserMinus } from 'lucide-react'
 
 interface Profile {
   address: string
@@ -7,16 +9,43 @@ interface Profile {
   avatar: string
   followers: number
   following: number
-  nftsCreated: number
-  nftsMinted: number
-  totalEarnings: string
 }
 
 interface ProfileHeaderProps {
   profile: Profile
+  isOwnProfile?: boolean
 }
 
-export default function ProfileHeader({ profile }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, isOwnProfile = true }: ProfileHeaderProps) {
+  const [isFollowing, setIsFollowing] = useState(false)
+
+  const handleFollow = () => {
+    setIsFollowing(!isFollowing)
+    // TODO: Implement actual follow/unfollow API call
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${profile.username} - Zorium.fun`,
+          text: `Check out ${profile.username}'s profile on Zorium.fun`,
+          url: window.location.href,
+        })
+      } catch (error) {
+        console.log('Error sharing:', error)
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href)
+        // TODO: Show toast notification
+        console.log('Profile link copied to clipboard')
+      } catch (error) {
+        console.log('Error copying to clipboard:', error)
+      }
+    }
+  }
   return (
     <div className="bg-background-secondary rounded-xl border border-border p-8 mb-8">
       <div className="flex flex-col md:flex-row items-start gap-6">
@@ -60,41 +89,42 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
             </div>
             
             <div className="flex gap-2 mt-4 sm:mt-0">
-              <button className="btn-secondary">
-                <Settings size={16} className="mr-2" />
-                Edit Profile
-              </button>
-              <button className="btn-primary">
-                <UserPlus size={16} className="mr-2" />
-                Unfollow
-              </button>
-              <button className="btn-secondary">
-                <Share size={16} />
-              </button>
+              {isOwnProfile ? (
+                <>
+                  <Link href="/profile/settings" className="btn-secondary">
+                    <Settings size={16} className="mr-2" />
+                    Edit Profile
+                  </Link>
+                  <button className="btn-secondary" onClick={handleShare}>
+                    <Share size={16} />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    className={isFollowing ? "btn-secondary" : "btn-primary"}
+                    onClick={handleFollow}
+                  >
+                    {isFollowing ? (
+                      <>
+                        <UserMinus size={16} className="mr-2" />
+                        Unfollow
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus size={16} className="mr-2" />
+                        Follow
+                      </>
+                    )}
+                  </button>
+                  <button className="btn-secondary" onClick={handleShare}>
+                    <Share size={16} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-text-primary">
-                {profile.nftsCreated}
-              </div>
-              <div className="text-text-secondary text-sm">Created</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-text-primary">
-                {profile.nftsMinted}
-              </div>
-              <div className="text-text-secondary text-sm">Minted</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-text-primary">
-                {profile.totalEarnings} ETH
-              </div>
-              <div className="text-text-secondary text-sm">Earnings</div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

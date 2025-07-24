@@ -13,10 +13,7 @@ const mockProfile = {
   bio: 'Digital artist exploring the boundaries of blockchain art. Creating unique NFTs with ZORIUM features.',
   avatar: '/images/avatar-placeholder.jpg',
   followers: 1247,
-  following: 389,
-  nftsCreated: 23,
-  nftsMinted: 145,
-  totalEarnings: '12.45'
+  following: 389
 }
 
 const mockNFTs = [
@@ -82,7 +79,7 @@ export default function ProfilePage({ params }: { params: { address: string } })
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
         {/* Profile Header */}
-        <ProfileHeader profile={mockProfile} />
+        <ProfileHeader profile={mockProfile} isOwnProfile={true} />
 
         {/* Profile Tabs */}
         <ProfileTabs 

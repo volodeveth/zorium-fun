@@ -3,29 +3,30 @@
 import { useState } from 'react'
 import { TrendingUp, Crown, Trophy, Medal, Award, Zap, Users, DollarSign } from 'lucide-react'
 import NFTCard from '@/components/nft/NFTCard'
+import UserLink from '@/components/common/UserLink'
 import Button from '@/components/common/Button'
 
 // Mock trending data with time-based metrics
 const mockTrendingData = {
   '5min': [
-    { id: 1, title: 'Cyber Punk 2077', creator: 'pixel_master', image: '/images/placeholder-nft.jpg', price: '0.000333', likes: 89, mints: 45, change: '+234%', volume: '1.45 ETH', rank: 1 },
-    { id: 2, title: 'Neon Dreams', creator: 'artisan_01', image: '/images/placeholder-nft.jpg', price: '0.000222', likes: 67, mints: 34, change: '+156%', volume: '0.98 ETH', rank: 2 },
-    { id: 3, title: 'Digital Aurora', creator: 'crypto_art', image: '/images/placeholder-nft.jpg', price: '0.000111', likes: 45, mints: 28, change: '+89%', volume: '0.67 ETH', rank: 3 },
+    { id: 1, title: 'Cyber Punk 2077', creator: 'pixel_master', creatorAddress: '0x1234...5678', image: '/images/placeholder-nft.jpg', price: '0.000333', likes: 89, mints: 45, change: '+234%', volume: '1.45 ETH', rank: 1 },
+    { id: 2, title: 'Neon Dreams', creator: 'artisan_01', creatorAddress: '0xabcd...efgh', image: '/images/placeholder-nft.jpg', price: '0.000222', likes: 67, mints: 34, change: '+156%', volume: '0.98 ETH', rank: 2 },
+    { id: 3, title: 'Digital Aurora', creator: 'crypto_art', creatorAddress: '0x9876...5432', image: '/images/placeholder-nft.jpg', price: '0.000111', likes: 45, mints: 28, change: '+89%', volume: '0.67 ETH', rank: 3 },
   ],
   '1hour': [
-    { id: 4, title: 'Ocean Depths', creator: 'nature_pro', image: '/images/placeholder-nft.jpg', price: '0.000444', likes: 123, mints: 67, change: '+89%', volume: '2.34 ETH', rank: 1 },
-    { id: 5, title: 'Mountain Peak', creator: 'landscape', image: '/images/placeholder-nft.jpg', price: '0.000333', likes: 98, mints: 54, change: '+67%', volume: '1.89 ETH', rank: 2 },
-    { id: 6, title: 'Sunset Glory', creator: 'photo_king', image: '/images/placeholder-nft.jpg', price: '0.000222', likes: 76, mints: 43, change: '+45%', volume: '1.23 ETH', rank: 3 },
+    { id: 4, title: 'Ocean Depths', creator: 'nature_pro', creatorAddress: '0x5555...6666', image: '/images/placeholder-nft.jpg', price: '0.000444', likes: 123, mints: 67, change: '+89%', volume: '2.34 ETH', rank: 1 },
+    { id: 5, title: 'Mountain Peak', creator: 'landscape', creatorAddress: '0x7777...8888', image: '/images/placeholder-nft.jpg', price: '0.000333', likes: 98, mints: 54, change: '+67%', volume: '1.89 ETH', rank: 2 },
+    { id: 6, title: 'Sunset Glory', creator: 'photo_king', creatorAddress: '0x9999...aaaa', image: '/images/placeholder-nft.jpg', price: '0.000222', likes: 76, mints: 43, change: '+45%', volume: '1.23 ETH', rank: 3 },
   ],
   '24hours': [
-    { id: 7, title: 'Abstract Vision', creator: 'modern_art', image: '/images/placeholder-nft.jpg', price: '0.000555', likes: 234, mints: 123, change: '+45%', volume: '5.67 ETH', rank: 1 },
-    { id: 8, title: 'Urban Life', creator: 'street_photo', image: '/images/placeholder-nft.jpg', price: '0.000333', likes: 198, mints: 98, change: '+34%', volume: '4.32 ETH', rank: 2 },
-    { id: 9, title: 'Future Tech', creator: 'tech_guru', image: '/images/placeholder-nft.jpg', price: '0.000444', likes: 167, mints: 87, change: '+23%', volume: '3.89 ETH', rank: 3 },
+    { id: 7, title: 'Abstract Vision', creator: 'modern_art', creatorAddress: '0xbbbb...cccc', image: '/images/placeholder-nft.jpg', price: '0.000555', likes: 234, mints: 123, change: '+45%', volume: '5.67 ETH', rank: 1 },
+    { id: 8, title: 'Urban Life', creator: 'street_photo', creatorAddress: '0xdddd...eeee', image: '/images/placeholder-nft.jpg', price: '0.000333', likes: 198, mints: 98, change: '+34%', volume: '4.32 ETH', rank: 2 },
+    { id: 9, title: 'Future Tech', creator: 'tech_guru', creatorAddress: '0xffff...0000', image: '/images/placeholder-nft.jpg', price: '0.000444', likes: 167, mints: 87, change: '+23%', volume: '3.89 ETH', rank: 3 },
   ],
   '7days': [
-    { id: 10, title: 'Cosmic Journey', creator: 'space_art', image: '/images/placeholder-nft.jpg', price: '0.000777', likes: 456, mints: 234, change: '+23%', volume: '12.34 ETH', rank: 1 },
-    { id: 11, title: 'Ancient Wisdom', creator: 'history_buff', image: '/images/placeholder-nft.jpg', price: '0.000666', likes: 389, mints: 198, change: '+18%', volume: '9.87 ETH', rank: 2 },
-    { id: 12, title: 'Digital Renaissance', creator: 'classic_art', image: '/images/placeholder-nft.jpg', price: '0.000555', likes: 334, mints: 167, change: '+12%', volume: '7.65 ETH', rank: 3 },
+    { id: 10, title: 'Cosmic Journey', creator: 'space_art', creatorAddress: '0x1111...2222', image: '/images/placeholder-nft.jpg', price: '0.000777', likes: 456, mints: 234, change: '+23%', volume: '12.34 ETH', rank: 1 },
+    { id: 11, title: 'Ancient Wisdom', creator: 'history_buff', creatorAddress: '0x3333...4444', image: '/images/placeholder-nft.jpg', price: '0.000666', likes: 389, mints: 198, change: '+18%', volume: '9.87 ETH', rank: 2 },
+    { id: 12, title: 'Digital Renaissance', creator: 'classic_art', creatorAddress: '0x5555...7777', image: '/images/placeholder-nft.jpg', price: '0.000555', likes: 334, mints: 167, change: '+12%', volume: '7.65 ETH', rank: 3 },
   ]
 }
 
@@ -130,7 +131,14 @@ export default function TrendingPage() {
                   
                   <div className="p-4">
                     <h3 className="font-semibold text-text-primary mb-1">{nft.title}</h3>
-                    <p className="text-text-secondary text-sm mb-3">by @{nft.creator}</p>
+                    <p className="text-text-secondary text-sm mb-3">
+                      by{' '}
+                      <UserLink
+                        address={nft.creatorAddress}
+                        username={nft.creator}
+                        className="text-text-secondary hover:text-purple-primary"
+                      />
+                    </p>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>
@@ -216,7 +224,14 @@ export default function TrendingPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-text-primary">{nft.title}</h3>
-                        <p className="text-text-secondary text-sm">by @{nft.creator}</p>
+                        <p className="text-text-secondary text-sm">
+                          by{' '}
+                          <UserLink
+                            address={nft.creatorAddress}
+                            username={nft.creator}
+                            className="text-text-secondary hover:text-purple-primary"
+                          />
+                        </p>
                       </div>
                     </div>
                   </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Heart, Share2, Flag, Eye, TrendingUp, Clock, User, Info, MessageCircle, Zap, ShoppingCart, Tag, Users, Image } from 'lucide-react'
 import Button from '@/components/common/Button'
+import UserLink from '@/components/common/UserLink'
 import { useParams } from 'next/navigation'
 
 interface NFTData {
@@ -301,7 +302,13 @@ export default function NFTDetail() {
               </div>
               <div>
                 <div className="text-text-secondary text-sm">Created by</div>
-                <div className="text-text-primary font-semibold">@{nftData.creator.username}</div>
+                <div className="text-text-primary font-semibold">
+                  <UserLink
+                    address={nftData.creator.address}
+                    username={nftData.creator.username}
+                    className="text-text-primary hover:text-purple-primary font-semibold"
+                  />
+                </div>
               </div>
             </div>
 
@@ -480,7 +487,11 @@ export default function NFTDetail() {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-text-primary font-medium">@{comment.user.username}</span>
+                            <UserLink
+                              address={comment.user.address}
+                              username={comment.user.username}
+                              className="text-text-primary font-medium hover:text-purple-primary"
+                            />
                             {comment.isHolder && (
                               <span className="bg-green-500/20 text-green-400 text-xs px-2 py-0.5 rounded-full border border-green-500/30">
                                 Holder
@@ -524,7 +535,13 @@ export default function NFTDetail() {
                         <User size={16} className="text-purple-primary" />
                       </div>
                       <div>
-                        <div className="text-text-primary font-medium">@{holder.user.username}</div>
+                        <div className="text-text-primary font-medium">
+                          <UserLink
+                            address={holder.user.address}
+                            username={holder.user.username}
+                            className="text-text-primary font-medium hover:text-purple-primary"
+                          />
+                        </div>
                         <div className="text-text-secondary text-sm flex items-center gap-2">
                           <Clock size={12} />
                           First mint: {formatTimeAgo(holder.firstMintDate)}
@@ -566,7 +583,12 @@ export default function NFTDetail() {
                       <div>
                         <div className="text-text-primary font-medium">
                           {activity.type === 'mint' ? 'Minted' :
-                           activity.type === 'sale' ? 'Sold' : 'Listed'} by @{activity.user.username}
+                           activity.type === 'sale' ? 'Sold' : 'Listed'} by{' '}
+                          <UserLink
+                            address={activity.user.address}
+                            username={activity.user.username}
+                            className="text-text-primary font-medium hover:text-purple-primary"
+                          />
                         </div>
                         <div className="text-text-secondary text-sm flex items-center gap-2">
                           <Clock size={12} />

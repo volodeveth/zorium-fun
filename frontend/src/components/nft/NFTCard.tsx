@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { Heart, ExternalLink } from 'lucide-react'
+import UserLink from '@/components/common/UserLink'
 
 interface NFT {
   id: number
   title: string
   creator: string
+  creatorAddress?: string
   image: string
   price: string
   promoted?: boolean
@@ -54,7 +56,12 @@ export default function NFTCard({ nft }: NFTCardProps) {
         </div>
         
         <p className="text-text-secondary text-sm mb-3">
-          by @{nft.creator}
+          by{' '}
+          <UserLink
+            address={nft.creatorAddress || `0x${nft.creator}`}
+            username={nft.creator}
+            className="text-text-secondary hover:text-purple-primary"
+          />
         </p>
         
         <div className="flex justify-between items-center">

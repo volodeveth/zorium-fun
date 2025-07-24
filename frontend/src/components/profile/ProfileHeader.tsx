@@ -33,14 +33,14 @@ export default function ProfileHeader({ profile, isOwnProfile = true, currentUse
   
   // Mock data for demonstration
   const [mockFollowers, setMockFollowers] = useState<User[]>([
-    { id: '1', username: 'ArtistAlex', address: '0x123...abc', isFollowing: false },
-    { id: '2', username: 'CryptoCollector', address: '0x456...def', isFollowing: true },
-    { id: '3', username: 'NFTEnthusiast', address: '0x789...ghi', isFollowing: false },
+    { id: '1', username: 'ArtistAlex', address: '0x1234567890abcdef1234567890abcdef12345678', isFollowing: false },
+    { id: '2', username: 'CryptoCollector', address: '0x9876543210fedcba9876543210fedcba98765432', isFollowing: true },
+    { id: '3', username: 'NFTEnthusiast', address: '0xabcdef1234567890abcdef1234567890abcdef12', isFollowing: false },
   ])
   
   const [mockFollowing, setMockFollowing] = useState<User[]>([
-    { id: '4', username: 'DigitalCreator', address: '0xabc...123', isFollowing: true },
-    { id: '5', username: 'BlockchainArt', address: '0xdef...456', isFollowing: true },
+    { id: '4', username: 'DigitalCreator', address: '0xfedcba0987654321fedcba0987654321fedcba09', isFollowing: true },
+    { id: '5', username: 'BlockchainArt', address: '0x5555555555555555555555555555555555555555', isFollowing: true },
   ])
 
   const handleFollow = () => {

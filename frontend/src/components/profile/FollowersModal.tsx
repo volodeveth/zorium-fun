@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { X, UserPlus, UserMinus } from 'lucide-react'
 
 interface User {
@@ -34,6 +35,12 @@ export default function FollowersModal({
 
   const isOwnProfile = currentUserId === profileOwnerId
   const title = type === 'followers' ? 'Followers' : 'Following'
+  
+  // Helper function to shorten address
+  const shortenAddress = (address: string) => {
+    if (address.length < 10) return address
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -67,20 +74,23 @@ export default function FollowersModal({
             <div className="space-y-4">
               {users.map((user) => (
                 <div key={user.id} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                  <Link 
+                    href={`/profile/${user.address}`}
+                    className="flex items-center space-x-3 flex-1 hover:bg-background-tertiary rounded-lg p-2 -m-2 transition-colors"
+                  >
                     {/* Avatar */}
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-primary/50 to-blue-500/50 flex items-center justify-center text-sm font-bold text-white">
                       {user.username.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <div className="text-text-primary font-medium">
+                      <div className="text-text-primary font-medium hover:text-purple-primary transition-colors">
                         {user.username}
                       </div>
                       <div className="text-text-secondary text-sm">
-                        {user.address}
+                        {shortenAddress(user.address)}
                       </div>
                     </div>
-                  </div>
+                  </Link>
 
                   {/* Follow/Unfollow Button - Only show if not own profile and not viewing own followers */}
                   {!isOwnProfile && user.id !== currentUserId && (

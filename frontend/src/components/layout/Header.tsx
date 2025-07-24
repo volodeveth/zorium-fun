@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X, Bell, Search } from 'lucide-react'
 import ConnectWallet from '@/components/web3/ConnectWallet'
@@ -16,6 +17,13 @@ export default function Header() {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
+            <Image 
+              src="/images/zoriumfun-logo.png" 
+              alt="Zorium Logo" 
+              width={32} 
+              height={32}
+              className="transition-transform duration-200 hover:scale-110"
+            />
             <div className="text-2xl font-bold gradient-text">
               zorium.fun
             </div>

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Twitter, Github, MessageCircle } from 'lucide-react'
 
 export default function Footer() {
@@ -8,8 +9,17 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and description */}
           <div className="space-y-4">
-            <div className="text-2xl font-bold gradient-text">
-              zorium.fun
+            <div className="flex items-center space-x-2">
+              <Image 
+                src="/images/zoriumfun-logo.png" 
+                alt="Zorium Logo" 
+                width={32} 
+                height={32}
+                className="transition-transform duration-200 hover:scale-110"
+              />
+              <div className="text-2xl font-bold gradient-text">
+                zorium.fun
+              </div>
             </div>
             <p className="text-text-secondary text-sm">
               Create & Discover NFTs on Zora Network with integrated social features and ZORIUM token utility.

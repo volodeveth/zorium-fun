@@ -78,7 +78,24 @@ export default function Footer() {
             © 2024 zorium.fun. All rights reserved.
           </p>
           <p className="text-text-secondary text-sm mt-4 md:mt-0">
-            Built on Zora Network
+            Powered by Zorium (ZRM) • {' '}
+            <a 
+              href="https://www.zorium.xyz/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-purple-primary hover:text-purple-hover transition-colors"
+            >
+              zorium.xyz
+            </a>
+            {' '} • Developed by {' '}
+            <a 
+              href="https://zora.co/@volodeveth" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-purple-primary hover:text-purple-hover transition-colors"
+            >
+              VoloDev.eth
+            </a>
           </p>
         </div>
       </div>

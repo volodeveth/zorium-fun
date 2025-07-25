@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react'
-import { Upload, X, FileImage, FileVideo, Image } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Upload, X, FileImage, FileVideo, Image, Camera } from 'lucide-react'
 
 interface MediaUploadProps {
   formData: any
@@ -9,7 +9,10 @@ interface MediaUploadProps {
 
 export default function MediaUpload({ formData, updateFormData, onNext }: MediaUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
+  const [thumbnailDragging, setThumbnailDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const thumbnailInputRef = useRef<HTMLInputElement>(null)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -31,7 +34,47 @@ export default function MediaUpload({ formData, updateFormData, onNext }: MediaU
     }
   }
 
-  const handleFileSelect = (file: File) => {
+  // Generate thumbnail from video
+  const generateVideoThumbnail = (videoFile: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video')
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      
+      video.addEventListener('loadeddata', () => {
+        // Set canvas dimensions
+        canvas.width = video.videoWidth
+        canvas.height = video.videoHeight
+        
+        // Seek to 1 second (or 10% of video duration)
+        video.currentTime = Math.min(1, video.duration * 0.1)
+      })
+      
+      video.addEventListener('seeked', () => {
+        if (ctx) {
+          // Draw video frame to canvas
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          
+          // Convert canvas to data URL
+          const thumbnailDataUrl = canvas.toDataURL('image/png', 0.8)
+          resolve(thumbnailDataUrl)
+        } else {
+          reject(new Error('Canvas context not available'))
+        }
+      })
+      
+      video.addEventListener('error', () => {
+        reject(new Error('Error loading video'))
+      })
+      
+      // Load video
+      const videoUrl = URL.createObjectURL(videoFile)
+      video.src = videoUrl
+      video.load()
+    })
+  }
+
+  const handleFileSelect = async (file: File) => {
     if (!file) return
 
     // Validate file type
@@ -56,6 +99,21 @@ export default function MediaUpload({ formData, updateFormData, onNext }: MediaU
     reader.readAsDataURL(file)
 
     updateFormData('file', file)
+
+    // Generate thumbnail for video files
+    if (file.type.startsWith('video/')) {
+      try {
+        const thumbnailDataUrl = await generateVideoThumbnail(file)
+        updateFormData('thumbnail', thumbnailDataUrl)
+        updateFormData('thumbnailType', 'generated')
+      } catch (error) {
+        console.error('Error generating thumbnail:', error)
+      }
+    } else {
+      // For images, clear any existing thumbnail
+      updateFormData('thumbnail', null)
+      updateFormData('thumbnailType', null)
+    }
   }
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,11 +123,88 @@ export default function MediaUpload({ formData, updateFormData, onNext }: MediaU
     }
   }
 
+  const handleThumbnailSelect = (file: File) => {
+    // Validate file type (only images)
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+    if (!validTypes.includes(file.type)) {
+      alert('Please select a valid image file for thumbnail')
+      return
+    }
+
+    // Validate file size (5MB limit)
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    if (file.size > maxSize) {
+      alert('Thumbnail file size must be less than 5MB')
+      return
+    }
+
+    // Create preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      updateFormData('thumbnail', e.target?.result as string)
+      updateFormData('thumbnailType', 'custom')
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleThumbnailInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleThumbnailSelect(file)
+    }
+  }
+
+  const handleThumbnailDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setThumbnailDragging(true)
+  }
+
+  const handleThumbnailDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setThumbnailDragging(false)
+  }
+
+  const handleThumbnailDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setThumbnailDragging(false)
+    
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      handleThumbnailSelect(files[0])
+    }
+  }
+
+  const removeThumbnail = () => {
+    updateFormData('thumbnail', null)
+    updateFormData('thumbnailType', null)
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = ''
+    }
+  }
+
+  const regenerateThumbnail = async () => {
+    if (formData.file && formData.file.type.startsWith('video/')) {
+      try {
+        const thumbnailDataUrl = await generateVideoThumbnail(formData.file)
+        updateFormData('thumbnail', thumbnailDataUrl)
+        updateFormData('thumbnailType', 'generated')
+      } catch (error) {
+        console.error('Error regenerating thumbnail:', error)
+        alert('Failed to generate thumbnail. Please try uploading a custom one.')
+      }
+    }
+  }
+
   const removeFile = () => {
     updateFormData('file', null)
     updateFormData('filePreview', null)
+    updateFormData('thumbnail', null)
+    updateFormData('thumbnailType', null)
     if (fileInputRef.current) {
       fileInputRef.current.value = ''
+    }
+    if (thumbnailInputRef.current) {
+      thumbnailInputRef.current.value = ''
     }
   }
 
@@ -176,12 +311,101 @@ export default function MediaUpload({ formData, updateFormData, onNext }: MediaU
                   />
                 ) : (
                   <video
+                    ref={videoRef}
                     src={formData.filePreview}
                     controls
                     className="w-full rounded-lg border border-border"
                   />
                 )}
               </div>
+            </div>
+          )}
+
+          {/* Thumbnail Section for Videos */}
+          {formData.file && formData.file.type.startsWith('video/') && (
+            <div className="bg-background-tertiary rounded-xl p-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Camera size={20} className="text-purple-primary" />
+                <h3 className="text-text-primary font-semibold">Video Thumbnail</h3>
+              </div>
+              
+              {formData.thumbnail ? (
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <img
+                      src={formData.thumbnail}
+                      alt="Thumbnail"
+                      className="w-32 h-20 object-cover rounded-lg border border-border"
+                    />
+                    <div className="flex-1">
+                      <p className="text-text-primary font-medium mb-1">
+                        {formData.thumbnailType === 'generated' ? 'Auto-generated thumbnail' : 'Custom thumbnail'}
+                      </p>
+                      <p className="text-text-secondary text-sm mb-3">
+                        {formData.thumbnailType === 'generated' 
+                          ? 'Generated from video frame' 
+                          : 'Custom uploaded image'}
+                      </p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => thumbnailInputRef.current?.click()}
+                          className="text-purple-primary hover:text-purple-hover text-sm font-medium"
+                        >
+                          Replace thumbnail
+                        </button>
+                        <span className="text-text-secondary">•</span>
+                        <button
+                          onClick={removeThumbnail}
+                          className="text-red-500 hover:text-red-400 text-sm font-medium"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+                      thumbnailDragging 
+                        ? 'border-purple-primary bg-purple-primary/5' 
+                        : 'border-border hover:border-purple-primary/50'
+                    }`}
+                    onDragOver={handleThumbnailDragOver}
+                    onDragLeave={handleThumbnailDragLeave}
+                    onDrop={handleThumbnailDrop}
+                    onClick={() => thumbnailInputRef.current?.click()}
+                  >
+                    <Camera size={32} className="text-text-secondary mx-auto mb-2" />
+                    <p className="text-text-primary font-medium mb-1">Upload custom thumbnail</p>
+                    <p className="text-text-secondary text-sm">
+                      PNG, JPG, GIF up to 5MB
+                    </p>
+                  </div>
+                  
+                  <div className="text-center">
+                    <button
+                      onClick={regenerateThumbnail}
+                      className="text-purple-primary hover:text-purple-hover text-sm font-medium"
+                    >
+                      Or auto-generate from video
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              <input
+                ref={thumbnailInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleThumbnailInputChange}
+                className="hidden"
+              />
+              
+              <p className="text-text-secondary text-xs mt-3">
+                A thumbnail helps users preview your video content. You can upload a custom image or we'll auto-generate one from your video.
+              </p>
             </div>
           )}
 

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAccount, useEnsName, useEnsAvatar, useDisconnect } from 'wagmi'
-import { User, Settings, LogOut, Copy, Check, Megaphone } from 'lucide-react'
+import { User, Settings, LogOut, Copy, Check, Megaphone, BarChart3 } from 'lucide-react'
 
 interface UserProfileDropdownProps {
   address: string
@@ -55,6 +55,11 @@ export default function UserProfileDropdown({ address }: UserProfileDropdownProp
 
   const handlePromotionClick = () => {
     router.push('/promote')
+    setIsOpen(false)
+  }
+
+  const handleDashboardClick = () => {
+    router.push('/dashboard')
     setIsOpen(false)
   }
 
@@ -135,6 +140,14 @@ export default function UserProfileDropdown({ address }: UserProfileDropdownProp
             >
               <User size={16} />
               <span>View Profile</span>
+            </button>
+            
+            <button
+              onClick={handleDashboardClick}
+              className="w-full flex items-center gap-3 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-background-secondary transition-colors"
+            >
+              <BarChart3 size={16} />
+              <span>Dashboard</span>
             </button>
             
             <button

@@ -22,16 +22,25 @@ interface NFTCardProps {
   nft: NFT
   showEditButton?: boolean
   onEdit?: (nft: NFT) => void
+  addReferralToLink?: boolean // For minted NFTs where user owns them
 }
 
-export default function NFTCard({ nft, showEditButton = false, onEdit }: NFTCardProps) {
-  const { copyReferralLink } = useReferral()
+export default function NFTCard({ nft, showEditButton = false, onEdit, addReferralToLink = false }: NFTCardProps) {
+  const { copyReferralLink, generateReferralLink } = useReferral()
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    // Only allow referral links if user owns/minted this NFT (for now just copy regular link)
-    await copyReferralLink(nft.id, false)
+    // Only allow referral links if user owns/minted this NFT
+    await copyReferralLink(nft.id, addReferralToLink)
+  }
+
+  // Generate NFT link with referral if user owns it
+  const getNFTLink = () => {
+    if (addReferralToLink) {
+      return generateReferralLink(`/nft/${nft.id}`)
+    }
+    return `/nft/${nft.id}`
   }
 
   return (
@@ -62,7 +71,7 @@ export default function NFTCard({ nft, showEditButton = false, onEdit }: NFTCard
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
           <div className="flex gap-2">
             <Link 
-              href={`/nft/${nft.id}`}
+              href={getNFTLink()}
               className="bg-purple-primary hover:bg-purple-hover text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
             >
               <ExternalLink size={16} />

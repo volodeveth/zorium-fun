@@ -169,7 +169,10 @@ export default function ProfilePage({ params }: { params: { address: string } })
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 * index }}
                     >
-                      <NFTCard nft={nft} />
+                      <NFTCard 
+                        nft={nft} 
+                        addReferralToLink={true}
+                      />
                     </motion.div>
                   ))}
                 </div>

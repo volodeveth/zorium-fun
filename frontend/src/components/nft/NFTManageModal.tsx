@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Edit, Trash2, Megaphone, Eye, EyeOff, Share2, BarChart3 } from 'lucide-react'
+import { X, Edit, Megaphone, Eye, EyeOff, Share2, BarChart3 } from 'lucide-react'
 
 interface NFT {
   id: number
@@ -34,13 +34,6 @@ export default function NFTManageModal({ isOpen, onClose, nft, onUpdate }: NFTMa
     setEditMode('view')
   }
 
-  const handleDelete = () => {
-    if (window.confirm('Are you sure you want to delete this NFT? This action cannot be undone.')) {
-      // TODO: Implement delete API call
-      console.log('Deleting NFT:', nft.id)
-      onClose()
-    }
-  }
 
   const handleToggleVisibility = () => {
     const updated = { ...editedNft, isVisible: !editedNft.isVisible }
@@ -150,7 +143,7 @@ export default function NFTManageModal({ isOpen, onClose, nft, onUpdate }: NFTMa
                 >
                   {editedNft.isVisible === false ? <EyeOff size={24} className="text-yellow-500 mb-2" /> : <Eye size={24} className="text-green-500 mb-2" />}
                   <span className="text-text-primary text-sm">
-                    {editedNft.isVisible === false ? 'Hidden' : 'Visible'}
+                    {editedNft.isVisible === false ? 'Show' : 'Hide'}
                   </span>
                 </button>
 
@@ -187,43 +180,47 @@ export default function NFTManageModal({ isOpen, onClose, nft, onUpdate }: NFTMa
                 </div>
               </div>
 
-              {/* Danger Zone */}
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-                <h4 className="text-red-400 font-semibold mb-2">Danger Zone</h4>
-                <p className="text-text-secondary text-sm mb-3">
-                  Delete this NFT permanently. This action cannot be undone.
-                </p>
-                <button
-                  onClick={handleDelete}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <Trash2 size={16} />
-                  Delete NFT
-                </button>
-              </div>
             </div>
           )}
 
           {editMode === 'edit' && (
             <div className="space-y-4">
-              <div>
-                <label className="block text-text-primary font-medium mb-2">Title</label>
-                <input
-                  type="text"
-                  value={editedNft.title}
-                  onChange={(e) => setEditedNft({ ...editedNft, title: e.target.value })}
-                  className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-2 text-text-primary"
-                />
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-4">
+                <p className="text-blue-400 text-sm">
+                  <strong>Note:</strong> NFT title and media cannot be edited after creation due to blockchain immutability.
+                </p>
               </div>
-              <div>
-                <label className="block text-text-primary font-medium mb-2">Price (ETH)</label>
-                <input
-                  type="text"
-                  value={editedNft.price}
-                  onChange={(e) => setEditedNft({ ...editedNft, price: e.target.value })}
-                  className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-2 text-text-primary"
-                />
-              </div>
+              
+              {/* Only show price editing if it's not the default price */}
+              {editedNft.price !== '0.000111' && (
+                <div>
+                  <label className="block text-text-primary font-medium mb-2">
+                    Price (ETH)
+                    <span className="text-text-secondary text-sm ml-2">(Custom price can be edited)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={editedNft.price}
+                    onChange={(e) => setEditedNft({ ...editedNft, price: e.target.value })}
+                    className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-2 text-text-primary"
+                    placeholder="0.001"
+                  />
+                </div>
+              )}
+              
+              {/* Show readonly price if it's default */}
+              {editedNft.price === '0.000111' && (
+                <div>
+                  <label className="block text-text-primary font-medium mb-2">
+                    Price (ETH)
+                    <span className="text-text-secondary text-sm ml-2">(Default price cannot be changed)</span>
+                  </label>
+                  <div className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-2 text-text-secondary">
+                    {editedNft.price} ETH (Default)
+                  </div>
+                </div>
+              )}
+              
               <div>
                 <label className="block text-text-primary font-medium mb-2">Description</label>
                 <textarea
@@ -231,6 +228,7 @@ export default function NFTManageModal({ isOpen, onClose, nft, onUpdate }: NFTMa
                   onChange={(e) => setEditedNft({ ...editedNft, description: e.target.value })}
                   rows={4}
                   className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-2 text-text-primary"
+                  placeholder="Update your NFT description..."
                 />
               </div>
             </div>

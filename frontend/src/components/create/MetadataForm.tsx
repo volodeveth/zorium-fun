@@ -30,7 +30,9 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
     }
   }
 
-  const canProceed = formData.title.trim() && formData.collection.trim()
+  const canProceed = formData.title.trim() && formData.collection.trim() && 
+    ((!formData.price || formData.price === '' || formData.price === DEFAULT_MINT_PRICE) || 
+     (formData.price && formData.price !== '' && formData.price !== DEFAULT_MINT_PRICE && formData.mintDuration))
 
   return (
     <div className="bg-background-secondary rounded-xl border border-border p-8">
@@ -223,6 +225,71 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
               </div>
             )}
           </div>
+        </div>
+
+        {/* Mint Duration */}
+        <div>
+          <label className="block text-text-primary font-medium mb-2">
+            Mint Duration
+          </label>
+          
+          {(!formData.price || formData.price === '' || formData.price === DEFAULT_MINT_PRICE) ? (
+            // Default price duration info
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+              <div className="text-text-primary font-medium mb-2">Default Mint Duration:</div>
+              <div className="text-text-secondary text-sm space-y-1">
+                <div>• No time limit until 1000 NFTs are minted</div>
+                <div>• After reaching 1000 mints: 48-hour final countdown starts</div>
+                <div>• During final 48 hours: unlimited minting (no supply cap)</div>
+              </div>
+            </div>
+          ) : (
+            // Custom price duration selection
+            <div className="space-y-3">
+              <p className="text-text-secondary text-sm">
+                Choose how long users can mint your NFT:
+              </p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  { value: '1d', label: '1 Day', hours: 24 },
+                  { value: '3d', label: '3 Days', hours: 72 },
+                  { value: '7d', label: '7 Days', hours: 168 },
+                  { value: '30d', label: '30 Days', hours: 720 },
+                  { value: '180d', label: '180 Days', hours: 4320 },
+                  { value: '1y', label: '1 Year', hours: 8760 },
+                ].map((duration) => (
+                  <label 
+                    key={duration.value}
+                    className="flex items-center p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors"
+                  >
+                    <input
+                      type="radio"
+                      name="mintDuration"
+                      value={duration.value}
+                      checked={formData.mintDuration === duration.value}
+                      onChange={(e) => updateFormData('mintDuration', e.target.value)}
+                      className="w-4 h-4 text-purple-primary"
+                    />
+                    <div className="ml-3 flex-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-text-primary font-medium">{duration.label}</span>
+                        <span className="text-text-secondary text-sm">{duration.hours}h</span>
+                      </div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+              
+              {!formData.mintDuration && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                  <p className="text-yellow-400 text-sm">
+                    Please select a mint duration for custom priced NFTs
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* NFT Promotion */}

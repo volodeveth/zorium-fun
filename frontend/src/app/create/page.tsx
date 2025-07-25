@@ -15,6 +15,7 @@ export default function CreatePage() {
     collection: '',
     tags: [] as string[],
     price: '',
+    mintDuration: '', // For custom price NFTs
     networkId: 8453, // Base network as default
     file: null as File | null,
     filePreview: null as string | null

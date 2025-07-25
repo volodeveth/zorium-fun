@@ -6,6 +6,7 @@ import Button from '@/components/common/Button'
 import UserLink from '@/components/common/UserLink'
 import ShareModal from '@/components/common/ShareModal'
 import ReferralInfo from '@/components/common/ReferralInfo'
+import MintTimer from '@/components/common/MintTimer'
 import { useParams } from 'next/navigation'
 import { useAutoReferral, useReferral } from '@/hooks/useReferral'
 
@@ -37,6 +38,8 @@ interface NFTData {
   mintPrice: string
   isForSale: boolean
   salePrice?: string
+  isDefaultPrice?: boolean
+  mintEndTime?: string
   attributes: Array<{
     trait_type: string
     value: string
@@ -130,6 +133,8 @@ export default function NFTDetail() {
     tokenStandard: "ERC-721",
     mintPrice: "0.000111",
     isForSale: false,
+    isDefaultPrice: true,
+    mintEndTime: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 3 days from now for demo
     attributes: [
       { trait_type: "Background", value: "Cosmic Purple" },
       { trait_type: "Style", value: "Abstract" },
@@ -343,6 +348,14 @@ export default function NFTDetail() {
                 </div>
               </div>
             </div>
+
+            {/* Mint Timer */}
+            <MintTimer
+              isDefaultPrice={nftData.isDefaultPrice}
+              mintedSupply={nftData.mintedSupply}
+              triggerSupply={1000}
+              mintEndTime={nftData.mintEndTime}
+            />
 
             {/* Actions */}
             <div className="space-y-4">

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
-import { Heart, ExternalLink, Edit, Share2, Check } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Heart, ExternalLink, Edit, Share2, Check, Clock, Zap } from 'lucide-react'
 import UserLink from '@/components/common/UserLink'
 import { getNetworkLogo, getNetworkName } from '@/lib/utils/networkHelpers'
 import { useReferral } from '@/hooks/useReferral'
@@ -17,6 +17,9 @@ interface NFT {
   likes: number
   mints: number
   networkId?: number
+  totalSupply?: number
+  isDefaultPrice?: boolean
+  mintEndTime?: string
 }
 
 interface NFTCardProps {
@@ -29,6 +32,49 @@ interface NFTCardProps {
 export default function NFTCard({ nft, showEditButton = false, onEdit, addReferralToLink = false }: NFTCardProps) {
   const { copyReferralLink, generateReferralLink } = useReferral()
   const [copied, setCopied] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<string | null>(null)
+  const [isUrgent, setIsUrgent] = useState(false)
+
+  // Timer logic for NFT cards
+  useEffect(() => {
+    const triggerSupply = 1000
+    if (nft.isDefaultPrice && nft.mints < triggerSupply) {
+      // Default price, no timer until trigger supply (1000)
+      setTimeLeft(null)
+      return
+    }
+
+    if (nft.mintEndTime) {
+      const updateTimer = () => {
+        const now = new Date()
+        const endTime = new Date(nft.mintEndTime!)
+        const difference = endTime.getTime() - now.getTime()
+        
+        if (difference <= 0) {
+          setTimeLeft('Ended')
+          return
+        }
+        
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24))
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60))
+        
+        setIsUrgent(days === 0 && hours < 24)
+        
+        if (days > 0) {
+          setTimeLeft(`${days}d ${hours}h`)
+        } else if (hours > 0) {
+          setTimeLeft(`${hours}h ${minutes}m`)
+        } else {
+          setTimeLeft(`${minutes}m`)
+        }
+      }
+      
+      updateTimer()
+      const interval = setInterval(updateTimer, 60000) // Update every minute
+      return () => clearInterval(interval)
+    }
+  }, [nft.mintEndTime, nft.isDefaultPrice, nft.mints, nft.totalSupply])
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -149,6 +195,44 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
           </div>
           <span>{nft.likes} likes</span>
         </div>
+
+        {/* Timer Badge */}
+        {timeLeft && (
+          <div className={`mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
+            timeLeft === 'Ended' 
+              ? 'bg-red-500/20 text-red-400'
+              : isUrgent 
+                ? 'bg-orange-500/20 text-orange-400'
+                : nft.isDefaultPrice && nft.mints >= (nft.totalSupply || 1000)
+                  ? 'bg-blue-500/20 text-blue-400'
+                  : 'bg-purple-500/20 text-purple-400'
+          }`}>
+            {timeLeft === 'Ended' ? (
+              <>
+                <Clock size={10} />
+                <span>Ended</span>
+              </>
+            ) : nft.isDefaultPrice && nft.mints >= 1000 ? (
+              <>
+                <Zap size={10} />
+                <span>Final {timeLeft}</span>
+              </>
+            ) : (
+              <>
+                <Clock size={10} />
+                <span>{timeLeft} left</span>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* No timer badge for default price under 1000 mints */}
+        {nft.isDefaultPrice && nft.mints < 1000 && (
+          <div className="mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
+            <Zap size={10} />
+            <span>No time limit</span>
+          </div>
+        )}
       </div>
     </div>
   )

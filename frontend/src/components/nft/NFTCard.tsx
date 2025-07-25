@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, ExternalLink, Edit, Share2 } from 'lucide-react'
+import { useState } from 'react'
+import { Heart, ExternalLink, Edit, Share2, Check } from 'lucide-react'
 import UserLink from '@/components/common/UserLink'
 import { getNetworkLogo, getNetworkName } from '@/lib/utils/networkHelpers'
 import { useReferral } from '@/hooks/useReferral'
@@ -27,12 +28,23 @@ interface NFTCardProps {
 
 export default function NFTCard({ nft, showEditButton = false, onEdit, addReferralToLink = false }: NFTCardProps) {
   const { copyReferralLink, generateReferralLink } = useReferral()
+  const [copied, setCopied] = useState(false)
 
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    
+    console.log('Share button clicked for NFT:', nft.id, 'addReferralToLink:', addReferralToLink)
+    
     // Only allow referral links if user owns/minted this NFT
-    await copyReferralLink(nft.id, addReferralToLink)
+    const success = await copyReferralLink(nft.id, addReferralToLink)
+    
+    console.log('Copy result:', success)
+    
+    if (success) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }
   }
 
   // Generate NFT link with referral if user owns it
@@ -61,10 +73,14 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
         {/* Quick Share Button */}
         <button
           onClick={handleShare}
-          className="absolute top-3 right-3 w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100"
-          title="Copy referral link"
+          className={`absolute top-3 right-3 w-8 h-8 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200 z-10 ${
+            copied 
+              ? 'bg-green-500 hover:bg-green-600 opacity-100' 
+              : 'bg-black/50 hover:bg-black/70 opacity-0 group-hover:opacity-100'
+          }`}
+          title={copied ? "Link copied!" : "Copy share link"}
         >
-          <Share2 size={14} />
+          {copied ? <Check size={14} /> : <Share2 size={14} />}
         </button>
         
         {/* Actions on hover */}

@@ -10,16 +10,17 @@ interface ShareModalProps {
   onClose: () => void
   nftId: string | number
   nftTitle: string
+  userOwnsNFT?: boolean
 }
 
-export default function ShareModal({ isOpen, onClose, nftId, nftTitle }: ShareModalProps) {
+export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsNFT = false }: ShareModalProps) {
   const [copied, setCopied] = useState(false)
   const { shareToTwitter, shareToTelegram, shareToFarcaster, copyReferralLink } = useReferral()
 
   if (!isOpen) return null
 
   const handleCopyLink = async () => {
-    const success = await copyReferralLink(nftId)
+    const success = await copyReferralLink(nftId, userOwnsNFT)
     if (success) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -27,17 +28,17 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle }: ShareMo
   }
 
   const handleTwitterShare = () => {
-    shareToTwitter(nftId, nftTitle)
+    shareToTwitter(nftId, nftTitle, userOwnsNFT)
     onClose()
   }
 
   const handleTelegramShare = () => {
-    shareToTelegram(nftId, nftTitle)
+    shareToTelegram(nftId, nftTitle, userOwnsNFT)
     onClose()
   }
 
   const handleFarcasterShare = () => {
-    shareToFarcaster(nftId, nftTitle)
+    shareToFarcaster(nftId, nftTitle, userOwnsNFT)
     onClose()
   }
 
@@ -58,7 +59,10 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle }: ShareMo
           <div className="text-center mb-6">
             <div className="text-lg font-medium text-text-primary mb-2">{nftTitle}</div>
             <div className="text-text-secondary text-sm">
-              Share this NFT and earn referral rewards when someone mints!
+              {userOwnsNFT 
+                ? "Share this NFT and earn referral rewards when someone mints!"
+                : "Share this NFT with others!"
+              }
             </div>
           </div>
 
@@ -105,21 +109,23 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle }: ShareMo
             </button>
           </div>
 
-          {/* Referral Info */}
-          <div className="bg-purple-primary/10 border border-purple-primary/20 rounded-xl p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-8 h-8 bg-purple-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                <Link size={16} className="text-purple-primary" />
-              </div>
-              <div>
-                <h4 className="text-text-primary font-medium mb-1">Earn Referral Rewards</h4>
-                <p className="text-text-secondary text-sm">
-                  When someone mints this NFT through your link, you'll receive{' '}
-                  <span className="text-purple-primary font-medium">20% of the mint fee</span> as a referral reward!
-                </p>
+          {/* Referral Info - only show if user owns NFT */}
+          {userOwnsNFT && (
+            <div className="bg-purple-primary/10 border border-purple-primary/20 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 bg-purple-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Link size={16} className="text-purple-primary" />
+                </div>
+                <div>
+                  <h4 className="text-text-primary font-medium mb-1">Earn Referral Rewards</h4>
+                  <p className="text-text-secondary text-sm">
+                    When someone mints this NFT through your link, you'll receive{' '}
+                    <span className="text-purple-primary font-medium">20% of the mint fee</span> as a referral reward!
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <Button
             onClick={onClose}

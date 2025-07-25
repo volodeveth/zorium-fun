@@ -346,9 +346,6 @@ export default function NFTDetail() {
 
             {/* Actions */}
             <div className="space-y-4">
-              {/* Referral Info */}
-              <ReferralInfo />
-
               {/* Mint Section */}
               <div className="bg-background-secondary rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -670,6 +667,7 @@ export default function NFTDetail() {
         onClose={() => setShowShareModal(false)}
         nftId={nftId}
         nftTitle={nftData.title}
+        userOwnsNFT={userHasNFT}
       />
 
       {/* Sell Modal */}

@@ -30,7 +30,8 @@ export default function NFTCard({ nft, showEditButton = false, onEdit }: NFTCard
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    await copyReferralLink(nft.id)
+    // Only allow referral links if user owns/minted this NFT (for now just copy regular link)
+    await copyReferralLink(nft.id, false)
   }
 
   return (

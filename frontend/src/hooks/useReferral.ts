@@ -40,46 +40,46 @@ export function useReferral() {
     return url.toString()
   }
 
-  // Add referral to current URL if user is connected and no existing referral
+  // Add referral to current URL only for specific contexts (not automatic)
   const addReferralToCurrentURL = () => {
-    if (!connectedAddress || referralAddress) return
+    // This function is now disabled - referrals should only be added via sharing
+    return
+  }
 
-    const currentUrl = new URL(window.location.href)
-    if (!currentUrl.searchParams.has(REFERRAL_PARAM)) {
-      currentUrl.searchParams.set(REFERRAL_PARAM, connectedAddress)
-      router.replace(currentUrl.pathname + currentUrl.search)
+  // Generate NFT share link with referral (only if user owns the NFT)
+  const generateNFTShareLink = (nftId: string | number, userOwnsNFT: boolean = false) => {
+    // Only generate referral links if user has minted/owns this NFT
+    if (userOwnsNFT && connectedAddress) {
+      return generateReferralLink(`/nft/${nftId}`)
     }
+    // Return regular link without referral if user doesn't own NFT
+    return `${window.location.origin}/nft/${nftId}`
   }
 
-  // Generate NFT share link with referral
-  const generateNFTShareLink = (nftId: string | number) => {
-    return generateReferralLink(`/nft/${nftId}`)
-  }
-
-  // Share functions for social media
-  const shareToTwitter = (nftId: string | number, title: string) => {
-    const url = generateNFTShareLink(nftId)
+  // Share functions for social media (with ownership check)
+  const shareToTwitter = (nftId: string | number, title: string, userOwnsNFT: boolean = false) => {
+    const url = generateNFTShareLink(nftId, userOwnsNFT)
     const text = `Check out this amazing NFT: ${title} on @ZoriumFun`
     const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`
     window.open(twitterUrl, '_blank', 'width=600,height=400')
   }
 
-  const shareToTelegram = (nftId: string | number, title: string) => {
-    const url = generateNFTShareLink(nftId)
+  const shareToTelegram = (nftId: string | number, title: string, userOwnsNFT: boolean = false) => {
+    const url = generateNFTShareLink(nftId, userOwnsNFT)
     const text = `Check out this amazing NFT: ${title} on Zorium.fun`
     const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`
     window.open(telegramUrl, '_blank', 'width=600,height=400')
   }
 
-  const shareToFarcaster = (nftId: string | number, title: string) => {
-    const url = generateNFTShareLink(nftId)
+  const shareToFarcaster = (nftId: string | number, title: string, userOwnsNFT: boolean = false) => {
+    const url = generateNFTShareLink(nftId, userOwnsNFT)
     const text = `Just discovered this incredible NFT: ${title} on @zorium! 🎨✨\n\nMint it now and join the community!`
     const farcasterUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}&embeds[]=${encodeURIComponent(url)}`
     window.open(farcasterUrl, '_blank', 'width=600,height=500')
   }
 
-  const copyReferralLink = async (nftId: string | number) => {
-    const url = generateNFTShareLink(nftId)
+  const copyReferralLink = async (nftId: string | number, userOwnsNFT: boolean = false) => {
+    const url = generateNFTShareLink(nftId, userOwnsNFT)
     try {
       await navigator.clipboard.writeText(url)
       return true
@@ -114,15 +114,8 @@ function isValidAddress(address: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(address)
 }
 
-// Custom hook for automatic referral URL management
+// Custom hook for automatic referral URL management (disabled)
 export function useAutoReferral() {
-  const { addReferralToCurrentURL } = useReferral()
-  const { isConnected } = useAccount()
-
-  useEffect(() => {
-    if (isConnected) {
-      // Add small delay to ensure address is available
-      setTimeout(addReferralToCurrentURL, 100)
-    }
-  }, [isConnected, addReferralToCurrentURL])
+  // Auto-referral is now disabled - referrals only work through sharing
+  return
 }

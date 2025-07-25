@@ -4,7 +4,10 @@ import { useState, useEffect } from 'react'
 import { Heart, Share2, Flag, Eye, TrendingUp, Clock, User, Info, MessageCircle, Zap, ShoppingCart, Tag, Users, Image } from 'lucide-react'
 import Button from '@/components/common/Button'
 import UserLink from '@/components/common/UserLink'
+import ShareModal from '@/components/common/ShareModal'
+import ReferralInfo from '@/components/common/ReferralInfo'
 import { useParams } from 'next/navigation'
+import { useAutoReferral, useReferral } from '@/hooks/useReferral'
 
 interface NFTData {
   id: string
@@ -83,12 +86,17 @@ export default function NFTDetail() {
   const params = useParams()
   const nftId = params.id as string
   
+  // Initialize auto-referral system
+  useAutoReferral()
+  const { referralAddress } = useReferral()
+  
   const [activeTab, setActiveTab] = useState<'comments' | 'holders' | 'activity' | 'details'>('comments')
   const [mintQuantity, setMintQuantity] = useState(1)
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(0)
   const [newComment, setNewComment] = useState('')
   const [showSellModal, setShowSellModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
   const [sellPrice, setSellPrice] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [currentUserAddress, setCurrentUserAddress] = useState('0x1111...2222')
@@ -218,6 +226,16 @@ export default function NFTDetail() {
 
   const handleMint = async () => {
     setIsLoading(true)
+    
+    // Include referral address in mint transaction if available
+    const mintData = {
+      nftId,
+      quantity: mintQuantity,
+      referralAddress: referralAddress || null
+    }
+    
+    console.log('Minting with data:', mintData)
+    
     // Simulate minting process
     await new Promise(resolve => setTimeout(resolve, 2000))
     setNftData(prev => ({ ...prev, mintedSupply: prev.mintedSupply + mintQuantity }))
@@ -328,6 +346,9 @@ export default function NFTDetail() {
 
             {/* Actions */}
             <div className="space-y-4">
+              {/* Referral Info */}
+              <ReferralInfo />
+
               {/* Mint Section */}
               <div className="bg-background-secondary rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -400,6 +421,7 @@ export default function NFTDetail() {
                 </Button>
                 
                 <Button
+                  onClick={() => setShowShareModal(true)}
                   variant="ghost"
                   leftIcon={<Share2 size={16} />}
                 >
@@ -641,6 +663,14 @@ export default function NFTDetail() {
           </div>
         </div>
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        nftId={nftId}
+        nftTitle={nftData.title}
+      />
 
       {/* Sell Modal */}
       {showSellModal && (

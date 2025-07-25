@@ -1,8 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, ExternalLink, Edit } from 'lucide-react'
+import { Heart, ExternalLink, Edit, Share2 } from 'lucide-react'
 import UserLink from '@/components/common/UserLink'
 import { getNetworkLogo, getNetworkName } from '@/lib/utils/networkHelpers'
+import { useReferral } from '@/hooks/useReferral'
 
 interface NFT {
   id: number
@@ -24,6 +25,14 @@ interface NFTCardProps {
 }
 
 export default function NFTCard({ nft, showEditButton = false, onEdit }: NFTCardProps) {
+  const { copyReferralLink } = useReferral()
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    await copyReferralLink(nft.id)
+  }
+
   return (
     <div className="nft-card group">
       {/* Image */}
@@ -38,6 +47,15 @@ export default function NFTCard({ nft, showEditButton = false, onEdit }: NFTCard
             Promoted
           </div>
         )}
+
+        {/* Quick Share Button */}
+        <button
+          onClick={handleShare}
+          className="absolute top-3 right-3 w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100"
+          title="Copy referral link"
+        >
+          <Share2 size={14} />
+        </button>
         
         {/* Actions on hover */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">

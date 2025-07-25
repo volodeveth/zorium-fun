@@ -14,7 +14,8 @@ const mockNFTs = [
     price: '0.000111',
     promoted: true,
     likes: 24,
-    mints: 12
+    mints: 12,
+    networkId: 8453
   },
   {
     id: 2,
@@ -25,7 +26,8 @@ const mockNFTs = [
     price: '0.000111',
     promoted: false,
     likes: 18,
-    mints: 8
+    mints: 8,
+    networkId: 7777777
   },
   {
     id: 3,
@@ -36,7 +38,8 @@ const mockNFTs = [
     price: '0.000111',
     promoted: true,
     likes: 35,
-    mints: 19
+    mints: 19,
+    networkId: 1
   },
   {
     id: 4,
@@ -47,7 +50,8 @@ const mockNFTs = [
     price: '0.000111',
     promoted: false,
     likes: 42,
-    mints: 23
+    mints: 23,
+    networkId: 137
   }
 ]
 

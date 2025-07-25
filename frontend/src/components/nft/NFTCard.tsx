@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Heart, ExternalLink, Edit } from 'lucide-react'
 import UserLink from '@/components/common/UserLink'
+import { getNetworkLogo, getNetworkName } from '@/lib/utils/networkHelpers'
 
 interface NFT {
   id: number
@@ -12,6 +14,7 @@ interface NFT {
   promoted?: boolean
   likes: number
   mints: number
+  networkId?: number
 }
 
 interface NFTCardProps {
@@ -90,8 +93,17 @@ export default function NFTCard({ nft, showEditButton = false, onEdit }: NFTCard
         </div>
         
         <div className="flex justify-between items-center mt-2 text-xs text-text-secondary">
-          <span>{nft.likes} e</span>
-          <span>{nft.mints} collected</span>
+          <div className="flex items-center gap-1">
+            <Image
+              src={getNetworkLogo(nft.networkId || 8453)}
+              alt={getNetworkName(nft.networkId || 8453)}
+              width={16}
+              height={16}
+              className="rounded-full"
+            />
+            <span>{getNetworkName(nft.networkId || 8453)}</span>
+          </div>
+          <span>{nft.likes} likes</span>
         </div>
       </div>
     </div>

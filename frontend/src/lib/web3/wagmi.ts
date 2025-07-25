@@ -35,9 +35,19 @@ export const zoraNetwork = {
 export const config = getDefaultConfig({
   appName: 'zorium.fun',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
-  chains: [zora, zoraNetwork, mainnet, polygon, optimism, arbitrum, base],
+  chains: [base, zora, zoraNetwork, mainnet, polygon, optimism, arbitrum], // Base as default (first)
   ssr: true, // If your dApp uses server side rendering (SSR)
 })
+
+// Supported networks for NFT creation with Base as default
+export const SUPPORTED_NETWORKS = [
+  { id: 8453, name: 'Base', symbol: 'ETH', isDefault: true },
+  { id: 7777777, name: 'Zora', symbol: 'ETH', isDefault: false },
+  { id: 1, name: 'Ethereum', symbol: 'ETH', isDefault: false },
+  { id: 137, name: 'Polygon', symbol: 'MATIC', isDefault: false },
+  { id: 10, name: 'Optimism', symbol: 'ETH', isDefault: false },
+  { id: 42161, name: 'Arbitrum', symbol: 'ETH', isDefault: false },
+] as const
 
 // ZORIUM Token Contract Address on Zora Network
 export const ZORIUM_TOKEN_ADDRESS = '0x538D6F4fb9598dC74e15e6974049B109ae0AbC6a'

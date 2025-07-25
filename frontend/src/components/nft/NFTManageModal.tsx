@@ -241,21 +241,80 @@ export default function NFTManageModal({ isOpen, onClose, nft, onUpdate }: NFTMa
               <div className="bg-purple-primary/10 border border-purple-primary/20 rounded-lg p-4">
                 <h4 className="text-purple-primary font-semibold mb-2">Promote Your NFT</h4>
                 <p className="text-text-secondary text-sm mb-4">
-                  Boost your NFT's visibility by promoting it. Promoted NFTs appear in featured sections and get more exposure.
+                  Boost your NFT's visibility using ZRM tokens. Promoted NFTs appear in featured sections and get more exposure.
                 </p>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-text-primary">24 hours promotion</span>
-                    <span className="text-purple-primary font-medium">0.01 ETH</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-text-primary">7 days promotion</span>
-                    <span className="text-purple-primary font-medium">0.05 ETH</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-text-primary">30 days promotion</span>
-                    <span className="text-purple-primary font-medium">0.15 ETH</span>
-                  </div>
+                  <label className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="promotionDuration"
+                        value="12h"
+                        className="w-4 h-4 text-purple-primary mr-3"
+                      />
+                      <span className="text-text-primary font-medium">12 Hours</span>
+                    </div>
+                    <span className="text-purple-primary font-bold">10,000 ZRM</span>
+                  </label>
+                  
+                  <label className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="promotionDuration"
+                        value="1d"
+                        className="w-4 h-4 text-purple-primary mr-3"
+                      />
+                      <span className="text-text-primary font-medium">1 Day</span>
+                    </div>
+                    <span className="text-purple-primary font-bold">18,000 ZRM</span>
+                  </label>
+                  
+                  <label className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="promotionDuration"
+                        value="3d"
+                        className="w-4 h-4 text-purple-primary mr-3"
+                      />
+                      <span className="text-text-primary font-medium">3 Days</span>
+                    </div>
+                    <span className="text-purple-primary font-bold">50,000 ZRM</span>
+                  </label>
+                  
+                  <label className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="promotionDuration"
+                        value="5d"
+                        className="w-4 h-4 text-purple-primary mr-3"
+                      />
+                      <span className="text-text-primary font-medium">5 Days</span>
+                    </div>
+                    <span className="text-purple-primary font-bold">80,000 ZRM</span>
+                  </label>
+                  
+                  <label className="flex items-center justify-between p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        name="promotionDuration"
+                        value="7d"
+                        className="w-4 h-4 text-purple-primary mr-3"
+                      />
+                      <span className="text-text-primary font-medium">7 Days</span>
+                    </div>
+                    <span className="text-purple-primary font-bold">100,000 ZRM</span>
+                  </label>
+                </div>
+                
+                <div className="mt-4 bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
+                  <p className="text-blue-400 text-sm">
+                    <strong>Note:</strong> Make sure you have approved sufficient ZRM tokens in the NFT Promotion page first. 
+                    ZRM tokens will be deducted from your approved balance when promotion starts.
+                  </p>
                 </div>
               </div>
             </div>

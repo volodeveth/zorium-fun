@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAccount, useEnsName, useEnsAvatar, useDisconnect } from 'wagmi'
-import { User, Settings, LogOut, Copy, Check } from 'lucide-react'
+import { User, Settings, LogOut, Copy, Check, Megaphone } from 'lucide-react'
 
 interface UserProfileDropdownProps {
   address: string
@@ -50,6 +50,11 @@ export default function UserProfileDropdown({ address }: UserProfileDropdownProp
 
   const handleSettingsClick = () => {
     router.push('/profile/settings')
+    setIsOpen(false)
+  }
+
+  const handlePromotionClick = () => {
+    router.push('/promote')
     setIsOpen(false)
   }
 
@@ -138,6 +143,14 @@ export default function UserProfileDropdown({ address }: UserProfileDropdownProp
             >
               <Settings size={16} />
               <span>Settings</span>
+            </button>
+            
+            <button
+              onClick={handlePromotionClick}
+              className="w-full flex items-center gap-3 px-4 py-2 text-text-secondary hover:text-text-primary hover:bg-background-secondary transition-colors"
+            >
+              <Megaphone size={16} />
+              <span>NFT Promotion</span>
             </button>
             
             <div className="border-t border-border my-2"></div>

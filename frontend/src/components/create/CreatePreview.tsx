@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Zap, Clock, DollarSign } from 'lucide-react'
+import { SUPPORTED_NETWORKS, DEFAULT_MINT_PRICE, DEFAULT_FEE_BREAKDOWN, CUSTOM_FEE_BREAKDOWN } from '@/lib/web3/wagmi'
 
 interface CreatePreviewProps {
   formData: any
@@ -8,6 +9,13 @@ interface CreatePreviewProps {
 
 export default function CreatePreview({ formData, onBack }: CreatePreviewProps) {
   const [isCreating, setIsCreating] = useState(false)
+  
+  // Get network info
+  const selectedNetwork = SUPPORTED_NETWORKS.find(n => n.id === formData.networkId) || SUPPORTED_NETWORKS[0]
+  
+  // Determine price and fee structure
+  const finalPrice = formData.price || DEFAULT_MINT_PRICE
+  const isDefaultPrice = !formData.price || formData.price === '' || formData.price === DEFAULT_MINT_PRICE
 
   const handleCreateNFT = async () => {
     setIsCreating(true)
@@ -39,10 +47,19 @@ export default function CreatePreview({ formData, onBack }: CreatePreviewProps) 
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <video
-                    src={formData.filePreview}
-                    className="w-full h-full object-cover"
-                  />
+                  // For videos, show thumbnail if available, otherwise show video
+                  formData.thumbnail ? (
+                    <img
+                      src={formData.thumbnail}
+                      alt="Video thumbnail"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <video
+                      src={formData.filePreview}
+                      className="w-full h-full object-cover"
+                    />
+                  )
                 )
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center">
@@ -65,7 +82,7 @@ export default function CreatePreview({ formData, onBack }: CreatePreviewProps) 
               
               <div className="flex justify-between items-center">
                 <div className="text-text-primary font-medium">
-                  {formData.price} ETH
+                  {finalPrice} ETH
                 </div>
                 <div className="text-text-secondary text-sm">
                   0 mints
@@ -145,24 +162,42 @@ export default function CreatePreview({ formData, onBack }: CreatePreviewProps) 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Mint Price:</span>
-                <span className="text-text-primary font-medium">{formData.price} ETH</span>
+                <span className="text-text-primary font-medium">{finalPrice} ETH</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Creator Fee:</span>
-                <span className="text-green-500">0.000055 ETH</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">First Minter Reward:</span>
-                <span className="text-blue-400">0.000011 ETH</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Referral Fee:</span>
-                <span className="text-purple-400">0.000022 ETH</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-text-secondary">Platform Fee:</span>
-                <span className="text-text-secondary">0.000022 ETH</span>
-              </div>
+              
+              {isDefaultPrice ? (
+                // Default fee structure
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Creator Fee:</span>
+                    <span className="text-green-500">{DEFAULT_FEE_BREAKDOWN.CREATOR} ETH (50%)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">First Minter Reward:</span>
+                    <span className="text-blue-400">{DEFAULT_FEE_BREAKDOWN.FIRST_MINTER} ETH (10%)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Referral Fee:</span>
+                    <span className="text-purple-400">{DEFAULT_FEE_BREAKDOWN.REFERRAL} ETH (20%)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Platform Fee:</span>
+                    <span className="text-text-secondary">{DEFAULT_FEE_BREAKDOWN.PLATFORM} ETH (20%)</span>
+                  </div>
+                </>
+              ) : (
+                // Custom fee structure
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Creator Fee:</span>
+                    <span className="text-green-500">{(parseFloat(finalPrice) * CUSTOM_FEE_BREAKDOWN.CREATOR_PERCENTAGE).toFixed(6)} ETH (95%)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-text-secondary">Platform Fee:</span>
+                    <span className="text-text-secondary">{(parseFloat(finalPrice) * CUSTOM_FEE_BREAKDOWN.PLATFORM_PERCENTAGE).toFixed(6)} ETH (5%)</span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -175,11 +210,11 @@ export default function CreatePreview({ formData, onBack }: CreatePreviewProps) 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Estimated Gas:</span>
-                <span className="text-text-primary">~0.003 ETH</span>
+                <span className="text-text-primary">~0.003 {selectedNetwork.symbol}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">Network:</span>
-                <span className="text-text-primary">Zora Network</span>
+                <span className="text-text-primary">{selectedNetwork.name}</span>
               </div>
             </div>
           </div>

@@ -14,7 +14,8 @@ export default function CreatePage() {
     description: '',
     collection: '',
     tags: [] as string[],
-    price: '0.000111',
+    price: '',
+    networkId: 8453, // Base network as default
     file: null as File | null,
     filePreview: null as string | null
   })

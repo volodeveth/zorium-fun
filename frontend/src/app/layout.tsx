@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'Zorium.fun - Create & Discover NFTs on Zora Network',
   description: 'Create, mint, and trade NFTs on Zora Network with Zorium token features',
   icons: {
-    icon: '/images/favicon.ico',
+    icon: '/favicon.ico',
   },
 }
 

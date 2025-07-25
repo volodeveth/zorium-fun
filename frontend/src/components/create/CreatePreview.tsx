@@ -210,12 +210,19 @@ export default function CreatePreview({ formData, onBack }: CreatePreviewProps) 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Estimated Gas:</span>
-                <span className="text-text-primary">~0.003 {selectedNetwork.symbol}</span>
+                <span className="text-text-primary">{selectedNetwork.estimatedGas}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">Network:</span>
                 <span className="text-text-primary">{selectedNetwork.name}</span>
               </div>
+              {selectedNetwork.id === 1 && (
+                <div className="mt-2 p-2 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                  <p className="text-orange-400 text-xs">
+                    💡 Consider using L2 networks like Base or Optimism for lower gas fees
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 

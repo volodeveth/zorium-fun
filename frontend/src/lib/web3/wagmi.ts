@@ -41,12 +41,12 @@ export const config = getDefaultConfig({
 
 // Supported networks for NFT creation with Base as default
 export const SUPPORTED_NETWORKS = [
-  { id: 8453, name: 'Base', symbol: 'ETH', isDefault: true },
-  { id: 7777777, name: 'Zora', symbol: 'ETH', isDefault: false },
-  { id: 1, name: 'Ethereum', symbol: 'ETH', isDefault: false },
-  { id: 137, name: 'Polygon', symbol: 'MATIC', isDefault: false },
-  { id: 10, name: 'Optimism', symbol: 'ETH', isDefault: false },
-  { id: 42161, name: 'Arbitrum', symbol: 'ETH', isDefault: false },
+  { id: 8453, name: 'Base', symbol: 'ETH', isDefault: true, estimatedGas: '~$0.01' },
+  { id: 7777777, name: 'Zora', symbol: 'ETH', isDefault: false, estimatedGas: '~$0.005' },
+  { id: 1, name: 'Ethereum', symbol: 'ETH', isDefault: false, estimatedGas: '~$3-15' },
+  { id: 137, name: 'Polygon', symbol: 'MATIC', isDefault: false, estimatedGas: '~$0.01' },
+  { id: 10, name: 'Optimism', symbol: 'ETH', isDefault: false, estimatedGas: '~$0.02' },
+  { id: 42161, name: 'Arbitrum', symbol: 'ETH', isDefault: false, estimatedGas: '~$0.01' },
 ] as const
 
 // ZORIUM Token Contract Address on Zora Network

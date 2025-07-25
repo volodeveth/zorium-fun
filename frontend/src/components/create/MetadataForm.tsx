@@ -91,6 +91,15 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
           <p className="text-text-secondary text-sm mt-1">
             Select the blockchain network to deploy your NFT on
           </p>
+          
+          {/* Gas fee hint */}
+          {formData.networkId && (
+            <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+              <p className="text-blue-400 text-xs">
+                ⚡ Estimated gas cost: {SUPPORTED_NETWORKS.find(n => n.id === formData.networkId)?.estimatedGas || '~$0.01'}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Collection */}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Plus, X, ChevronDown } from 'lucide-react'
-import { SUPPORTED_NETWORKS } from '@/lib/web3/wagmi'
+import { SUPPORTED_NETWORKS, DEFAULT_MINT_PRICE, DEFAULT_FEE_BREAKDOWN, CUSTOM_FEE_BREAKDOWN } from '@/lib/web3/wagmi'
 
 interface MetadataFormProps {
   formData: any
@@ -114,7 +114,7 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
             </button>
           </div>
           <p className="text-text-secondary text-sm mt-1">
-            Leave empty = default 0.000111 ETH
+            Create new collection or select existing one
           </p>
         </div>
 
@@ -168,30 +168,51 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
           </label>
           <input
             type="text"
-            value={formData.price}
+            value={formData.price || ''}
             onChange={(e) => updateFormData('price', e.target.value)}
-            placeholder="0.000111"
+            placeholder={DEFAULT_MINT_PRICE}
             className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary focus:outline-none focus:border-purple-primary transition-colors"
           />
-          <div className="mt-2 p-3 bg-background-tertiary rounded-lg">
-            <div className="text-text-secondary text-sm space-y-1">
-              <div className="flex justify-between">
-                <span>Creator fee:</span>
-                <span>0.000055 ETH</span>
+          <p className="text-text-secondary text-sm mt-1">
+            Leave empty = default {DEFAULT_MINT_PRICE} ETH
+          </p>
+          
+          <div className="mt-3 p-3 bg-background-tertiary rounded-lg">
+            {(!formData.price || formData.price === '' || formData.price === DEFAULT_MINT_PRICE) ? (
+              // Default fee structure
+              <div className="text-text-secondary text-sm space-y-1">
+                <div className="text-text-primary font-medium mb-2">Default fee structure ({DEFAULT_MINT_PRICE} ETH):</div>
+                <div className="flex justify-between">
+                  <span>Creator fee:</span>
+                  <span>{DEFAULT_FEE_BREAKDOWN.CREATOR} ETH (50%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>First minter reward:</span>
+                  <span>{DEFAULT_FEE_BREAKDOWN.FIRST_MINTER} ETH (10%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Referral fee:</span>
+                  <span>{DEFAULT_FEE_BREAKDOWN.REFERRAL} ETH (20%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Platform fee:</span>
+                  <span>{DEFAULT_FEE_BREAKDOWN.PLATFORM} ETH (20%)</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>First minter reward:</span>
-                <span>0.000011 ETH</span>
+            ) : (
+              // Custom price fee structure
+              <div className="text-text-secondary text-sm space-y-1">
+                <div className="text-text-primary font-medium mb-2">Custom price fee structure:</div>
+                <div className="flex justify-between">
+                  <span>Creator fee:</span>
+                  <span>{(parseFloat(formData.price || '0') * CUSTOM_FEE_BREAKDOWN.CREATOR_PERCENTAGE).toFixed(6)} ETH (95%)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Platform fee:</span>
+                  <span>{(parseFloat(formData.price || '0') * CUSTOM_FEE_BREAKDOWN.PLATFORM_PERCENTAGE).toFixed(6)} ETH (5%)</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Referral fee:</span>
-                <span>0.000022 ETH</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Platform fee:</span>
-                <span>0.000022 ETH</span>
-              </div>
-            </div>
+            )}
           </div>
         </div>
 

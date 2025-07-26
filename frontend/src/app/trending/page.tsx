@@ -167,7 +167,7 @@ export default function TrendingPage() {
                 {/* Enhanced NFT Card */}
                 <div className="relative overflow-hidden rounded-xl bg-background-secondary border-2 border-purple-primary/30 hover:border-purple-primary/60 transition-all duration-300 hover:scale-105 shadow-xl">
                   {/* Trending Badge */}
-                  <div className="absolute top-4 left-4 z-20 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+                  <div className="absolute top-12 left-4 z-20 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
                     <TrendingUp size={12} />
                     {nft.change}
                   </div>

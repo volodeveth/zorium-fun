@@ -99,8 +99,7 @@ export default function NFTCardExpanded({ nft, showEditButton = false, onEdit, a
   }
 
   return (
-    <div className="bg-background-primary border border-border rounded-2xl overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         {/* Left side - NFT Image */}
         <div className="relative aspect-square overflow-hidden rounded-xl">
           <div className="w-full h-full bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center">
@@ -257,9 +256,16 @@ export default function NFTCardExpanded({ nft, showEditButton = false, onEdit, a
                 <span>No time limit</span>
               </div>
             )}
+
+            {/* Mint Button */}
+            <div className="mt-6">
+              <button className="w-full bg-purple-primary hover:bg-purple-hover text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2">
+                <Zap size={18} />
+                Mint NFT ({nft.price} ETH)
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
   )
 }

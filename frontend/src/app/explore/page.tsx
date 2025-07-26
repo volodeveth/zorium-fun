@@ -285,11 +285,11 @@ export default function ExplorePage() {
                 {filteredNFTs.map((nft) => (
                   <div key={nft.id} className={viewMode === 'list' ? 'max-w-4xl mx-auto' : ''}>
                     {viewMode === 'list' ? (
-                      <div className="space-y-6">
+                      <div className="bg-background-primary border border-border rounded-2xl overflow-hidden">
                         <NFTCardExpanded nft={nft} />
                         {/* Comments Section */}
                         {nft.comments && nft.comments.length > 0 && (
-                          <div className="bg-background-primary border border-border rounded-2xl p-6">
+                          <div className="border-t border-border p-6">
                             <h4 className="text-lg font-semibold text-text-primary mb-4">Comments</h4>
                             <div className="space-y-4">
                               {nft.comments.slice(0, 2).map((comment) => (

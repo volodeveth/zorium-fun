@@ -17,8 +17,20 @@ const mockProfile = {
   followers: 1247,
   following: 389,
   website: 'https://golumdexter.art',
-  twitterHandle: 'golumdexter',
-  farcasterHandle: 'golumdexter'
+  twitter: {
+    id: 'tw_789012',
+    username: 'golumdexter',
+    isVerified: true,
+    connectedAt: '2025-01-15T10:30:00Z',
+    profileUrl: 'https://x.com/golumdexter'
+  },
+  farcaster: {
+    id: 'fc_345678',
+    username: 'golumdexter',
+    isVerified: true,
+    connectedAt: '2025-01-20T14:15:00Z',
+    profileUrl: 'https://warpcast.com/golumdexter'
+  }
 }
 
 const mockNFTs = [

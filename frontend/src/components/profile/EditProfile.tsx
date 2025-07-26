@@ -6,13 +6,21 @@ import { Camera, Save, User, Mail, Globe, Twitter, Upload, X } from 'lucide-reac
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 
+interface SocialAccount {
+  id: string
+  username: string
+  isVerified: boolean
+  connectedAt: string
+  profileUrl: string
+}
+
 interface ProfileData {
   displayName: string
   bio: string
   email: string
   website: string
-  twitter: string
-  farcaster: string
+  twitter: SocialAccount | null
+  farcaster: SocialAccount | null
   avatar: string | null
 }
 
@@ -30,15 +38,72 @@ export default function EditProfile() {
     bio: '',
     email: '',
     website: '',
-    twitter: '',
-    farcaster: '',
+    twitter: null,
+    farcaster: null,
     avatar: ensAvatar || null
   })
+  
+  const [isConnecting, setIsConnecting] = useState<string | null>(null)
 
   const handleInputChange = (field: keyof ProfileData, value: string) => {
     setProfileData(prev => ({
       ...prev,
       [field]: value
+    }))
+  }
+
+  const connectTwitter = async () => {
+    setIsConnecting('twitter')
+    try {
+      // Redirect to Twitter OAuth
+      const clientId = process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID
+      const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/twitter/callback`)
+      const state = encodeURIComponent(JSON.stringify({ wallet: address }))
+      
+      const twitterAuthUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=tweet.read%20users.read&state=${state}&code_challenge=challenge&code_challenge_method=plain`
+      
+      window.location.href = twitterAuthUrl
+    } catch (error) {
+      console.error('Error connecting Twitter:', error)
+      setIsConnecting(null)
+    }
+  }
+
+  const connectFarcaster = async () => {
+    setIsConnecting('farcaster')
+    try {
+      // For Farcaster, we'll use a different approach - Farcaster Connect protocol
+      // This is a simplified version - in real implementation you'd use Farcaster's SDK
+      console.log('Connecting to Farcaster...')
+      
+      // Simulate connection process
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      
+      // Mock successful connection
+      const mockFarcasterAccount: SocialAccount = {
+        id: 'fc_123456',
+        username: 'golumdexter',
+        isVerified: true,
+        connectedAt: new Date().toISOString(),
+        profileUrl: 'https://warpcast.com/golumdexter'
+      }
+      
+      setProfileData(prev => ({
+        ...prev,
+        farcaster: mockFarcasterAccount
+      }))
+      
+    } catch (error) {
+      console.error('Error connecting Farcaster:', error)
+    } finally {
+      setIsConnecting(null)
+    }
+  }
+
+  const disconnectSocial = (platform: 'twitter' | 'farcaster') => {
+    setProfileData(prev => ({
+      ...prev,
+      [platform]: null
     }))
   }
 
@@ -192,7 +257,8 @@ export default function EditProfile() {
       {/* Social Links */}
       <div className="bg-background-secondary rounded-lg p-6 border border-border">
         <h2 className="text-xl font-semibold text-text-primary mb-6">Social Links</h2>
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* Website */}
           <div>
             <label className="block text-text-primary font-medium mb-2 flex items-center gap-2">
               <Globe size={16} />
@@ -207,40 +273,142 @@ export default function EditProfile() {
             />
           </div>
 
+          {/* Twitter/X */}
           <div>
-            <label className="block text-text-primary font-medium mb-2 flex items-center gap-2">
+            <label className="block text-text-primary font-medium mb-3 flex items-center gap-2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
               </svg>
               X (Twitter)
             </label>
-            <Input
-              value={profileData.twitter}
-              onChange={(e) => handleInputChange('twitter', e.target.value)}
-              placeholder="@username"
-              className="w-full"
-            />
-            <p className="text-text-secondary text-xs mt-1">
-              Your X handle (will link to x.com)
-            </p>
+            
+            {profileData.twitter ? (
+              <div className="bg-background-primary border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-text-primary">@{profileData.twitter.username}</span>
+                        {profileData.twitter.isVerified && (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="#10B981">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        )}
+                      </div>
+                      <p className="text-text-secondary text-sm">
+                        Connected {new Date(profileData.twitter.connectedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => disconnectSocial('twitter')}
+                    className="text-red-500 hover:text-red-600 text-sm"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Button
+                  onClick={connectTwitter}
+                  disabled={isConnecting === 'twitter'}
+                  variant="secondary"
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  {isConnecting === 'twitter' ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-text-secondary border-t-transparent rounded-full animate-spin"></div>
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                      Connect X Account
+                    </>
+                  )}
+                </Button>
+                <p className="text-text-secondary text-xs mt-2">
+                  Connect your X account to verify ownership and display it on your profile
+                </p>
+              </div>
+            )}
           </div>
 
+          {/* Farcaster */}
           <div>
-            <label className="block text-text-primary font-medium mb-2 flex items-center gap-2">
+            <label className="block text-text-primary font-medium mb-3 flex items-center gap-2">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
               </svg>
               Farcaster
             </label>
-            <Input
-              value={profileData.farcaster}
-              onChange={(e) => handleInputChange('farcaster', e.target.value)}
-              placeholder="@username"
-              className="w-full"
-            />
-            <p className="text-text-secondary text-xs mt-1">
-              Your Farcaster handle (will link to Warpcast)
-            </p>
+            
+            {profileData.farcaster ? (
+              <div className="bg-background-primary border border-border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                        <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-text-primary">@{profileData.farcaster.username}</span>
+                        {profileData.farcaster.isVerified && (
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="#10B981">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                          </svg>
+                        )}
+                      </div>
+                      <p className="text-text-secondary text-sm">
+                        Connected {new Date(profileData.farcaster.connectedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => disconnectSocial('farcaster')}
+                    className="text-red-500 hover:text-red-600 text-sm"
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <Button
+                  onClick={connectFarcaster}
+                  disabled={isConnecting === 'farcaster'}
+                  variant="secondary"
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  {isConnecting === 'farcaster' ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-text-secondary border-t-transparent rounded-full animate-spin"></div>
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
+                      </svg>
+                      Connect Farcaster Account
+                    </>
+                  )}
+                </Button>
+                <p className="text-text-secondary text-xs mt-2">
+                  Connect your Farcaster account to verify ownership and display it on your profile
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

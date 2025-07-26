@@ -5,14 +5,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Light theme colors */
-  --background-primary: #ffffff;
-  --background-secondary: #f8fafc;
-  --background-tertiary: #f1f5f9;
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
+  /* Light theme colors - softer, less bright */
+  --background-primary: #fafbfc;
+  --background-secondary: #f4f6f8;
+  --background-tertiary: #eef2f5;
+  --text-primary: #2d3748;
+  --text-secondary: #718096;
   --text-accent: #8b5cf6;
-  --border: #e2e8f0;
+  --border: #d1d9e0;
 }
 
 .dark {
@@ -81,9 +81,9 @@ a {
 
   /* Light theme specific styles */
   .light .glass-effect {
-    background: rgba(248, 250, 252, 0.8);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(244, 246, 248, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.08);
   }
 
   .light .gradient-text {
@@ -91,5 +91,25 @@ a {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+
+  /* Improved light theme shadows and borders */
+  .light .nft-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .light .nft-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: rgba(139, 92, 246, 0.3);
+  }
+
+  /* Light theme button improvements */
+  .light .btn-secondary {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .light .btn-secondary:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   }
 }

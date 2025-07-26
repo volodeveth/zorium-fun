@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
+import AuthenticationFlow from '@/components/auth/AuthenticationFlow'
 import Providers from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className={`${inter.className} bg-background-primary min-h-screen`}>
         <Providers>
           <Header />
+          <AuthenticationFlow />
           <main className="min-h-screen">
             {children}
           </main>

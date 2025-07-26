@@ -1,5 +1,5 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
-import { mainnet, polygon, optimism, arbitrum, base, zora } from 'wagmi/chains'
+import { mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains'
 
 // Zora Network configuration
 export const zoraNetwork = {
@@ -35,7 +35,7 @@ export const zoraNetwork = {
 export const config = getDefaultConfig({
   appName: 'zorium.fun',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'your-project-id',
-  chains: [base, zora, zoraNetwork, mainnet, polygon, optimism, arbitrum], // Base as default (first)
+  chains: [base, zoraNetwork, mainnet, polygon, optimism, arbitrum], // Base as default (first)
   ssr: true, // If your dApp uses server side rendering (SSR)
 })
 

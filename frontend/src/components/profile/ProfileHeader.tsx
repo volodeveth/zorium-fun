@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { useState } from 'react'
-import { Share, Settings, UserPlus, UserMinus } from 'lucide-react'
+import { Share, Settings, UserPlus, UserMinus, ExternalLink, Globe } from 'lucide-react'
 import FollowersModal from './FollowersModal'
 
 interface User {
@@ -18,6 +18,9 @@ interface Profile {
   avatar: string
   followers: number
   following: number
+  website?: string
+  twitterHandle?: string
+  farcasterHandle?: string
 }
 
 interface ProfileHeaderProps {
@@ -136,9 +139,57 @@ export default function ProfileHeader({ profile, isOwnProfile = true, currentUse
                 </button>
               </div>
               
-              <p className="text-text-secondary max-w-2xl">
+              <p className="text-text-secondary max-w-2xl mb-4">
                 {profile.bio}
               </p>
+              
+              {/* Social Links */}
+              {(profile.website || profile.twitterHandle || profile.farcasterHandle) && (
+                <div className="flex items-center gap-4 flex-wrap">
+                  {profile.website && (
+                    <a 
+                      href={profile.website.startsWith('http') ? profile.website : `https://${profile.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-text-secondary hover:text-purple-primary transition-colors"
+                    >
+                      <Globe size={16} />
+                      <span className="text-sm">{profile.website.replace(/^https?:\/\//, '')}</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                  
+                  {profile.twitterHandle && (
+                    <a 
+                      href={`https://x.com/${profile.twitterHandle.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-text-secondary hover:text-purple-primary transition-colors"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                      <span className="text-sm">@{profile.twitterHandle.replace('@', '')}</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                  
+                  {profile.farcasterHandle && (
+                    <a 
+                      href={`https://warpcast.com/${profile.farcasterHandle.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-text-secondary hover:text-purple-primary transition-colors"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
+                      </svg>
+                      <span className="text-sm">@{profile.farcasterHandle.replace('@', '')}</span>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
             
             <div className="flex gap-2 mt-4 sm:mt-0">

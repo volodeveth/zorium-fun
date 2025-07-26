@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useAccount, useEnsName, useEnsAvatar } from 'wagmi'
-import { Camera, Save, User, Mail, Globe, Twitter, Instagram, Upload, X } from 'lucide-react'
+import { Camera, Save, User, Mail, Globe, Twitter, Upload, X } from 'lucide-react'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 
@@ -12,7 +12,7 @@ interface ProfileData {
   email: string
   website: string
   twitter: string
-  instagram: string
+  farcaster: string
   avatar: string | null
 }
 
@@ -31,7 +31,7 @@ export default function EditProfile() {
     email: '',
     website: '',
     twitter: '',
-    instagram: '',
+    farcaster: '',
     avatar: ensAvatar || null
   })
 
@@ -209,8 +209,10 @@ export default function EditProfile() {
 
           <div>
             <label className="block text-text-primary font-medium mb-2 flex items-center gap-2">
-              <Twitter size={16} />
-              Twitter
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              X (Twitter)
             </label>
             <Input
               value={profileData.twitter}
@@ -218,19 +220,27 @@ export default function EditProfile() {
               placeholder="@username"
               className="w-full"
             />
+            <p className="text-text-secondary text-xs mt-1">
+              Your X handle (will link to x.com)
+            </p>
           </div>
 
           <div>
             <label className="block text-text-primary font-medium mb-2 flex items-center gap-2">
-              <Instagram size={16} />
-              Instagram
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
+              </svg>
+              Farcaster
             </label>
             <Input
-              value={profileData.instagram}
-              onChange={(e) => handleInputChange('instagram', e.target.value)}
+              value={profileData.farcaster}
+              onChange={(e) => handleInputChange('farcaster', e.target.value)}
               placeholder="@username"
               className="w-full"
             />
+            <p className="text-text-secondary text-xs mt-1">
+              Your Farcaster handle (will link to Warpcast)
+            </p>
           </div>
         </div>
       </div>

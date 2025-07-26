@@ -15,7 +15,10 @@ const mockProfile = {
   bio: 'Digital artist exploring the boundaries of blockchain art. Creating unique NFTs with ZORIUM features.',
   avatar: '/images/avatar-placeholder.jpg',
   followers: 1247,
-  following: 389
+  following: 389,
+  website: 'https://golumdexter.art',
+  twitterHandle: 'golumdexter',
+  farcasterHandle: 'golumdexter'
 }
 
 const mockNFTs = [

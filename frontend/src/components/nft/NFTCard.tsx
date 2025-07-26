@@ -104,51 +104,17 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
   return (
     <div className="nft-card group">
       {/* Image */}
-      <div className="relative aspect-square overflow-hidden rounded-t-lg">
-        {/* Mock NFT Image with gradient and title */}
-        <div className={`w-full h-full flex items-center justify-center relative ${
-          // Generate different gradients based on NFT ID for variety
-          nft.id % 6 === 0 ? 'bg-gradient-to-br from-purple-primary/40 via-blue-500/40 to-pink-500/40' :
-          nft.id % 6 === 1 ? 'bg-gradient-to-br from-blue-500/40 via-cyan-500/40 to-teal-500/40' :
-          nft.id % 6 === 2 ? 'bg-gradient-to-br from-pink-500/40 via-rose-500/40 to-red-500/40' :
-          nft.id % 6 === 3 ? 'bg-gradient-to-br from-green-500/40 via-emerald-500/40 to-lime-500/40' :
-          nft.id % 6 === 4 ? 'bg-gradient-to-br from-orange-500/40 via-yellow-500/40 to-amber-500/40' :
-          'bg-gradient-to-br from-indigo-500/40 via-purple-500/40 to-violet-500/40'
-        }`}>
-          <div className="text-center p-4">
-            <div className="text-2xl font-bold text-white mb-2 drop-shadow-lg">
-              {nft.title}
-            </div>
-            <div className="text-sm text-white/80 drop-shadow">
-              by {nft.creator}
-            </div>
-            {nft.promoted && (
-              <div className="mt-3 text-xs bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-white font-medium">
-                ✨ Featured
-              </div>
-            )}
-          </div>
-          {/* Decorative elements - vary by NFT */}
-          {nft.id % 3 === 0 && (
-            <>
-              <div className="absolute top-4 left-4 w-8 h-8 border-2 border-white/30 rounded-full"></div>
-              <div className="absolute bottom-4 right-4 w-6 h-6 border-2 border-white/30 rounded-full"></div>
-            </>
-          )}
-          {nft.id % 3 === 1 && (
-            <>
-              <div className="absolute top-6 right-6 w-4 h-4 bg-white/20 rounded-full"></div>
-              <div className="absolute bottom-6 left-6 w-3 h-3 bg-white/30 rounded-full"></div>
-              <div className="absolute top-1/2 left-4 w-2 h-2 bg-white/40 rounded-full"></div>
-            </>
-          )}
-          {nft.id % 3 === 2 && (
-            <>
-              <div className="absolute top-4 right-4 w-6 h-6 border border-white/20 rotate-45"></div>
-              <div className="absolute bottom-4 left-4 w-4 h-4 border border-white/30 rotate-12"></div>
-            </>
-          )}
+      <div className="relative aspect-square overflow-hidden">
+        <div className="w-full h-full bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center">
+          <div className="text-text-secondary text-sm">NFT Preview</div>
         </div>
+        
+        {/* Promoted Badge */}
+        {nft.promoted && (
+          <div className="absolute top-3 left-3 bg-purple-primary text-white text-xs px-2 py-1 rounded-full">
+            Promoted
+          </div>
+        )}
 
         {/* Quick Share Button */}
         <button

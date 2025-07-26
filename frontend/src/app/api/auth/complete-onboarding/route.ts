@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock database - in real app this would be a proper database
-let users: any[] = []
+import { findUserByAddress, updateUser } from '@/lib/mock-database'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,15 +13,13 @@ export async function POST(request: NextRequest) {
     }
     
     // Find user by address
-    const userIndex = users.findIndex(user => user.address.toLowerCase() === address.toLowerCase())
-    if (userIndex === -1) {
+    const user = findUserByAddress(address)
+    if (!user) {
       return NextResponse.json(
         { message: 'User not found' },
         { status: 404 }
       )
     }
-    
-    const user = users[userIndex]
     
     // Check if user has verified email
     if (!user.isEmailVerified || user.registrationStep !== 'email_verified') {
@@ -34,15 +30,12 @@ export async function POST(request: NextRequest) {
     }
     
     // Update user with onboarding completion
-    const updatedUser = {
-      ...user,
+    const updatedUser = updateUser(address, {
       registrationStep: 'completed',
       isVerified: true,
       followedUsers: followedUsers,
       onboardingCompletedAt: new Date().toISOString()
-    }
-    
-    users[userIndex] = updatedUser
+    })
     
     // TODO: Process follow relationships in database
     if (followedUsers.length > 0) {

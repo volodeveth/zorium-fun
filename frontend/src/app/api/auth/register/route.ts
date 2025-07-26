@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock database - in real app this would be a proper database
-const users: any[] = []
-const emailTokens: { [token: string]: { email: string; address: string; userData: any } } = {}
+import { findUserByEmail, findUserByUsername, findUserByAddress, addEmailToken } from '@/lib/mock-database'
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if email already exists
-    const existingEmailUser = users.find(user => user.email.toLowerCase() === email.toLowerCase())
+    const existingEmailUser = findUserByEmail(email)
     if (existingEmailUser) {
       return NextResponse.json(
         { message: 'Email address is already registered' },
@@ -25,7 +22,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if username already exists
-    const existingUsernameUser = users.find(user => user.username.toLowerCase() === username.toLowerCase())
+    const existingUsernameUser = findUserByUsername(username)
     if (existingUsernameUser) {
       return NextResponse.json(
         { message: 'Username is already taken' },
@@ -34,7 +31,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if wallet address already exists
-    const existingWalletUser = users.find(user => user.address.toLowerCase() === address.toLowerCase())
+    const existingWalletUser = findUserByAddress(address)
     if (existingWalletUser) {
       return NextResponse.json(
         { message: 'Wallet address is already registered' },
@@ -60,11 +57,11 @@ export async function POST(request: NextRequest) {
     }
     
     // Store verification token
-    emailTokens[verificationToken] = {
+    addEmailToken(verificationToken, {
       email: email.toLowerCase(),
       address: address.toLowerCase(),
       userData
-    }
+    })
     
     // TODO: Send verification email
     console.log(`Verification email would be sent to ${email} with token: ${verificationToken}`)
@@ -91,5 +88,5 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Export the verification tokens for use in email verification
-export { emailTokens, users }
+// Note: In production, these would be stored in a proper database
+// For now, using module-level variables for demo purposes

@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Import the mock storage from register route
-// In real app, this would be a proper database
-let emailTokens: { [token: string]: { email: string; address: string; userData: any } } = {}
-let users: any[] = []
+import { getEmailToken, removeEmailToken, addUser } from '@/lib/mock-database'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Find token in storage
-    const tokenData = emailTokens[token]
+    const tokenData = getEmailToken(token)
     if (!tokenData) {
       return NextResponse.json(
         { message: 'Invalid or expired verification token' },
@@ -33,10 +29,10 @@ export async function POST(request: NextRequest) {
       verifiedAt: new Date().toISOString()
     }
     
-    users.push(verifiedUser)
+    addUser(verifiedUser)
     
     // Remove the token as it's been used
-    delete emailTokens[token]
+    removeEmailToken(token)
     
     return NextResponse.json({
       success: true,
@@ -69,7 +65,7 @@ export async function GET(request: NextRequest) {
     }
     
     // Find token in storage
-    const tokenData = emailTokens[token]
+    const tokenData = getEmailToken(token)
     if (!tokenData) {
       return NextResponse.redirect(new URL('/login?error=invalid-token', request.url))
     }
@@ -82,10 +78,10 @@ export async function GET(request: NextRequest) {
       verifiedAt: new Date().toISOString()
     }
     
-    users.push(verifiedUser)
+    addUser(verifiedUser)
     
     // Remove the token as it's been used
-    delete emailTokens[token]
+    removeEmailToken(token)
     
     // Redirect to success page or dashboard
     return NextResponse.redirect(new URL('/?verified=true', request.url))

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-// Mock database - in real app this would be a proper database
-let users: any[] = []
+import { findUserByAddress } from '@/lib/mock-database'
 
 export async function GET(
   request: NextRequest,
@@ -18,7 +16,7 @@ export async function GET(
     }
     
     // Find user by address
-    const user = users.find(user => user.address.toLowerCase() === address.toLowerCase())
+    const user = findUserByAddress(address)
     
     if (!user) {
       return NextResponse.json(

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { TrendingUp, Crown, Trophy, Medal, Award, Zap, Users, DollarSign } from 'lucide-react'
+import { TrendingUp, Crown, Trophy, Medal, Award, Zap, Clock, Calendar, CalendarDays } from 'lucide-react'
 import NFTCard from '@/components/nft/NFTCard'
 import UserLink from '@/components/common/UserLink'
 import Button from '@/components/common/Button'
@@ -67,9 +67,9 @@ export default function TrendingPage() {
   
   const timeFilters = [
     { key: '5min' as TimeFilter, label: '5 Minutes', icon: Zap },
-    { key: '1hour' as TimeFilter, label: '1 Hour', icon: TrendingUp },
-    { key: '24hours' as TimeFilter, label: '24 Hours', icon: Users },
-    { key: '7days' as TimeFilter, label: '7 Days', icon: DollarSign }
+    { key: '1hour' as TimeFilter, label: '1 Hour', icon: Clock },
+    { key: '24hours' as TimeFilter, label: '24 Hours', icon: Calendar },
+    { key: '7days' as TimeFilter, label: '7 Days', icon: CalendarDays }
   ]
 
   const currentTrending = mockTrendingData[selectedTime]

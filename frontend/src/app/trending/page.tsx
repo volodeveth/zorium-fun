@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { TrendingUp, Crown, Trophy, Medal, Award, Zap, Clock, Calendar, CalendarDays } from 'lucide-react'
+import { TrendingUp, Crown, Trophy, Medal, Award, Zap, Clock, Calendar, CalendarDays, DollarSign, Users } from 'lucide-react'
 import NFTCard from '@/components/nft/NFTCard'
 import UserLink from '@/components/common/UserLink'
 import Button from '@/components/common/Button'

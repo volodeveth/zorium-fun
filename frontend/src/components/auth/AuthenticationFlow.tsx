@@ -7,6 +7,13 @@ import FollowSuggestionsModal from './FollowSuggestionsModal'
 import { CheckCircle, Mail, Clock, Users } from 'lucide-react'
 
 export default function AuthenticationFlow() {
+  // TEMPORARY: Disable authentication flow
+  const ENABLE_AUTH_FLOW = false
+  
+  if (!ENABLE_AUTH_FLOW) {
+    return null
+  }
+
   const { 
     user, 
     needsRegistration, 

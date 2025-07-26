@@ -127,7 +127,7 @@ export default function EmailRegistrationModal({
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               error={errors.email}
-              icon={<Mail size={18} />}
+              leftIcon={<Mail size={18} />}
               disabled={isLoading}
             />
             <p className="text-xs text-text-secondary mt-1">
@@ -146,7 +146,7 @@ export default function EmailRegistrationModal({
               value={formData.username}
               onChange={(e) => handleInputChange('username', e.target.value.toLowerCase())}
               error={errors.username}
-              icon={<User size={18} />}
+              leftIcon={<User size={18} />}
               disabled={isLoading}
             />
             <p className="text-xs text-text-secondary mt-1">
@@ -165,7 +165,7 @@ export default function EmailRegistrationModal({
               value={formData.nickname}
               onChange={(e) => handleInputChange('nickname', e.target.value)}
               error={errors.nickname}
-              icon={<UserCheck size={18} />}
+              leftIcon={<UserCheck size={18} />}
               disabled={isLoading}
             />
             <p className="text-xs text-text-secondary mt-1">

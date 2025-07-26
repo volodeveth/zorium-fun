@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Edit, ExternalLink } from 'lucide-react'
+import Link from 'next/link'
 import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileTabs from '@/components/profile/ProfileTabs'
 import NFTCard from '@/components/nft/NFTCard'
@@ -73,6 +74,36 @@ const mockMintedNFTs = [
   }
 ]
 
+const mockCollections = [
+  {
+    id: 'digital-art-series',
+    title: 'Digital Art Series',
+    description: 'A collection of abstract digital artworks',
+    itemCount: 8,
+    floorPrice: '0.000111',
+    totalVolume: '2.34',
+    image: '/images/placeholder-collection.jpg'
+  },
+  {
+    id: 'cyberpunk-dreams',
+    title: 'Cyberpunk Dreams',
+    description: 'Futuristic cyberpunk inspired digital art',
+    itemCount: 12,
+    floorPrice: '0.000222',
+    totalVolume: '5.67',
+    image: '/images/placeholder-collection.jpg'
+  },
+  {
+    id: 'nature-vibes',
+    title: 'Nature Vibes',
+    description: 'Beautiful nature-inspired NFT collection',
+    itemCount: 15,
+    floorPrice: '0.000099',
+    totalVolume: '1.89',
+    image: '/images/placeholder-collection.jpg'
+  }
+]
+
 export default function ProfilePage({ params }: { params: { address: string } }) {
   const [activeTab, setActiveTab] = useState('created')
   const [selectedNFT, setSelectedNFT] = useState<any>(null)
@@ -105,7 +136,7 @@ export default function ProfilePage({ params }: { params: { address: string } })
           stats={{
             created: nfts.length,
             minted: mockMintedNFTs.length,
-            collections: 3
+            collections: mockCollections.length
           }}
         />
 
@@ -196,22 +227,64 @@ export default function ProfilePage({ params }: { params: { address: string } })
                 <button className="btn-primary">Create Collection</button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Mock Collections */}
-                <div className="bg-background-secondary rounded-xl border border-border p-6 hover:border-purple-primary/50 transition-colors">
-                  <div className="aspect-square bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-lg mb-4 flex items-center justify-center">
-                    <div className="text-text-secondary">Collection</div>
-                  </div>
-                  <h3 className="text-text-primary font-semibold mb-2">Digital Art Series</h3>
-                  <p className="text-text-secondary text-sm mb-4">A collection of abstract digital artworks</p>
-                  <div className="flex justify-between items-center">
-                    <span className="text-text-secondary text-sm">8 items</span>
-                    <button className="text-purple-primary hover:text-purple-hover">
-                      <ExternalLink size={16} />
-                    </button>
-                  </div>
+              {mockCollections.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {mockCollections.map((collection, index) => (
+                    <motion.div
+                      key={collection.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                    >
+                      <Link href={`/collections/${collection.id}`}>
+                        <div className="bg-background-secondary rounded-xl border border-border overflow-hidden hover:border-purple-primary/50 hover:scale-105 transition-all duration-300 cursor-pointer group">
+                          {/* Collection Image */}
+                          <div className="aspect-square bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center relative">
+                            <div className="text-text-secondary text-lg font-medium">Collection</div>
+                            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <ExternalLink size={20} className="text-purple-primary" />
+                            </div>
+                          </div>
+                          
+                          {/* Collection Info */}
+                          <div className="p-6">
+                            <h3 className="text-text-primary font-semibold mb-2 group-hover:text-purple-primary transition-colors">
+                              {collection.title}
+                            </h3>
+                            <p className="text-text-secondary text-sm mb-4 line-clamp-2">
+                              {collection.description}
+                            </p>
+                            
+                            {/* Collection Stats */}
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <span className="text-text-secondary">Items:</span>
+                                <div className="font-semibold text-text-primary">{collection.itemCount}</div>
+                              </div>
+                              <div>
+                                <span className="text-text-secondary">Floor:</span>
+                                <div className="font-semibold text-purple-primary">{collection.floorPrice} ETH</div>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-3 pt-3 border-t border-border">
+                              <div className="flex justify-between items-center">
+                                <span className="text-text-secondary text-xs">Total Volume</span>
+                                <span className="font-semibold text-text-primary text-sm">{collection.totalVolume} ETH</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </Link>
+                    </motion.div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-text-secondary mb-4">No collections created yet</div>
+                  <button className="btn-primary">Create Your First Collection</button>
+                </div>
+              )}
             </motion.div>
           )}
 

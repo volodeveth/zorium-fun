@@ -20,7 +20,12 @@ const mockNFTs = [
     promoted: true,
     likes: 24,
     mints: 12,
-    category: 'Art'
+    category: 'Art',
+    comments: [
+      { id: 1, user: 'crypto_fan', text: 'Amazing artwork! Love the colors 🎨', timestamp: '2m ago' },
+      { id: 2, user: 'nft_collector', text: 'This is going straight to my collection!', timestamp: '5m ago' },
+      { id: 3, user: 'artist_pro', text: 'Incredible detail work', timestamp: '10m ago' }
+    ]
   },
   {
     id: 2,
@@ -32,7 +37,11 @@ const mockNFTs = [
     promoted: false,
     likes: 18,
     mints: 8,
-    category: 'Photography'
+    category: 'Photography',
+    comments: [
+      { id: 1, user: 'wave_rider', text: 'Perfect timing on this shot!', timestamp: '1h ago' },
+      { id: 2, user: 'photo_lover', text: 'The composition is stunning', timestamp: '2h ago' }
+    ]
   },
   {
     id: 3,
@@ -44,7 +53,11 @@ const mockNFTs = [
     promoted: true,
     likes: 35,
     mints: 19,
-    category: 'Art'
+    category: 'Art',
+    comments: [
+      { id: 1, user: 'neon_fan', text: 'The glow effect is incredible! How did you achieve this?', timestamp: '30m ago' },
+      { id: 2, user: 'tech_artist', text: 'Masterpiece! 🔥', timestamp: '45m ago' }
+    ]
   },
   {
     id: 4,
@@ -56,7 +69,12 @@ const mockNFTs = [
     promoted: false,
     likes: 42,
     mints: 23,
-    category: 'Art'
+    category: 'Art',
+    comments: [
+      { id: 1, user: 'samurai_soul', text: 'Epic blend of traditional and futuristic!', timestamp: '15m ago' },
+      { id: 2, user: 'cyber_punk', text: 'This belongs in a museum', timestamp: '20m ago' },
+      { id: 3, user: 'warrior_fan', text: 'The detail on the armor is insane', timestamp: '25m ago' }
+    ]
   },
   {
     id: 5,
@@ -68,7 +86,10 @@ const mockNFTs = [
     promoted: false,
     likes: 31,
     mints: 15,
-    category: 'Photography'
+    category: 'Photography',
+    comments: [
+      { id: 1, user: 'ocean_explorer', text: 'Makes me want to dive right in!', timestamp: '3h ago' }
+    ]
   },
   {
     id: 6,
@@ -80,7 +101,11 @@ const mockNFTs = [
     promoted: false,
     likes: 28,
     mints: 11,
-    category: 'Photography'
+    category: 'Photography',
+    comments: [
+      { id: 1, user: 'mountain_climber', text: 'Breathtaking view! Which peak is this?', timestamp: '1h ago' },
+      { id: 2, user: 'nature_lover', text: 'Perfect golden hour lighting', timestamp: '1.5h ago' }
+    ]
   }
 ]
 
@@ -88,7 +113,7 @@ export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [sortBy, setSortBy] = useState('newest')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showFilters, setShowFilters] = useState(false)
   const [priceRange, setPriceRange] = useState([0, 1])
   const [onlyPromoted, setOnlyPromoted] = useState(false)
@@ -248,11 +273,54 @@ export default function ExplorePage() {
               <div className={
                 viewMode === 'grid' 
                   ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                  : "space-y-4"
+                  : "space-y-8"
               }>
                 {filteredNFTs.map((nft) => (
-                  <div key={nft.id}>
-                    <NFTCard nft={nft} />
+                  <div key={nft.id} className={viewMode === 'list' ? 'max-w-2xl mx-auto' : ''}>
+                    {viewMode === 'list' ? (
+                      <div className="bg-background-primary border border-border rounded-2xl overflow-hidden">
+                        <div className="h-80">
+                          <NFTCard nft={nft} />
+                        </div>
+                        {/* Comments Section */}
+                        {nft.comments && nft.comments.length > 0 && (
+                          <div className="p-4 border-t border-border">
+                            <h4 className="text-sm font-semibold text-text-primary mb-3">Comments</h4>
+                            <div className="space-y-3">
+                              {nft.comments.slice(0, 2).map((comment) => (
+                                <div key={comment.id} className="flex gap-3">
+                                  <div className="w-8 h-8 bg-purple-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
+                                    <span className="text-xs font-semibold text-purple-primary">
+                                      {comment.user.charAt(0).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="text-sm font-medium text-text-primary truncate">
+                                        {comment.user}
+                                      </span>
+                                      <span className="text-xs text-text-secondary">
+                                        {comment.timestamp}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-text-secondary">
+                                      {comment.text}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                              {nft.comments.length > 2 && (
+                                <button className="text-sm text-purple-primary hover:text-purple-hover">
+                                  View all {nft.comments.length} comments
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <NFTCard nft={nft} />
+                    )}
                   </div>
                 ))}
               </div>

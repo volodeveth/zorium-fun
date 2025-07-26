@@ -21,8 +21,10 @@ const mockNFTs = [
     promoted: true,
     likes: 24,
     mints: 12,
+    networkId: 8453,
     category: 'Art',
     description: 'A mesmerizing digital artwork that captures the essence of aurora borealis with vibrant colors and ethereal beauty.',
+    mintEndTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
     comments: [
       { id: 1, user: 'crypto_fan', text: 'Amazing artwork! Love the colors 🎨', timestamp: '2m ago' },
       { id: 2, user: 'nft_collector', text: 'This is going straight to my collection!', timestamp: '5m ago' },
@@ -39,8 +41,10 @@ const mockNFTs = [
     promoted: false,
     likes: 18,
     mints: 8,
+    networkId: 7777777,
     category: 'Photography',
     description: 'Stunning ocean waves captured at the perfect moment, showcasing the raw power and beauty of nature.',
+    mintEndTime: new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString(), // 23 hours from now
     comments: [
       { id: 1, user: 'wave_rider', text: 'Perfect timing on this shot!', timestamp: '1h ago' },
       { id: 2, user: 'photo_lover', text: 'The composition is stunning', timestamp: '2h ago' }
@@ -56,8 +60,10 @@ const mockNFTs = [
     promoted: true,
     likes: 35,
     mints: 19,
+    networkId: 1,
     category: 'Art',
     description: 'An electrifying neon artwork that glows with futuristic energy and cyberpunk aesthetics.',
+    mintEndTime: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
     comments: [
       { id: 1, user: 'neon_fan', text: 'The glow effect is incredible! How did you achieve this?', timestamp: '30m ago' },
       { id: 2, user: 'tech_artist', text: 'Masterpiece! 🔥', timestamp: '45m ago' }
@@ -73,8 +79,10 @@ const mockNFTs = [
     promoted: false,
     likes: 42,
     mints: 23,
+    networkId: 137,
     category: 'Art',
     description: 'A masterful blend of traditional samurai culture with futuristic cyberpunk elements, creating a unique digital warrior.',
+    mintEndTime: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // ended 1 hour ago
     comments: [
       { id: 1, user: 'samurai_soul', text: 'Epic blend of traditional and futuristic!', timestamp: '15m ago' },
       { id: 2, user: 'cyber_punk', text: 'This belongs in a museum', timestamp: '20m ago' },
@@ -91,8 +99,10 @@ const mockNFTs = [
     promoted: false,
     likes: 31,
     mints: 15,
+    networkId: 10,
     category: 'Photography',
     description: 'Deep underwater photography revealing the mysterious beauty of ocean depths and marine life.',
+    mintEndTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now
     comments: [
       { id: 1, user: 'ocean_explorer', text: 'Makes me want to dive right in!', timestamp: '3h ago' }
     ]
@@ -107,8 +117,10 @@ const mockNFTs = [
     promoted: false,
     likes: 28,
     mints: 11,
+    networkId: 42161,
     category: 'Photography',
     description: 'Breathtaking mountain landscape captured during golden hour, showcasing majestic peaks and natural grandeur.',
+    mintEndTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
     comments: [
       { id: 1, user: 'mountain_climber', text: 'Breathtaking view! Which peak is this?', timestamp: '1h ago' },
       { id: 2, user: 'nature_lover', text: 'Perfect golden hour lighting', timestamp: '1.5h ago' }
@@ -124,6 +136,17 @@ export default function ExplorePage() {
   const [showFilters, setShowFilters] = useState(false)
   const [priceRange, setPriceRange] = useState([0, 1])
   const [onlyPromoted, setOnlyPromoted] = useState(false)
+  const [selectedNetwork, setSelectedNetwork] = useState<string | number>('all')
+  const [timeRemaining, setTimeRemaining] = useState('all')
+
+  // Helper function to calculate time remaining in hours
+  const getTimeRemainingHours = (mintEndTime: string | undefined) => {
+    if (!mintEndTime) return null
+    const now = new Date()
+    const endTime = new Date(mintEndTime)
+    const diffMs = endTime.getTime() - now.getTime()
+    return diffMs / (1000 * 60 * 60) // Convert to hours
+  }
 
   // Filter and sort NFTs based on current filters
   const filteredNFTs = mockNFTs
@@ -148,6 +171,31 @@ export default function ExplorePage() {
       const price = parseFloat(nft.price)
       if (price < priceRange[0] || price > priceRange[1]) {
         return false
+      }
+
+      // Network filter
+      if (selectedNetwork !== 'all' && nft.networkId !== selectedNetwork) {
+        return false
+      }
+
+      // Time remaining filter
+      if (timeRemaining !== 'all') {
+        const hoursRemaining = getTimeRemainingHours(nft.mintEndTime)
+        
+        switch (timeRemaining) {
+          case '1hour':
+            if (!hoursRemaining || hoursRemaining <= 0 || hoursRemaining > 1) return false
+            break
+          case '24hours':
+            if (!hoursRemaining || hoursRemaining <= 0 || hoursRemaining > 24) return false
+            break
+          case '7days':
+            if (!hoursRemaining || hoursRemaining <= 0 || hoursRemaining > 168) return false
+            break
+          case 'ended':
+            if (!hoursRemaining || hoursRemaining > 0) return false
+            break
+        }
       }
       
       return true
@@ -249,6 +297,10 @@ export default function ExplorePage() {
                 onPriceRangeChange={setPriceRange}
                 onlyPromoted={onlyPromoted}
                 onOnlyPromotedChange={setOnlyPromoted}
+                selectedNetwork={selectedNetwork}
+                onNetworkChange={setSelectedNetwork}
+                timeRemaining={timeRemaining}
+                onTimeRemainingChange={setTimeRemaining}
               />
             </div>
           )}

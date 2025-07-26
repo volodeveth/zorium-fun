@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { TrendingUp, Users, DollarSign, Zap } from 'lucide-react'
+import { TrendingUp, Users, DollarSign, Zap, ChevronLeft, ChevronRight } from 'lucide-react'
 import NFTCard from '@/components/nft/NFTCard'
 import { useState, useEffect, useCallback } from 'react'
 
@@ -19,7 +19,7 @@ const generateMockNFT = (id: number) => ({
   networkId: [8453, 7777777, 1, 137][Math.floor(Math.random() * 4)]
 })
 
-const featuredNFTs = [
+const allFeaturedNFTs = [
   {
     id: 1,
     title: 'Aurora',
@@ -55,8 +55,54 @@ const featuredNFTs = [
     likes: 35,
     mints: 19,
     networkId: 1
+  },
+  {
+    id: 4,
+    title: 'Cyber Samurai',
+    creator: 'futuristic',
+    creatorAddress: '0x5555...6666',
+    image: '/images/placeholder-nft.jpg',
+    price: '0.000111',
+    promoted: true,
+    likes: 42,
+    mints: 23,
+    networkId: 137
+  },
+  {
+    id: 5,
+    title: 'Quantum Dreams',
+    creator: 'dreamweaver',
+    creatorAddress: '0x7777...8888',
+    image: '/images/placeholder-nft.jpg',
+    price: '0.000111',
+    promoted: true,
+    likes: 28,
+    mints: 15,
+    networkId: 8453
+  },
+  {
+    id: 6,
+    title: 'Electric Storm',
+    creator: 'stormcaster',
+    creatorAddress: '0x9999...0000',
+    image: '/images/placeholder-nft.jpg',
+    price: '0.000111',
+    promoted: true,
+    likes: 51,
+    mints: 31,
+    networkId: 1
   }
 ]
+
+// Shuffle array function
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+  return shuffled
+}
 
 const mockStats = {
   totalNFTs: 15420,
@@ -70,6 +116,14 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
+  const [featuredNFTs, setFeaturedNFTs] = useState<any[]>([])
+  const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0)
+
+  // Initialize featured NFTs with random shuffle
+  useEffect(() => {
+    const shuffled = shuffleArray(allFeaturedNFTs)
+    setFeaturedNFTs(shuffled)
+  }, [])
 
   // Load initial NFTs
   useEffect(() => {
@@ -115,6 +169,25 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [hasMore, loading, loadMoreNFTs])
 
+  // Carousel navigation functions
+  const nextSlide = () => {
+    setCurrentCarouselIndex((prev) => 
+      prev >= featuredNFTs.length - 2 ? 0 : prev + 1
+    )
+  }
+
+  const prevSlide = () => {
+    setCurrentCarouselIndex((prev) => 
+      prev <= 0 ? Math.max(0, featuredNFTs.length - 2) : prev - 1
+    )
+  }
+
+  // Get current pair of NFTs for display
+  const getCurrentNFTPair = () => {
+    if (featuredNFTs.length === 0) return []
+    return featuredNFTs.slice(currentCarouselIndex, currentCarouselIndex + 2)
+  }
+
   return (
     <div className="min-h-screen">
       {/* Hero Section - Split Layout */}
@@ -142,16 +215,49 @@ export default function HomePage() {
               </div>
             </div>
             
-            {/* Right Side - Featured NFTs */}
+            {/* Right Side - Featured NFTs Carousel */}
             <div className="">
-              <h3 className="text-2xl font-bold text-text-primary mb-6">Featured NFTs</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-                {featuredNFTs.map((nft, index) => (
-                  <div key={nft.id}>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-text-primary">Featured NFTs</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={prevSlide}
+                    className="p-2 rounded-full bg-background-secondary hover:bg-purple-primary/20 transition-colors"
+                    disabled={featuredNFTs.length <= 2}
+                  >
+                    <ChevronLeft size={20} className="text-text-secondary hover:text-purple-primary" />
+                  </button>
+                  <button
+                    onClick={nextSlide}
+                    className="p-2 rounded-full bg-background-secondary hover:bg-purple-primary/20 transition-colors"
+                    disabled={featuredNFTs.length <= 2}
+                  >
+                    <ChevronRight size={20} className="text-text-secondary hover:text-purple-primary" />
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {getCurrentNFTPair().map((nft, index) => (
+                  <div key={`${nft.id}-${currentCarouselIndex}`}>
                     <NFTCard nft={nft} />
                   </div>
                 ))}
               </div>
+              {featuredNFTs.length > 2 && (
+                <div className="flex justify-center mt-4 gap-2">
+                  {Array.from({ length: Math.max(1, featuredNFTs.length - 1) }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentCarouselIndex(index)}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        index === currentCarouselIndex
+                          ? 'bg-purple-primary'
+                          : 'bg-text-secondary/30'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -198,7 +304,7 @@ export default function HomePage() {
 
 
       {/* Latest Activity with Infinite Scroll */}
-      <section className="py-16 bg-background-secondary">
+      <section className="py-16">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-text-primary">Latest Activity</h2>

@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Menu, X, Bell, Search } from 'lucide-react'
 import ConnectWallet from '@/components/web3/ConnectWallet'
 import SearchModal from '@/components/common/SearchModal'
+import ThemeToggle from '@/components/common/ThemeToggle'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -55,6 +56,9 @@ export default function Header() {
             >
               <Search size={20} />
             </button>
+            
+            {/* Theme Toggle */}
+            <ThemeToggle />
             
             {/* Notifications */}
             <Link href="/notifications" className="p-2 text-text-secondary hover:text-text-primary transition-colors relative">

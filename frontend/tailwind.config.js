@@ -5,25 +5,26 @@ module.exports = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
         background: {
-          primary: '#0a0a0a',
-          secondary: '#1a1a1a',
-          tertiary: '#2a2a2a'
+          primary: 'var(--background-primary)',
+          secondary: 'var(--background-secondary)',
+          tertiary: 'var(--background-tertiary)'
         },
         text: {
-          primary: '#ffffff',
-          secondary: '#a0a0a0',
-          accent: '#8b5cf6'
+          primary: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          accent: 'var(--text-accent)'
         },
         purple: {
           primary: '#8b5cf6',
           hover: '#7c3aed',
           dark: '#6d28d9'
         },
-        border: '#333333'
+        border: 'var(--border)'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

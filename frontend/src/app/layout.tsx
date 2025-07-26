@@ -22,8 +22,21 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body className={`${inter.className} bg-background-primary min-h-screen`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('theme') || 
+                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.className = theme;
+              } catch (e) {
+                document.documentElement.className = 'dark';
+              }
+            `,
+          }}
+        />
         <Providers>
           <Header />
           <AuthenticationFlow />

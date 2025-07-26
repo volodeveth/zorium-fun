@@ -13,7 +13,7 @@ const generateMockNFT = (id: number) => ({
   creatorAddress: `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`,
   image: '/images/placeholder-nft.jpg',
   price: '0.000111',
-  promoted: Math.random() > 0.8,
+  promoted: false, // Regular NFTs are not promoted
   likes: Math.floor(Math.random() * 50) + 1,
   mints: Math.floor(Math.random() * 30) + 1,
   networkId: [8453, 7777777, 1, 137][Math.floor(Math.random() * 4)]
@@ -118,6 +118,7 @@ export default function HomePage() {
   const [page, setPage] = useState(0)
   const [featuredNFTs, setFeaturedNFTs] = useState<any[]>([])
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0)
+  const [usedPromotedIds, setUsedPromotedIds] = useState<Set<number>>(new Set())
 
   // Initialize featured NFTs with random shuffle
   useEffect(() => {
@@ -137,11 +138,69 @@ export default function HomePage() {
     
     // Simulate API call
     setTimeout(() => {
-      const newNFTs = Array.from({ length: 20 }, (_, i) => 
+      // Get available promoted NFTs (not yet used)
+      const availablePromoted = allFeaturedNFTs.filter(nft => !usedPromotedIds.has(nft.id))
+      
+      // If we've used all promoted NFTs, reset and start over
+      let promotedToUse = availablePromoted
+      let shouldResetUsed = false
+      
+      if (availablePromoted.length < 3 && allFeaturedNFTs.length >= 3) {
+        // If we don't have enough unused promoted NFTs, but we have enough in total, reset
+        promotedToUse = allFeaturedNFTs
+        shouldResetUsed = true
+      }
+      
+      // Calculate how many promoted NFTs we can use (max 3 or whatever we have available)
+      const promotedCount = Math.min(3, promotedToUse.length)
+      
+      // Generate regular NFTs (20 total minus promoted count)
+      const regularCount = 20 - promotedCount
+      const regularNFTs = Array.from({ length: regularCount }, (_, i) => 
         generateMockNFT(page * 20 + i + 100)
       )
       
-      setLatestNFTs(prev => [...prev, ...newNFTs])
+      // Select random promoted NFTs from available pool
+      const shuffledPromoted = shuffleArray(promotedToUse)
+      const selectedPromoted = shuffledPromoted.slice(0, promotedCount)
+      
+      // Update used promoted IDs
+      const newUsedIds = new Set(shouldResetUsed ? [] : Array.from(usedPromotedIds))
+      selectedPromoted.forEach(nft => newUsedIds.add(nft.id))
+      setUsedPromotedIds(newUsedIds)
+      
+      // Create final promoted NFTs with unique IDs for this batch
+      const finalPromoted = selectedPromoted.map((nft, i) => ({
+        ...nft,
+        id: page * 1000 + nft.id + i // Ensure unique IDs for each batch
+      }))
+      
+      // Create array of 20 positions
+      const positions = Array.from({ length: 20 }, (_, i) => i)
+      const shuffledPositions = shuffleArray(positions)
+      
+      // Select random positions for promoted NFTs (based on how many we actually have)
+      const promotedPositions = shuffledPositions.slice(0, promotedCount).sort((a, b) => a - b)
+      
+      // Create final array with promoted NFTs at random positions
+      const finalNFTs: any[] = []
+      let regularIndex = 0
+      let promotedIndex = 0
+      
+      // Calculate how many regular NFTs we need (20 total minus promoted count)
+      const regularNeeded = 20 - promotedCount
+      
+      for (let i = 0; i < 20; i++) {
+        if (promotedPositions.includes(i) && promotedIndex < finalPromoted.length) {
+          finalNFTs.push(finalPromoted[promotedIndex])
+          promotedIndex++
+        } else if (regularIndex < regularNeeded && regularIndex < regularNFTs.length) {
+          finalNFTs.push(regularNFTs[regularIndex])
+          regularIndex++
+        }
+      }
+      
+      setLatestNFTs(prev => [...prev, ...finalNFTs])
       setPage(prev => prev + 1)
       setLoading(false)
       

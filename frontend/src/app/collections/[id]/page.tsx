@@ -2,9 +2,12 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Share2, Heart, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Share2, ExternalLink, Camera, Edit3, Globe } from 'lucide-react'
 import Link from 'next/link'
 import NFTCard from '@/components/nft/NFTCard'
+import UserLink from '@/components/common/UserLink'
+import ShareModal from '@/components/common/ShareModal'
+import { getExplorerUrl, getExplorerName } from '@/lib/utils/networkHelpers'
 
 const mockCollections: Record<string, any> = {
   'digital-art-series': {
@@ -16,6 +19,9 @@ const mockCollections: Record<string, any> = {
     totalVolume: '2.34',
     owner: 'golumdexter',
     ownerAddress: '0x123...abc',
+    contractAddress: '0x1234567890abcdef1234567890abcdef12345678',
+    networkId: 8453,
+    collectionImage: null,
     nfts: [
       {
         id: 101,
@@ -75,7 +81,10 @@ const mockCollections: Record<string, any> = {
     floorPrice: '0.000222',
     totalVolume: '5.67',
     owner: 'golumdexter',
-    ownerAddress: '0x123...abc',
+    ownerAddress: '0x456...def',
+    contractAddress: '0xabcdef1234567890abcdef1234567890abcdef12',
+    networkId: 8453,
+    collectionImage: null,
     nfts: [
       {
         id: 201,
@@ -111,7 +120,10 @@ const mockCollections: Record<string, any> = {
     floorPrice: '0.000099',
     totalVolume: '1.89',
     owner: 'golumdexter',
-    ownerAddress: '0x123...abc',
+    ownerAddress: '0x789...ghi',
+    contractAddress: '0x567890abcdef1234567890abcdef1234567890ab',
+    networkId: 8453,
+    collectionImage: null,
     nfts: [
       {
         id: 301,
@@ -149,7 +161,12 @@ interface CollectionDetailProps {
 
 export default function CollectionDetail({ params }: CollectionDetailProps) {
   const [sortBy, setSortBy] = useState('newest')
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [isEditingImage, setIsEditingImage] = useState(false)
+  const [currentUserAddress] = useState('0x123...abc') // Mock current user
   const collection = mockCollections[params.id]
+  
+  const isOwner = collection && currentUserAddress === collection.ownerAddress
 
   if (!collection) {
     return (
@@ -179,10 +196,36 @@ export default function CollectionDetail({ params }: CollectionDetailProps) {
           {/* Collection Header */}
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Collection Image */}
-            <div className="w-full lg:w-80 flex-shrink-0">
-              <div className="aspect-square bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-2xl flex items-center justify-center">
-                <div className="text-text-secondary text-2xl font-bold">Collection</div>
+            <div className="w-full lg:w-80 flex-shrink-0 relative group">
+              <div className="aspect-square bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-2xl flex items-center justify-center overflow-hidden">
+                {collection.collectionImage ? (
+                  <img 
+                    src={collection.collectionImage} 
+                    alt={collection.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="text-center">
+                    <div className="text-6xl mb-4">🎨</div>
+                    <div className="text-text-secondary text-lg font-medium">Collection</div>
+                  </div>
+                )}
               </div>
+              
+              {/* Edit Image Button - Only show for collection owner */}
+              {isOwner && (
+                <button
+                  onClick={() => setIsEditingImage(true)}
+                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl flex items-center justify-center"
+                >
+                  <div className="text-white text-center">
+                    <Camera size={32} className="mx-auto mb-2" />
+                    <div className="text-sm font-medium">
+                      {collection.collectionImage ? 'Change Image' : 'Add Image'}
+                    </div>
+                  </div>
+                </button>
+              )}
             </div>
 
             {/* Collection Info */}
@@ -207,25 +250,35 @@ export default function CollectionDetail({ params }: CollectionDetailProps) {
                   <div className="text-text-secondary text-sm">Total Volume</div>
                 </div>
                 <div className="text-center p-4 bg-background-primary rounded-xl border border-border">
-                  <div className="text-2xl font-bold text-text-primary">{collection.owner}</div>
+                  <UserLink
+                    address={collection.ownerAddress}
+                    username={collection.owner}
+                    className="text-text-primary font-bold text-2xl hover:text-purple-primary"
+                    showAt={false}
+                  />
                   <div className="text-text-secondary text-sm">Owner</div>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex gap-4">
-                <button className="btn-primary">
-                  <Heart size={18} />
-                  Favorite
-                </button>
-                <button className="btn-secondary">
+                <button 
+                  onClick={() => setShowShareModal(true)}
+                  className="btn-secondary"
+                >
                   <Share2 size={18} />
                   Share
                 </button>
-                <button className="btn-secondary">
-                  <ExternalLink size={18} />
+                <a
+                  href={getExplorerUrl(collection.networkId, collection.contractAddress)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary inline-flex items-center gap-2"
+                  title={`View on ${getExplorerName(collection.networkId)}`}
+                >
+                  <Globe size={18} />
                   View on Explorer
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -273,6 +326,63 @@ export default function CollectionDetail({ params }: CollectionDetailProps) {
           </div>
         )}
       </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        nftId={collection.id}
+        nftTitle={collection.title}
+        userOwnsNFT={isOwner}
+      />
+
+      {/* Image Upload Modal - Simple placeholder for now */}
+      {isEditingImage && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-background-secondary rounded-2xl p-6 w-full max-w-md">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-text-primary">Update Collection Image</h3>
+              <button
+                onClick={() => setIsEditingImage(false)}
+                className="w-8 h-8 bg-background-tertiary rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div className="text-center p-8 border-2 border-dashed border-border rounded-xl">
+                <Camera size={32} className="text-text-secondary mx-auto mb-3" />
+                <p className="text-text-secondary text-sm mb-4">
+                  Click to upload or drag and drop
+                </p>
+                <p className="text-text-secondary text-xs">
+                  Supports: JPG, PNG, GIF (Max 10MB)
+                </p>
+              </div>
+              
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsEditingImage(false)}
+                  className="flex-1 bg-background-tertiary hover:bg-background-tertiary/80 text-text-primary py-2 px-4 rounded-lg transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    // TODO: Implement actual upload logic
+                    console.log('Upload image functionality will be implemented')
+                    setIsEditingImage(false)
+                  }}
+                  className="flex-1 bg-purple-primary hover:bg-purple-hover text-white py-2 px-4 rounded-lg transition-colors"
+                >
+                  Upload
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

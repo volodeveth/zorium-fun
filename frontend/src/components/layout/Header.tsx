@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import ConnectWallet from '@/components/web3/ConnectWallet'
 import SearchModal from '@/components/common/SearchModal'
 import ThemeToggle from '@/components/common/ThemeToggle'
+import ZoriumBalance from '@/components/common/ZoriumBalance'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -69,6 +70,11 @@ export default function Header() {
               <ThemeToggle />
             </div>
             
+            {/* Zorium Balance - Desktop */}
+            <div className="hidden sm:block">
+              <ZoriumBalance />
+            </div>
+            
             {/* Notifications - Hidden on mobile */}
             <Link href="/notifications" className="hidden sm:block p-2 text-text-secondary hover:text-text-primary transition-colors relative">
               <Bell size={20} />
@@ -121,6 +127,11 @@ export default function Header() {
               
               {/* Mobile-only actions */}
               <div className="pt-4 border-t border-border space-y-4">
+                {/* Zorium Balance - Mobile */}
+                <div className="sm:hidden">
+                  <ZoriumBalance />
+                </div>
+                
                 {/* Search in mobile menu */}
                 <button
                   onClick={() => {

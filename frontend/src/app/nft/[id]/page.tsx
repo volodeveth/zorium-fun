@@ -380,6 +380,26 @@ export default function NFTDetail() {
                   </div>
                 </div>
                 
+                {/* Quick Quantity Selection */}
+                <div className="mb-4">
+                  <div className="text-sm text-text-secondary mb-2">Quick select:</div>
+                  <div className="flex gap-2 flex-wrap">
+                    {[1, 5, 10, 100, 1000].map((qty) => (
+                      <button
+                        key={qty}
+                        onClick={() => setMintQuantity(qty)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                          mintQuantity === qty
+                            ? 'bg-purple-primary text-white'
+                            : 'bg-background-tertiary text-text-primary hover:bg-purple-primary/20'
+                        }`}
+                      >
+                        {qty}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
                 <div className="flex gap-3">
                   <Button
                     onClick={handleMint}

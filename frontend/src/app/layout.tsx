@@ -9,8 +9,8 @@ import Providers from './providers'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Zorium.fun - Create & Discover NFTs on Zora Network',
-  description: 'Create, mint, and trade NFTs on Zora Network with Zorium token features',
+  title: 'Zorium.fun - Create & Discover NFTs on ZORIUM.FUN',
+  description: 'Create, mint, and trade NFTs across multiple networks with Zorium token features',
   icons: {
     icon: '/favicon.ico',
   },

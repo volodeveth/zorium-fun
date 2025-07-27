@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import SearchBar from '@/components/explore/SearchBar'
 import FilterPanel from '@/components/explore/FilterPanel'
 import SortDropdown from '@/components/explore/SortDropdown'
@@ -138,6 +138,31 @@ export default function ExplorePage() {
   const [onlyPromoted, setOnlyPromoted] = useState(false)
   const [selectedNetwork, setSelectedNetwork] = useState<string | number>('all')
   const [timeRemaining, setTimeRemaining] = useState('all')
+
+  // Close filters on mobile when clicking outside or on escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && showFilters) {
+        setShowFilters(false)
+      }
+    }
+
+    const handleResize = () => {
+      // Close mobile filters on desktop resize
+      if (window.innerWidth >= 1024 && showFilters) {
+        // On desktop, let filters stay open
+        return
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [showFilters])
 
   // Helper function to calculate time remaining in hours
   const getTimeRemainingHours = (mintEndTime: string | undefined) => {
@@ -288,25 +313,51 @@ export default function ExplorePage() {
           />
         </div>
 
-        <div className="flex gap-6">
+        <div className="flex gap-6 relative">
+          {/* Mobile Filter Overlay */}
+          {showFilters && (
+            <div className="lg:hidden fixed inset-0 z-40 bg-black/50" onClick={() => setShowFilters(false)} />
+          )}
+          
           {/* Filters Sidebar */}
           {showFilters && (
-            <div className="w-80 flex-shrink-0">
-              <FilterPanel
-                priceRange={priceRange}
-                onPriceRangeChange={setPriceRange}
-                onlyPromoted={onlyPromoted}
-                onOnlyPromotedChange={setOnlyPromoted}
-                selectedNetwork={selectedNetwork}
-                onNetworkChange={setSelectedNetwork}
-                timeRemaining={timeRemaining}
-                onTimeRemainingChange={setTimeRemaining}
-              />
+            <div className={`
+              lg:w-80 lg:flex-shrink-0 lg:relative lg:bg-transparent
+              fixed lg:static top-0 left-0 h-full lg:h-auto w-80 max-w-[90vw]
+              bg-background-primary z-50 lg:z-auto
+              transform lg:transform-none transition-transform duration-300
+              ${showFilters ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+              border-r lg:border-r-0 border-border lg:border-none
+              overflow-y-auto lg:overflow-visible
+            `}>
+              <div className="p-4 lg:p-0">
+                {/* Mobile close button */}
+                <div className="lg:hidden flex justify-between items-center mb-4 pb-4 border-b border-border">
+                  <h2 className="text-lg font-semibold text-text-primary">Filters</h2>
+                  <button
+                    onClick={() => setShowFilters(false)}
+                    className="p-2 text-text-secondary hover:text-text-primary"
+                  >
+                    ×
+                  </button>
+                </div>
+                
+                <FilterPanel
+                  priceRange={priceRange}
+                  onPriceRangeChange={setPriceRange}
+                  onlyPromoted={onlyPromoted}
+                  onOnlyPromotedChange={setOnlyPromoted}
+                  selectedNetwork={selectedNetwork}
+                  onNetworkChange={setSelectedNetwork}
+                  timeRemaining={timeRemaining}
+                  onTimeRemainingChange={setTimeRemaining}
+                />
+              </div>
             </div>
           )}
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Sort and Results Count */}
             <div className="flex items-center justify-between mb-6">
               <p className="text-text-secondary">

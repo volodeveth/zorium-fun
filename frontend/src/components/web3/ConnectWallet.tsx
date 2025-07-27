@@ -41,11 +41,16 @@ export default function ConnectWallet() {
                   <button
                     onClick={openConnectModal}
                     type="button"
-                    className="btn-primary flex items-center gap-2"
+                    className="btn-primary flex items-center gap-2 text-sm sm:text-base px-3 sm:px-4 py-2 flex-shrink-0"
                     disabled={isConnecting}
                   >
-                    <Wallet size={18} />
-                    {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                    <Wallet size={16} className="sm:w-[18px] sm:h-[18px]" />
+                    <span className="hidden sm:inline">
+                      {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                    </span>
+                    <span className="sm:hidden">
+                      {isConnecting ? '...' : 'Connect'}
+                    </span>
                   </button>
                 )
               }
@@ -55,21 +60,22 @@ export default function ConnectWallet() {
                   <button 
                     onClick={openChainModal} 
                     type="button"
-                    className="bg-red-500 hover:bg-red-600 text-white font-medium px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                    className="bg-red-500 hover:bg-red-600 text-white font-medium px-3 sm:px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-1 sm:gap-2 text-sm sm:text-base flex-shrink-0"
                   >
-                    Wrong network
-                    <ChevronDown size={16} />
+                    <span className="hidden sm:inline">Wrong network</span>
+                    <span className="sm:hidden">Wrong</span>
+                    <ChevronDown size={14} className="sm:w-4 sm:h-4" />
                   </button>
                 )
               }
 
               return (
-                <div className="flex items-center gap-2">
-                  {/* Chain Selector */}
+                <div className="flex items-center gap-1 sm:gap-2">
+                  {/* Chain Selector - Hidden on mobile */}
                   <button
                     onClick={openChainModal}
                     type="button"
-                    className="bg-background-secondary hover:bg-background-tertiary border border-border px-3 py-2 rounded-lg flex items-center gap-2 transition-colors duration-200"
+                    className="hidden sm:flex bg-background-secondary hover:bg-background-tertiary border border-border px-3 py-2 rounded-lg items-center gap-2 transition-colors duration-200"
                   >
                     {chain.hasIcon && (
                       <div

@@ -115,9 +115,10 @@ export default function TrendingPage() {
       <div className="bg-background-secondary border-b border-border">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-text-primary mb-4 flex items-center justify-center gap-3">
-              <TrendingUp className="text-purple-primary" size={40} />
-              Trending NFTs
+            <h1 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4 flex items-center justify-center gap-2 sm:gap-3">
+              <TrendingUp className="text-purple-primary" size={32} />
+              <span className="sm:hidden">Trending</span>
+              <span className="hidden sm:inline">Trending NFTs</span>
             </h1>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
               Discover the hottest NFTs rising in popularity across different time periods
@@ -130,14 +131,17 @@ export default function TrendingPage() {
               <button
                 key={key}
                 onClick={() => setSelectedTime(key)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-medium transition-all duration-200 text-sm sm:text-base ${
                   selectedTime === key
                     ? 'bg-purple-primary text-white shadow-lg scale-105'
                     : 'bg-background-primary text-text-secondary hover:bg-background-tertiary hover:text-text-primary border border-border'
                 }`}
               >
-                <Icon size={20} />
-                {label}
+                <Icon size={16} className="sm:w-5 sm:h-5" />
+                <span className="hidden sm:inline">{label}</span>
+                <span className="sm:hidden">
+                  {key === '5min' ? '5m' : key === '1hour' ? '1h' : key === '24hours' ? '24h' : '7d'}
+                </span>
               </button>
             ))}
           </div>

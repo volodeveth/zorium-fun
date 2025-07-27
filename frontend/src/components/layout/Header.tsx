@@ -4,6 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import { Menu, X, Bell, Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import ConnectWallet from '@/components/web3/ConnectWallet'
 import SearchModal from '@/components/common/SearchModal'
 import ThemeToggle from '@/components/common/ThemeToggle'
@@ -11,13 +12,19 @@ import ThemeToggle from '@/components/common/ThemeToggle'
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
+  const router = useRouter()
+
+  const handleMobileNavClick = (href: string) => {
+    setIsMobileMenuOpen(false)
+    router.push(href)
+  }
 
   return (
     <header className="sticky top-0 z-50 glass-effect">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <Image 
               src="/images/zoriumfun-logo.png" 
               alt="Zorium Logo" 
@@ -25,7 +32,7 @@ export default function Header() {
               height={32}
               className="transition-transform duration-200 hover:scale-110"
             />
-            <div className="text-2xl font-bold gradient-text">
+            <div className="text-xl sm:text-2xl font-bold gradient-text">
               zorium.fun
             </div>
           </Link>
@@ -47,34 +54,38 @@ export default function Header() {
           </nav>
 
           {/* Right side actions */}
-          <div className="flex items-center space-x-4">
-            {/* Search */}
+          <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-4">
+            {/* Search - Hidden on mobile, shown in mobile menu */}
             <button 
               onClick={() => setIsSearchModalOpen(true)}
-              className="p-2 text-text-secondary hover:text-text-primary transition-colors"
+              className="hidden sm:block p-2 text-text-secondary hover:text-text-primary transition-colors"
               title="Search"
             >
               <Search size={20} />
             </button>
             
-            {/* Theme Toggle */}
-            <ThemeToggle />
+            {/* Theme Toggle - Always visible but smaller on mobile */}
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
             
-            {/* Notifications */}
-            <Link href="/notifications" className="p-2 text-text-secondary hover:text-text-primary transition-colors relative">
+            {/* Notifications - Hidden on mobile */}
+            <Link href="/notifications" className="hidden sm:block p-2 text-text-secondary hover:text-text-primary transition-colors relative">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 w-3 h-3 bg-purple-primary rounded-full"></span>
             </Link>
 
-            {/* Connect Wallet */}
-            <ConnectWallet />
+            {/* Connect Wallet - Simplified on mobile */}
+            <div className="flex-shrink-0">
+              <ConnectWallet />
+            </div>
 
             {/* Mobile menu button */}
             <button 
-              className="md:hidden p-2 text-text-secondary hover:text-text-primary"
+              className="md:hidden p-2 text-text-secondary hover:text-text-primary flex-shrink-0"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         </div>
@@ -83,18 +94,61 @@ export default function Header() {
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <nav className="flex flex-col space-y-4">
-              <Link href="/" className="text-text-secondary hover:text-text-primary transition-colors">
+              <button
+                onClick={() => handleMobileNavClick('/')}
+                className="text-left text-text-secondary hover:text-text-primary transition-colors"
+              >
                 Home
-              </Link>
-              <Link href="/explore" className="text-text-secondary hover:text-text-primary transition-colors">
+              </button>
+              <button
+                onClick={() => handleMobileNavClick('/explore')}
+                className="text-left text-text-secondary hover:text-text-primary transition-colors"
+              >
                 Explore
-              </Link>
-              <Link href="/trending" className="text-text-secondary hover:text-text-primary transition-colors">
+              </button>
+              <button
+                onClick={() => handleMobileNavClick('/trending')}
+                className="text-left text-text-secondary hover:text-text-primary transition-colors"
+              >
                 Trending
-              </Link>
-              <Link href="/create" className="text-text-secondary hover:text-text-primary transition-colors">
+              </button>
+              <button
+                onClick={() => handleMobileNavClick('/create')}
+                className="text-left text-text-secondary hover:text-text-primary transition-colors"
+              >
                 Create
-              </Link>
+              </button>
+              
+              {/* Mobile-only actions */}
+              <div className="pt-4 border-t border-border space-y-4">
+                {/* Search in mobile menu */}
+                <button
+                  onClick={() => {
+                    setIsSearchModalOpen(true)
+                    setIsMobileMenuOpen(false)
+                  }}
+                  className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  <Search size={18} />
+                  <span>Search</span>
+                </button>
+                
+                {/* Notifications in mobile menu */}
+                <button
+                  onClick={() => handleMobileNavClick('/notifications')}
+                  className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors relative"
+                >
+                  <Bell size={18} />
+                  <span>Notifications</span>
+                  <span className="w-2 h-2 bg-purple-primary rounded-full ml-1"></span>
+                </button>
+                
+                {/* Theme toggle in mobile menu */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-text-secondary">Theme</span>
+                  <ThemeToggle />
+                </div>
+              </div>
             </nav>
           </div>
         )}

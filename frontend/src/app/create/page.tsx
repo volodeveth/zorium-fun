@@ -51,7 +51,7 @@ export default function CreatePage() {
 
         {/* Progress Steps */}
         <div className="mb-8">
-          <div className="flex items-center justify-center space-x-8">
+          <div className="flex items-center justify-center space-x-2 sm:space-x-4 lg:space-x-8">
             {steps.map((step, index) => {
               const Icon = step.icon
               const isActive = currentStep === step.number
@@ -59,21 +59,22 @@ export default function CreatePage() {
               
               return (
                 <div key={step.number} className="flex items-center">
-                  <div className={`flex items-center space-x-2 ${
+                  <div className={`flex items-center space-x-1 sm:space-x-2 ${
                     isActive ? 'text-purple-primary' : 
                     isCompleted ? 'text-green-500' : 'text-text-secondary'
                   }`}>
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center border-2 ${
                       isActive ? 'border-purple-primary bg-purple-primary/10' :
                       isCompleted ? 'border-green-500 bg-green-500/10' :
                       'border-border bg-background-secondary'
                     }`}>
-                      <Icon size={18} />
+                      <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
                     </div>
-                    <span className="font-medium">{step.title}</span>
+                    <span className="font-medium text-sm sm:text-base hidden sm:inline">{step.title}</span>
+                    <span className="font-medium text-xs sm:hidden">{step.number}</span>
                   </div>
                   {index < steps.length - 1 && (
-                    <div className={`w-16 h-px mx-4 ${
+                    <div className={`w-8 sm:w-16 h-px mx-2 sm:mx-4 ${
                       isCompleted ? 'bg-green-500' : 'bg-border'
                     }`} />
                   )}

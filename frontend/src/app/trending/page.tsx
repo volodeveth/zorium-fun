@@ -283,9 +283,9 @@ export default function TrendingPage() {
                     
                     {/* NFT Info */}
                     <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-lg flex items-center justify-center text-text-secondary text-xs">
+                      <Link href={`/nft/${nft.id}`} className="w-16 h-16 bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-lg flex items-center justify-center text-text-secondary text-xs cursor-pointer hover:bg-gradient-to-br hover:from-purple-primary/30 hover:to-blue-500/30 transition-all duration-200">
                         NFT
-                      </div>
+                      </Link>
                       <div>
                         <h3 className="font-semibold text-text-primary">{nft.title}</h3>
                         <p className="text-text-secondary text-sm mb-2">
@@ -330,10 +330,6 @@ export default function TrendingPage() {
                     </div>
                   </div>
 
-                  {/* NFT Image Link */}
-                  <Link href={`/nft/${nft.id}`} className="w-16 h-16 bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-lg flex items-center justify-center text-text-secondary text-xs cursor-pointer hover:bg-gradient-to-br hover:from-purple-primary/30 hover:to-blue-500/30 transition-all duration-200">
-                    NFT
-                  </Link>
                 </div>
 
                 {/* Mobile Stats */}

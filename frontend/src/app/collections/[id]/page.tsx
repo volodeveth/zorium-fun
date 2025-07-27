@@ -214,17 +214,28 @@ export default function CollectionDetail({ params }: CollectionDetailProps) {
               
               {/* Edit Image Button - Only show for collection owner */}
               {isOwner && (
-                <button
-                  onClick={() => setIsEditingImage(true)}
-                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl flex items-center justify-center"
-                >
-                  <div className="text-white text-center">
-                    <Camera size={32} className="mx-auto mb-2" />
-                    <div className="text-sm font-medium">
-                      {collection.collectionImage ? 'Change Image' : 'Add Image'}
+                <>
+                  <button
+                    onClick={() => setIsEditingImage(true)}
+                    className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-2xl flex items-center justify-center"
+                  >
+                    <div className="text-white text-center">
+                      <Camera size={32} className="mx-auto mb-2" />
+                      <div className="text-sm font-medium">
+                        {collection.collectionImage ? 'Change Image' : 'Add Image'}
+                      </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
+                  
+                  {/* Always visible edit button for better UX */}
+                  <button
+                    onClick={() => setIsEditingImage(true)}
+                    className="absolute top-3 right-3 w-10 h-10 bg-purple-primary hover:bg-purple-hover text-white rounded-lg flex items-center justify-center transition-colors shadow-lg"
+                    title={collection.collectionImage ? 'Change collection image' : 'Add collection image'}
+                  >
+                    <Camera size={18} />
+                  </button>
+                </>
               )}
             </div>
 

@@ -33,7 +33,8 @@ export async function POST(request: NextRequest) {
     let foundListing = null
     let nftId = null
     
-    for (const [key, listings] of marketplaceStorage.entries()) {
+    for (const key of marketplaceStorage.keys()) {
+      const listings = marketplaceStorage.get(key) || []
       const listing = listings.find(l => l.id === listingId && l.status === 'active')
       if (listing) {
         foundListing = listing

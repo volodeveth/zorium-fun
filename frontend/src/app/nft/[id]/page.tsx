@@ -11,6 +11,7 @@ import { useParams } from 'next/navigation'
 import { useAutoReferral, useReferral } from '@/hooks/useReferral'
 import { useViewTracking } from '@/hooks/useViewTracking'
 import { getExplorerUrl, getExplorerName, getNetworkName } from '@/lib/utils/networkHelpers'
+import { calculateFeeBreakdown, isCreatorFirstMint } from '@/lib/utils/feeCalculator'
 import MarketplaceSection from '@/components/nft/MarketplaceSection'
 
 interface NFTData {
@@ -50,6 +51,7 @@ interface NFTData {
   }>
   createdAt: string
   mintedAt?: string
+  hasCreatorMinted?: boolean
 }
 
 interface Activity {
@@ -116,6 +118,7 @@ export default function NFTDetail() {
   const [isLoading, setIsLoading] = useState(false)
   const [currentUserAddress, setCurrentUserAddress] = useState('0x1111...2222')
   const [userHasNFT, setUserHasNFT] = useState(true) // Mock: user has minted this NFT
+  const [hasCreatorMinted, setHasCreatorMinted] = useState(false) // Mock: track if creator has minted
 
   // Mock data - in real app, this would come from API
   const [nftData, setNftData] = useState<NFTData>({
@@ -155,7 +158,8 @@ export default function NFTDetail() {
       { trait_type: "Energy", value: "High" }
     ],
     createdAt: "2024-01-15T10:30:00Z",
-    mintedAt: "2024-01-16T14:20:00Z"
+    mintedAt: "2024-01-16T14:20:00Z",
+    hasCreatorMinted: false
   })
 
   const [activities] = useState<Activity[]>([
@@ -249,14 +253,23 @@ export default function NFTDetail() {
     const mintData = {
       nftId,
       quantity: mintQuantity,
-      referralAddress: referralAddress || null
+      referralAddress: referralAddress || null,
+      isCreatorFirstMint: isFirstCreatorMint,
+      totalCost: totalMintCost
     }
     
     console.log('Minting with data:', mintData)
     
     // Simulate minting process
     await new Promise(resolve => setTimeout(resolve, 2000))
-    setNftData(prev => ({ ...prev, mintedSupply: prev.mintedSupply + mintQuantity }))
+    
+    // Update NFT data and creator mint status
+    setNftData(prev => ({ 
+      ...prev, 
+      mintedSupply: prev.mintedSupply + mintQuantity,
+      hasCreatorMinted: isUserCreator ? true : prev.hasCreatorMinted
+    }))
+    
     setIsLoading(false)
   }
 
@@ -286,6 +299,15 @@ export default function NFTDetail() {
     if (diffInHours < 24) return `${diffInHours} hours ago`
     return `${Math.floor(diffInHours / 24)} days ago`
   }
+
+  // Determine if current user is creator and calculate pricing
+  const isUserCreator = currentUserAddress.toLowerCase() === nftData.creator.address.toLowerCase()
+  const isFirstCreatorMint = isCreatorFirstMint(currentUserAddress, nftData.creator.address, nftData.hasCreatorMinted || false)
+  
+  // Calculate fee breakdown based on user type
+  const feeBreakdown = calculateFeeBreakdown(!!referralAddress, undefined, isFirstCreatorMint)
+  const displayPrice = isFirstCreatorMint ? '0.000000' : nftData.mintPrice
+  const totalMintCost = isFirstCreatorMint ? '0.000000' : (parseFloat(nftData.mintPrice) * mintQuantity).toFixed(6)
 
   return (
     <div className="min-h-screen bg-background-primary">
@@ -338,8 +360,16 @@ export default function NFTDetail() {
             {/* Price and Stats */}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-background-secondary rounded-xl p-4">
-                <div className="text-text-secondary text-sm mb-1">Mint Price</div>
-                <div className="text-2xl font-bold text-text-primary">{nftData.mintPrice} ETH</div>
+                <div className="text-text-secondary text-sm mb-1">
+                  {isFirstCreatorMint ? "Your Price (First Mint)" : "Mint Price"}
+                </div>
+                <div className="text-2xl font-bold text-text-primary">
+                  {isFirstCreatorMint ? (
+                    <span className="text-green-500">FREE (gas only)</span>
+                  ) : (
+                    `${displayPrice} ETH`
+                  )}
+                </div>
               </div>
               <div className="bg-background-secondary rounded-xl p-4">
                 <div className="text-text-secondary text-sm mb-1">Minted</div>
@@ -400,6 +430,20 @@ export default function NFTDetail() {
                   </div>
                 </div>
                 
+                {/* Creator First Mint Info */}
+                {isFirstCreatorMint && (
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 mb-4">
+                    <div className="flex items-center gap-2 text-green-600 text-sm font-medium">
+                      <Zap size={14} />
+                      Creator First Mint Benefit
+                    </div>
+                    <p className="text-green-700 text-xs mt-1">
+                      As the creator, your first mint is completely free! You only pay gas fees. 
+                      Subsequent mints will use the set price.
+                    </p>
+                  </div>
+                )}
+                
                 <div className="flex gap-3">
                   <Button
                     onClick={handleMint}
@@ -407,7 +451,11 @@ export default function NFTDetail() {
                     className="flex-1"
                     leftIcon={<Zap size={16} />}
                   >
-                    Mint {mintQuantity} for {(parseFloat(nftData.mintPrice) * mintQuantity).toFixed(6)} ETH
+                    {isFirstCreatorMint ? (
+                      `Mint ${mintQuantity} FREE (gas only)`
+                    ) : (
+                      `Mint ${mintQuantity} for ${totalMintCost} ETH`
+                    )}
                   </Button>
                 </div>
               </div>

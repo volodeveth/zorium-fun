@@ -9,6 +9,7 @@ interface FeeBreakdownProps {
   showTitle?: boolean
   variant?: 'default' | 'compact' | 'detailed'
   className?: string
+  isCreatorFirstMint?: boolean
 }
 
 export default function FeeBreakdown({ 
@@ -16,18 +17,26 @@ export default function FeeBreakdown({
   customTotal,
   showTitle = true,
   variant = 'default',
-  className = ''
+  className = '',
+  isCreatorFirstMint = false
 }: FeeBreakdownProps) {
-  const fees = calculateFeeBreakdown(hasReferral, customTotal)
+  const fees = calculateFeeBreakdown(hasReferral, customTotal, isCreatorFirstMint)
   
   if (variant === 'compact') {
     return (
       <div className={`text-sm text-text-secondary ${className}`}>
         <div className="flex justify-between items-center">
           <span>Total Fee:</span>
-          <span className="font-medium text-text-primary">{formatFee(fees.total)}</span>
+          <span className={`font-medium ${isCreatorFirstMint ? 'text-green-500' : 'text-text-primary'}`}>
+            {isCreatorFirstMint ? 'FREE (gas only)' : formatFee(fees.total)}
+          </span>
         </div>
-        {hasReferral && (
+        {isCreatorFirstMint && (
+          <div className="text-xs text-green-500 mt-1">
+            ✓ Creator's first mint is free
+          </div>
+        )}
+        {hasReferral && !isCreatorFirstMint && (
           <div className="text-xs text-green-500 mt-1">
             ✓ Referral bonus included
           </div>
@@ -45,11 +54,24 @@ export default function FeeBreakdown({
         </div>
       )}
       
+      {/* Creator First Mint Special Message */}
+      {isCreatorFirstMint && (
+        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 mb-4">
+          <div className="text-green-600 font-medium text-sm mb-1">🎉 Creator First Mint</div>
+          <p className="text-green-700 text-xs">
+            As the creator, your first mint is completely free! Only gas fees apply.
+            This special benefit applies only to your very first mint.
+          </p>
+        </div>
+      )}
+      
       <div className="space-y-2">
         {/* Total Fee */}
         <div className="flex justify-between items-center py-2 border-b border-border">
           <span className="font-medium text-text-primary">Total Mint Fee</span>
-          <span className="font-bold text-text-primary">{formatFee(fees.total)}</span>
+          <span className={`font-bold ${isCreatorFirstMint ? 'text-green-500' : 'text-text-primary'}`}>
+            {isCreatorFirstMint ? 'FREE (gas only)' : formatFee(fees.total)}
+          </span>
         </div>
         
         {/* Creator Fee */}
@@ -113,7 +135,12 @@ export default function FeeBreakdown({
       
       {/* Referral Status */}
       <div className="mt-3 pt-3 border-t border-border">
-        {hasReferral ? (
+        {isCreatorFirstMint ? (
+          <div className="flex items-center gap-2 text-sm text-green-500">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span>Creator first mint - all fees waived</span>
+          </div>
+        ) : hasReferral ? (
           <div className="flex items-center gap-2 text-sm text-green-500">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <span>Referral link used - bonus distributed</span>
@@ -129,8 +156,10 @@ export default function FeeBreakdown({
       {variant === 'detailed' && (
         <div className="mt-3 pt-3 border-t border-border text-xs text-text-secondary">
           <p>
-            Default fee structure ensures fair distribution between creators, 
-            minters, referrers, and platform sustainability.
+            {isCreatorFirstMint 
+              ? "Creators get their first mint completely free to encourage platform participation. Subsequent mints use the standard fee structure."
+              : "Default fee structure ensures fair distribution between creators, minters, referrers, and platform sustainability."
+            }
           </p>
         </div>
       )}

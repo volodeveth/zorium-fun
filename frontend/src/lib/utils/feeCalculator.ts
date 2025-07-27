@@ -27,15 +27,29 @@ export const DEFAULT_FEE_STRUCTURE = {
 } as const
 
 /**
- * Calculate fee breakdown based on whether referral is present
+ * Calculate fee breakdown based on minter type and referral presence
  * @param hasReferral - Whether a referral address is provided
  * @param customTotal - Custom total fee (optional, defaults to 0.000111 ETH)
+ * @param isCreatorFirstMint - Whether this is the creator's first free mint
  * @returns FeeBreakdown object with all calculated fees
  */
 export function calculateFeeBreakdown(
   hasReferral: boolean = false,
-  customTotal?: number
+  customTotal?: number,
+  isCreatorFirstMint: boolean = false
 ): FeeBreakdown {
+  // Creator's first mint is free (only gas)
+  if (isCreatorFirstMint) {
+    return {
+      total: '0.000000',
+      creator: '0.000000',
+      firstMinter: '0.000000',
+      referral: '0.000000',
+      platform: '0.000000',
+      hasReferral: false
+    }
+  }
+  
   const total = customTotal || DEFAULT_FEE_STRUCTURE.TOTAL
   
   // Calculate base amounts
@@ -69,13 +83,15 @@ export function calculateFeeBreakdown(
  * Get fee amounts as numbers for calculations
  * @param hasReferral - Whether a referral address is provided
  * @param customTotal - Custom total fee (optional)
+ * @param isCreatorFirstMint - Whether this is the creator's first free mint
  * @returns FeeAmounts object with numeric values
  */
 export function getFeeAmounts(
   hasReferral: boolean = false,
-  customTotal?: number
+  customTotal?: number,
+  isCreatorFirstMint: boolean = false
 ): FeeAmounts {
-  const breakdown = calculateFeeBreakdown(hasReferral, customTotal)
+  const breakdown = calculateFeeBreakdown(hasReferral, customTotal, isCreatorFirstMint)
   
   return {
     total: parseFloat(breakdown.total),
@@ -140,4 +156,37 @@ export function extractReferralFromUrl(url?: string): string | undefined {
   
   const referral = searchParams.get('ref')
   return isValidReferral(referral || '') ? referral || undefined : undefined
+}
+
+/**
+ * Determine if current user is creator and if this would be their first mint
+ * @param currentUserAddress - Current user's wallet address
+ * @param creatorAddress - NFT creator's wallet address  
+ * @param hasCreatorMinted - Whether creator has already minted once
+ * @returns boolean indicating if this is creator's first free mint
+ */
+export function isCreatorFirstMint(
+  currentUserAddress?: string,
+  creatorAddress?: string,
+  hasCreatorMinted: boolean = false
+): boolean {
+  if (!currentUserAddress || !creatorAddress) return false
+  
+  // Check if current user is the creator and hasn't minted yet
+  return currentUserAddress.toLowerCase() === creatorAddress.toLowerCase() && !hasCreatorMinted
+}
+
+/**
+ * Determine who should receive the first minter reward
+ * @param creatorAddress - NFT creator's wallet address
+ * @param firstPaidMinterAddress - Address of first person who paid to mint (not creator's free mint)
+ * @returns Address that should receive first minter reward
+ */
+export function getFirstMinterRewardRecipient(
+  creatorAddress?: string,
+  firstPaidMinterAddress?: string
+): string | undefined {
+  // First minter reward goes to the first person who PAID to mint
+  // This could be a different wallet or even the creator if they mint again after their free mint
+  return firstPaidMinterAddress
 }

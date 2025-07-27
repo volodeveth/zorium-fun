@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Copy, Twitter, Send, Link, Check, Zap } from 'lucide-react'
+import { X, Copy, Send, Link, Check, Zap } from 'lucide-react'
 import Button from '@/components/common/Button'
 import { useReferral } from '@/hooks/useReferral'
 
@@ -91,8 +91,10 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsN
               onClick={handleTwitterShare}
               className="flex flex-col items-center gap-2 p-4 bg-background-tertiary hover:bg-background-tertiary/80 rounded-xl transition-colors"
             >
-              <Twitter size={24} className="text-blue-400" />
-              <span className="text-text-primary text-sm font-medium">Twitter</span>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-black dark:text-white">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              <span className="text-text-primary text-sm font-medium">X (ex Twitter)</span>
             </button>
           </div>
 

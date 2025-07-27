@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useAccount, useEnsName, useEnsAvatar } from 'wagmi'
-import { Camera, Save, User, Mail, Globe, Twitter, Upload, X } from 'lucide-react'
+import { Camera, Save, User, Mail, Globe, Upload, X } from 'lucide-react'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 

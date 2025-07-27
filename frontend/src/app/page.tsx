@@ -16,7 +16,9 @@ const generateMockNFT = (id: number) => ({
   promoted: false, // Regular NFTs are not promoted
   likes: Math.floor(Math.random() * 50) + 1,
   mints: Math.floor(Math.random() * 30) + 1,
-  networkId: [8453, 7777777, 1, 137][Math.floor(Math.random() * 4)]
+  networkId: [8453, 7777777, 1, 137][Math.floor(Math.random() * 4)],
+  contractAddress: `0x${Math.random().toString(16).substr(2, 40)}`,
+  tokenId: Math.floor(Math.random() * 10000).toString()
 })
 
 const allFeaturedNFTs = [
@@ -30,7 +32,9 @@ const allFeaturedNFTs = [
     promoted: true,
     likes: 24,
     mints: 12,
-    networkId: 8453
+    networkId: 8453,
+    contractAddress: '0xa1b2c3d4e5f6789012345678901234567890abcd',
+    tokenId: '1'
   },
   {
     id: 2,
@@ -42,7 +46,9 @@ const allFeaturedNFTs = [
     promoted: true,
     likes: 18,
     mints: 8,
-    networkId: 7777777
+    networkId: 7777777,
+    contractAddress: '0xb2c3d4e5f6789012345678901234567890abcdef',
+    tokenId: '42'
   },
   {
     id: 3,
@@ -54,7 +60,9 @@ const allFeaturedNFTs = [
     promoted: true,
     likes: 35,
     mints: 19,
-    networkId: 1
+    networkId: 1,
+    contractAddress: '0xc3d4e5f6789012345678901234567890abcdef12',
+    tokenId: '123'
   },
   {
     id: 4,
@@ -66,7 +74,9 @@ const allFeaturedNFTs = [
     promoted: true,
     likes: 42,
     mints: 23,
-    networkId: 137
+    networkId: 137,
+    contractAddress: '0xd4e5f6789012345678901234567890abcdef1234',
+    tokenId: '777'
   },
   {
     id: 5,
@@ -78,7 +88,9 @@ const allFeaturedNFTs = [
     promoted: true,
     likes: 28,
     mints: 15,
-    networkId: 8453
+    networkId: 8453,
+    contractAddress: '0xe5f6789012345678901234567890abcdef123456',
+    tokenId: '999'
   },
   {
     id: 6,
@@ -90,7 +102,9 @@ const allFeaturedNFTs = [
     promoted: true,
     likes: 51,
     mints: 31,
-    networkId: 1
+    networkId: 1,
+    contractAddress: '0xf6789012345678901234567890abcdef1234567890',
+    tokenId: '2024'
   }
 ]
 

@@ -1,9 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
-import { Heart, ExternalLink, Edit, Share2, Check, Clock, Zap } from 'lucide-react'
+import { Heart, ExternalLink, Edit, Share2, Check, Clock, Zap, Globe } from 'lucide-react'
 import UserLink from '@/components/common/UserLink'
-import { getNetworkLogo, getNetworkName } from '@/lib/utils/networkHelpers'
+import { getNetworkLogo, getNetworkName, getExplorerUrl, getExplorerName } from '@/lib/utils/networkHelpers'
 import { useReferral } from '@/hooks/useReferral'
 
 interface NFT {
@@ -20,6 +20,8 @@ interface NFT {
   totalSupply?: number
   isDefaultPrice?: boolean
   mintEndTime?: string
+  contractAddress?: string
+  tokenId?: string
 }
 
 interface NFTCardProps {
@@ -116,18 +118,35 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
           </div>
         )}
 
-        {/* Quick Share Button */}
-        <button
-          onClick={handleShare}
-          className={`absolute top-3 right-3 w-8 h-8 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200 z-10 ${
-            copied 
-              ? 'bg-green-500 hover:bg-green-600 opacity-100' 
-              : 'bg-black/50 hover:bg-black/70 opacity-0 group-hover:opacity-100'
-          }`}
-          title={copied ? "Link copied!" : "Copy share link"}
-        >
-          {copied ? <Check size={14} /> : <Share2 size={14} />}
-        </button>
+        {/* Top right controls */}
+        <div className="absolute top-3 right-3 flex gap-2 z-10">
+          {/* Explorer Link */}
+          {nft.contractAddress && (
+            <a
+              href={getExplorerUrl(nft.networkId || 8453, nft.contractAddress, nft.tokenId)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-8 h-8 backdrop-blur-sm bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-all duration-200"
+              title={`View on ${getExplorerName(nft.networkId || 8453)}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Globe size={14} />
+            </a>
+          )}
+          
+          {/* Quick Share Button */}
+          <button
+            onClick={handleShare}
+            className={`w-8 h-8 backdrop-blur-sm rounded-full flex items-center justify-center text-white transition-all duration-200 ${
+              copied 
+                ? 'bg-green-500 hover:bg-green-600 opacity-100' 
+                : 'bg-black/50 hover:bg-black/70 opacity-0 group-hover:opacity-100'
+            }`}
+            title={copied ? "Link copied!" : "Copy share link"}
+          >
+            {copied ? <Check size={14} /> : <Share2 size={14} />}
+          </button>
+        </div>
         
         {/* Actions on hover */}
         <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">

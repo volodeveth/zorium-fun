@@ -9,7 +9,9 @@ import ReferralInfo from '@/components/common/ReferralInfo'
 import MintTimer from '@/components/common/MintTimer'
 import { useParams } from 'next/navigation'
 import { useAutoReferral, useReferral } from '@/hooks/useReferral'
+import { useViewTracking } from '@/hooks/useViewTracking'
 import { getExplorerUrl, getExplorerName, getNetworkName } from '@/lib/utils/networkHelpers'
+import MarketplaceSection from '@/components/nft/MarketplaceSection'
 
 interface NFTData {
   id: string
@@ -95,14 +97,22 @@ export default function NFTDetail() {
   useAutoReferral()
   const { referralAddress } = useReferral()
   
+  // Track views for this NFT
+  const { views: viewCount, isLoading: viewsLoading } = useViewTracking({
+    resourceId: nftId,
+    resourceType: 'nft',
+    minimumViewTime: 3000, // 3 seconds
+    onViewTracked: (id, type) => {
+      console.log(`Tracked view for ${type} ${id}`)
+    }
+  })
+  
   const [activeTab, setActiveTab] = useState<'comments' | 'holders' | 'activity' | 'details'>('comments')
   const [mintQuantity, setMintQuantity] = useState(1)
   const [isLiked, setIsLiked] = useState(false)
   const [likesCount, setLikesCount] = useState(0)
   const [newComment, setNewComment] = useState('')
-  const [showSellModal, setShowSellModal] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
-  const [sellPrice, setSellPrice] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [currentUserAddress, setCurrentUserAddress] = useState('0x1111...2222')
   const [userHasNFT, setUserHasNFT] = useState(true) // Mock: user has minted this NFT
@@ -127,7 +137,7 @@ export default function NFTDetail() {
     mintedSupply: 42,
     likes: 156,
     isLiked: false,
-    views: 1234,
+    views: 0, // Will be updated by useViewTracking
     royalties: "5%",
     contractAddress: "0x538D6F4fb9598dC74e15e6974049B109ae0AbC6a",
     tokenId: nftId,
@@ -250,21 +260,6 @@ export default function NFTDetail() {
     setIsLoading(false)
   }
 
-  const handleSell = async () => {
-    if (!sellPrice) return
-    setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 1500))
-    setNftData(prev => ({ ...prev, isForSale: true, salePrice: sellPrice }))
-    setShowSellModal(false)
-    setIsLoading(false)
-  }
-
-  const handleBuy = async () => {
-    setIsLoading(true)
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setNftData(prev => ({ ...prev, isForSale: false, salePrice: undefined }))
-    setIsLoading(false)
-  }
 
   const handleAddComment = () => {
     if (!newComment.trim() || !userHasNFT) return
@@ -310,7 +305,9 @@ export default function NFTDetail() {
             {/* View Counter */}
             <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-lg px-3 py-1 flex items-center gap-2">
               <Eye size={16} className="text-text-secondary" />
-              <span className="text-text-primary text-sm">{nftData.views.toLocaleString()}</span>
+              <span className="text-text-primary text-sm">
+                {viewsLoading ? '...' : viewCount.toLocaleString()}
+              </span>
             </div>
           </div>
 
@@ -395,36 +392,16 @@ export default function NFTDetail() {
                 </div>
               </div>
 
-              {/* Buy/Sell Section */}
-              {nftData.isForSale && (
-                <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-text-primary">Buy Now</h3>
-                    <div className="text-2xl font-bold text-green-400">{nftData.salePrice} ETH</div>
-                  </div>
-                  <Button
-                    onClick={handleBuy}
-                    loading={isLoading}
-                    variant="primary"
-                    className="w-full bg-green-500 hover:bg-green-600"
-                    leftIcon={<ShoppingCart size={16} />}
-                  >
-                    Buy Now
-                  </Button>
-                </div>
-              )}
+              {/* Marketplace Section */}
+              <MarketplaceSection 
+                nftId={nftId}
+                userOwnsNFT={userHasNFT}
+                onPurchaseSuccess={() => {
+                  console.log('NFT purchased successfully!')
+                }}
+              />
 
               <div className="flex gap-3">
-                {!nftData.isForSale && (
-                  <Button
-                    onClick={() => setShowSellModal(true)}
-                    variant="outline"
-                    leftIcon={<Tag size={16} />}
-                  >
-                    Sell
-                  </Button>
-                )}
-                
                 <Button
                   onClick={handleLike}
                   variant="ghost"
@@ -723,44 +700,6 @@ export default function NFTDetail() {
         userOwnsNFT={userHasNFT}
       />
 
-      {/* Sell Modal */}
-      {showSellModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-background-secondary rounded-2xl p-6 w-full max-w-md">
-            <h3 className="text-xl font-semibold text-text-primary mb-4">List for Sale</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-text-secondary text-sm mb-2">Sale Price (ETH)</label>
-                <input
-                  type="number"
-                  step="0.000001"
-                  value={sellPrice}
-                  onChange={(e) => setSellPrice(e.target.value)}
-                  className="w-full bg-background-primary border border-border rounded-lg p-3 text-text-primary focus:outline-none focus:ring-2 focus:ring-purple-primary"
-                  placeholder="0.000111"
-                />
-              </div>
-              <div className="flex gap-3">
-                <Button
-                  onClick={() => setShowSellModal(false)}
-                  variant="ghost"
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSell}
-                  loading={isLoading}
-                  className="flex-1"
-                  disabled={!sellPrice}
-                >
-                  List for Sale
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

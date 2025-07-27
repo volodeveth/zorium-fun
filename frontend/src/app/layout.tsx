@@ -28,8 +28,13 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                const theme = localStorage.getItem('theme') || 
-                  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                const THEME_STORAGE_KEY = 'zorium-theme';
+                const DEFAULT_THEME = 'dark';
+                
+                const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+                const isValidTheme = storedTheme === 'light' || storedTheme === 'dark';
+                const theme = isValidTheme ? storedTheme : DEFAULT_THEME;
+                
                 document.documentElement.className = theme;
               } catch (e) {
                 document.documentElement.className = 'dark';

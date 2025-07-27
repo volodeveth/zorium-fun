@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-
-type Theme = 'light' | 'dark'
+import { Theme, getStoredTheme, saveTheme, applyTheme } from '@/lib/utils/theme'
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>('dark')
@@ -12,38 +11,37 @@ export function useTheme() {
   useEffect(() => {
     setMounted(true)
     
-    // Check localStorage or system preference
-    const savedTheme = localStorage.getItem('theme') as Theme
-    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    
-    const initialTheme = savedTheme || systemTheme
+    // Get stored theme or default to dark
+    const initialTheme = getStoredTheme()
     setTheme(initialTheme)
     applyTheme(initialTheme)
-  }, [])
-
-  const applyTheme = (newTheme: Theme) => {
-    const root = document.documentElement
     
-    if (newTheme === 'dark') {
-      root.classList.add('dark')
-      root.classList.remove('light')
-    } else {
-      root.classList.add('light')
-      root.classList.remove('dark')
+    // Listen for storage changes (theme changes in other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'zorium-theme' && (e.newValue === 'light' || e.newValue === 'dark')) {
+        setTheme(e.newValue)
+        applyTheme(e.newValue)
+      }
     }
-  }
+    
+    window.addEventListener('storage', handleStorageChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+    }
+  }, [])
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
     setTheme(newTheme)
     applyTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
+    saveTheme(newTheme)
   }
 
   const setThemeMode = (newTheme: Theme) => {
     setTheme(newTheme)
     applyTheme(newTheme)
-    localStorage.setItem('theme', newTheme)
+    saveTheme(newTheme)
   }
 
   return {

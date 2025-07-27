@@ -98,9 +98,9 @@ export default function ConnectWallet() {
                         )}
                       </div>
                     )}
-                    <span className="hidden sm:inline text-sm">{chain.name}</span>
+                    <span className="hidden sm:inline text-sm">{chain.name || 'Unknown'}</span>
                     <span className="sm:hidden text-xs">
-                      {chain.name.length > 6 ? chain.name.substring(0, 4) + '...' : chain.name}
+                      {chain.name && chain.name.length > 6 ? chain.name.substring(0, 4) + '...' : (chain.name || 'Unknown')}
                     </span>
                     <ChevronDown size={12} className="sm:w-[14px] sm:h-[14px]" />
                   </button>

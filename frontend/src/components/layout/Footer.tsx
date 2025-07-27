@@ -72,22 +72,25 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-text-primary font-semibold">Support</h3>
             <div className="space-y-2 text-sm">
-              <Link href="/help" className="text-text-secondary hover:text-text-primary block transition-colors">
+              <a href="mailto:support@zorium.fun" className="text-text-secondary hover:text-text-primary block transition-colors">
                 Help Center
-              </Link>
+              </a>
               <Link href="/terms" className="text-text-secondary hover:text-text-primary block transition-colors">
-                Terms
+                Terms of Service
               </Link>
               <Link href="/privacy" className="text-text-secondary hover:text-text-primary block transition-colors">
-                Privacy
+                Privacy Policy
               </Link>
+              <a href="mailto:legal@zorium.fun" className="text-text-secondary hover:text-text-primary block transition-colors">
+                Legal
+              </a>
             </div>
           </div>
         </div>
 
         <div className="mt-8 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center">
           <p className="text-text-secondary text-sm">
-            © 2024 zorium.fun. All rights reserved.
+            © {new Date().getFullYear()} zorium.fun. All rights reserved.
           </p>
           <p className="text-text-secondary text-sm mt-4 md:mt-0">
             Powered by Zorium (ZRM) • {' '}

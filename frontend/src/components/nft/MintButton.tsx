@@ -117,13 +117,13 @@ export default function MintButton({
         <div className="flex gap-2">
           {isFirstMint && (
             <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-full text-xs font-medium">
-              <‰ First Mint - Earn 0.000011 ETH reward!
+              ðŸŽ‰ First Mint - Earn 0.000011 ETH reward!
             </div>
           )}
           
           {referralAddress && (
             <div className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-medium">
-              = Referral bonus active
+              ðŸ”— Referral bonus active
             </div>
           )}
         </div>
@@ -163,7 +163,7 @@ export default function MintButton({
             onClick={() => setShowFeeModal(true)}
             className="text-xs text-purple-primary hover:text-purple-hover transition-colors mt-1"
           >
-            View fee breakdown ’
+            View fee breakdown â†’
           </button>
         </div>
 

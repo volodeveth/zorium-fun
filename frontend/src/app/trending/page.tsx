@@ -177,9 +177,9 @@ export default function TrendingPage() {
                     {nft.change}
                   </div>
 
-                  <div className="aspect-square bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center text-text-secondary">
+                  <Link href={`/nft/${nft.id}`} className="block aspect-square bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center text-text-secondary cursor-pointer hover:bg-gradient-to-br hover:from-purple-primary/30 hover:to-blue-500/30 transition-all duration-200">
                     NFT Preview
-                  </div>
+                  </Link>
                   
                   <div className="p-4">
                     <h3 className="font-semibold text-text-primary mb-1">{nft.title}</h3>
@@ -222,13 +222,6 @@ export default function TrendingPage() {
                         <div className="font-semibold text-text-primary">{nft.likes}</div>
                       </div>
                     </div>
-                    
-                    {/* View NFT Button */}
-                    <Link href={`/nft/${nft.id}`} className="w-full">
-                      <Button className="w-full" size="sm">
-                        View NFT
-                      </Button>
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -337,11 +330,9 @@ export default function TrendingPage() {
                     </div>
                   </div>
 
-                  {/* Action */}
-                  <Link href={`/nft/${nft.id}`}>
-                    <Button size="sm" variant="outline">
-                      View NFT
-                    </Button>
+                  {/* NFT Image Link */}
+                  <Link href={`/nft/${nft.id}`} className="w-16 h-16 bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-lg flex items-center justify-center text-text-secondary text-xs cursor-pointer hover:bg-gradient-to-br hover:from-purple-primary/30 hover:to-blue-500/30 transition-all duration-200">
+                    NFT
                   </Link>
                 </div>
 

@@ -101,8 +101,8 @@ export default function NFTCardExpanded({ nft, showEditButton = false, onEdit, a
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         {/* Left side - NFT Image */}
-        <div className="relative aspect-square overflow-hidden rounded-xl">
-          <div className="w-full h-full bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center">
+        <Link href={getNFTLink()} className="relative aspect-square overflow-hidden rounded-xl block cursor-pointer">
+          <div className="w-full h-full bg-gradient-to-br from-purple-primary/20 to-blue-500/20 flex items-center justify-center hover:bg-gradient-to-br hover:from-purple-primary/30 hover:to-blue-500/30 transition-all duration-200">
             <div className="text-text-secondary text-sm">NFT Preview</div>
           </div>
           
@@ -126,31 +126,23 @@ export default function NFTCardExpanded({ nft, showEditButton = false, onEdit, a
             {copied ? <Check size={14} /> : <Share2 size={14} />}
           </button>
           
-          {/* Actions on hover */}
-          <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="flex gap-2">
-              <Link 
-                href={getNFTLink()}
-                className="bg-purple-primary hover:bg-purple-hover text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          {/* Edit button on hover (only if showEditButton) */}
+          {showEditButton && onEdit && (
+            <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <button
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  onEdit(nft)
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
               >
-                <ExternalLink size={16} />
-                View NFT
-              </Link>
-              {showEditButton && onEdit && (
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    onEdit(nft)
-                  }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-                >
-                  <Edit size={16} />
-                  Manage
-                </button>
-              )}
+                <Edit size={16} />
+                Manage
+              </button>
             </div>
-          </div>
-        </div>
+          )}
+        </Link>
 
         {/* Right side - NFT Details */}
         <div className="flex flex-col justify-between">

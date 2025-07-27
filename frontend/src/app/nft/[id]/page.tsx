@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Heart, Share2, Flag, Eye, TrendingUp, Clock, User, Info, MessageCircle, Zap, ShoppingCart, Tag, Users, Image } from 'lucide-react'
+import { Heart, Share2, Flag, Eye, TrendingUp, Clock, User, Info, MessageCircle, Zap, ShoppingCart, Tag, Users, Image, Globe } from 'lucide-react'
 import Button from '@/components/common/Button'
 import UserLink from '@/components/common/UserLink'
 import ShareModal from '@/components/common/ShareModal'
@@ -9,6 +9,7 @@ import ReferralInfo from '@/components/common/ReferralInfo'
 import MintTimer from '@/components/common/MintTimer'
 import { useParams } from 'next/navigation'
 import { useAutoReferral, useReferral } from '@/hooks/useReferral'
+import { getExplorerUrl, getExplorerName, getNetworkName } from '@/lib/utils/networkHelpers'
 
 interface NFTData {
   id: string
@@ -40,6 +41,7 @@ interface NFTData {
   salePrice?: string
   isDefaultPrice?: boolean
   mintEndTime?: string
+  networkId: number
   attributes: Array<{
     trait_type: string
     value: string
@@ -130,6 +132,7 @@ export default function NFTDetail() {
     contractAddress: "0x538D6F4fb9598dC74e15e6974049B109ae0AbC6a",
     tokenId: nftId,
     blockchain: "Zora",
+    networkId: 7777777,
     tokenStandard: "ERC-721",
     mintPrice: "0.000111",
     isForSale: false,
@@ -437,6 +440,17 @@ export default function NFTDetail() {
                 >
                   Share
                 </Button>
+                
+                <a
+                  href={getExplorerUrl(nftData.networkId, nftData.contractAddress, nftData.tokenId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={`View on ${getExplorerName(nftData.networkId)}`}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 text-text-secondary hover:text-text-primary transition-colors rounded-lg hover:bg-background-secondary"
+                >
+                  <Globe size={16} />
+                  Explorer
+                </a>
               </div>
             </div>
           </div>
@@ -652,11 +666,37 @@ export default function NFTDetail() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Contract Address</span>
-                      <span className="text-text-primary font-mono text-sm">{nftData.contractAddress}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-text-primary font-mono text-sm">{nftData.contractAddress}</span>
+                        <a
+                          href={getExplorerUrl(nftData.networkId, nftData.contractAddress)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-primary hover:text-purple-hover transition-colors"
+                          title={`View contract on ${getExplorerName(nftData.networkId)}`}
+                        >
+                          <Globe size={14} />
+                        </a>
+                      </div>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-text-secondary">Token ID</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-text-primary font-mono text-sm">#{nftData.tokenId}</span>
+                        <a
+                          href={getExplorerUrl(nftData.networkId, nftData.contractAddress, nftData.tokenId)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-purple-primary hover:text-purple-hover transition-colors"
+                          title={`View NFT on ${getExplorerName(nftData.networkId)}`}
+                        >
+                          <Globe size={14} />
+                        </a>
+                      </div>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Chain</span>
-                      <span className="text-text-primary">{nftData.blockchain}</span>
+                      <span className="text-text-primary">{getNetworkName(nftData.networkId)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-text-secondary">Media</span>

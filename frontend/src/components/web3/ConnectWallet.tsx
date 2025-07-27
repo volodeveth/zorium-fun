@@ -71,33 +71,38 @@ export default function ConnectWallet() {
 
               return (
                 <div className="flex items-center gap-1 sm:gap-2">
-                  {/* Chain Selector - Hidden on mobile */}
+                  {/* Chain Selector - Compact on mobile, full on desktop */}
                   <button
                     onClick={openChainModal}
                     type="button"
-                    className="hidden sm:flex bg-background-secondary hover:bg-background-tertiary border border-border px-3 py-2 rounded-lg items-center gap-2 transition-colors duration-200"
+                    className="flex bg-background-secondary hover:bg-background-tertiary border border-border px-2 sm:px-3 py-2 rounded-lg items-center gap-1 sm:gap-2 transition-colors duration-200 flex-shrink-0"
                   >
                     {chain.hasIcon && (
                       <div
                         style={{
                           background: chain.iconBackground,
-                          width: 20,
-                          height: 20,
+                          width: 18,
+                          height: 18,
                           borderRadius: 999,
                           overflow: 'hidden',
                         }}
+                        className="sm:w-5 sm:h-5"
                       >
                         {chain.iconUrl && (
                           <img
                             alt={chain.name ?? 'Chain icon'}
                             src={chain.iconUrl}
-                            style={{ width: 20, height: 20 }}
+                            style={{ width: 18, height: 18 }}
+                            className="sm:w-5 sm:h-5"
                           />
                         )}
                       </div>
                     )}
-                    {chain.name}
-                    <ChevronDown size={14} />
+                    <span className="hidden sm:inline text-sm">{chain.name}</span>
+                    <span className="sm:hidden text-xs">
+                      {chain.name.length > 6 ? chain.name.substring(0, 4) + '...' : chain.name}
+                    </span>
+                    <ChevronDown size={12} className="sm:w-[14px] sm:h-[14px]" />
                   </button>
 
                   {/* User Profile Dropdown */}

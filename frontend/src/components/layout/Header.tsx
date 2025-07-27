@@ -127,7 +127,7 @@ export default function Header() {
                     setIsSearchModalOpen(true)
                     setIsMobileMenuOpen(false)
                   }}
-                  className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors"
+                  className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors w-full text-left"
                 >
                   <Search size={18} />
                   <span>Search</span>
@@ -136,7 +136,7 @@ export default function Header() {
                 {/* Notifications in mobile menu */}
                 <button
                   onClick={() => handleMobileNavClick('/notifications')}
-                  className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors relative"
+                  className="flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors relative w-full text-left"
                 >
                   <Bell size={18} />
                   <span>Notifications</span>

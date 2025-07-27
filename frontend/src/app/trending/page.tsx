@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { TrendingUp, Crown, Trophy, Medal, Award, Zap, Clock, Calendar, CalendarDays, DollarSign, Users } from 'lucide-react'
 import NFTCard from '@/components/nft/NFTCard'
 import UserLink from '@/components/common/UserLink'
@@ -203,7 +204,7 @@ export default function TrendingPage() {
                       <span className="text-xs text-text-secondary">{getNetworkName(nft.networkId)}</span>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                       <div>
                         <span className="text-text-secondary">Price:</span>
                         <div className="font-semibold text-text-primary">{nft.price} ETH</div>
@@ -221,6 +222,13 @@ export default function TrendingPage() {
                         <div className="font-semibold text-text-primary">{nft.likes}</div>
                       </div>
                     </div>
+                    
+                    {/* View NFT Button */}
+                    <Link href={`/nft/${nft.id}`} className="w-full">
+                      <Button className="w-full" size="sm">
+                        View NFT
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -330,9 +338,11 @@ export default function TrendingPage() {
                   </div>
 
                   {/* Action */}
-                  <Button size="sm" variant="outline">
-                    View NFT
-                  </Button>
+                  <Link href={`/nft/${nft.id}`}>
+                    <Button size="sm" variant="outline">
+                      View NFT
+                    </Button>
+                  </Link>
                 </div>
 
                 {/* Mobile Stats */}

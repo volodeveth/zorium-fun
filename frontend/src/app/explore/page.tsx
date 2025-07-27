@@ -7,6 +7,7 @@ import SortDropdown from '@/components/explore/SortDropdown'
 import CategoryFilter from '@/components/explore/CategoryFilter'
 import NFTCard from '@/components/nft/NFTCard'
 import NFTCardExpanded from '@/components/nft/NFTCardExpanded'
+import UserLink from '@/components/common/UserLink'
 import { Filter, LayoutGrid, LayoutList } from 'lucide-react'
 
 // Mock data - in real app this would come from API
@@ -26,9 +27,9 @@ const mockNFTs = [
     description: 'A mesmerizing digital artwork that captures the essence of aurora borealis with vibrant colors and ethereal beauty.',
     mintEndTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
     comments: [
-      { id: 1, user: 'crypto_fan', text: 'Amazing artwork! Love the colors 🎨', timestamp: '2m ago' },
-      { id: 2, user: 'nft_collector', text: 'This is going straight to my collection!', timestamp: '5m ago' },
-      { id: 3, user: 'artist_pro', text: 'Incredible detail work', timestamp: '10m ago' }
+      { id: 1, user: 'crypto_fan', userAddress: '0xc1a2b3...4d5e', text: 'Amazing artwork! Love the colors 🎨', timestamp: '2m ago' },
+      { id: 2, user: 'nft_collector', userAddress: '0xf6g7h8...9i0j', text: 'This is going straight to my collection!', timestamp: '5m ago' },
+      { id: 3, user: 'artist_pro', userAddress: '0xk1l2m3...4n5o', text: 'Incredible detail work', timestamp: '10m ago' }
     ]
   },
   {
@@ -46,8 +47,8 @@ const mockNFTs = [
     description: 'Stunning ocean waves captured at the perfect moment, showcasing the raw power and beauty of nature.',
     mintEndTime: new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString(), // 23 hours from now
     comments: [
-      { id: 1, user: 'wave_rider', text: 'Perfect timing on this shot!', timestamp: '1h ago' },
-      { id: 2, user: 'photo_lover', text: 'The composition is stunning', timestamp: '2h ago' }
+      { id: 1, user: 'wave_rider', userAddress: '0xp1q2r3...4s5t', text: 'Perfect timing on this shot!', timestamp: '1h ago' },
+      { id: 2, user: 'photo_lover', userAddress: '0xu6v7w8...9x0y', text: 'The composition is stunning', timestamp: '2h ago' }
     ]
   },
   {
@@ -65,8 +66,8 @@ const mockNFTs = [
     description: 'An electrifying neon artwork that glows with futuristic energy and cyberpunk aesthetics.',
     mintEndTime: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
     comments: [
-      { id: 1, user: 'neon_fan', text: 'The glow effect is incredible! How did you achieve this?', timestamp: '30m ago' },
-      { id: 2, user: 'tech_artist', text: 'Masterpiece! 🔥', timestamp: '45m ago' }
+      { id: 1, user: 'neon_fan', userAddress: '0xa1b2c3...4d5e', text: 'The glow effect is incredible! How did you achieve this?', timestamp: '30m ago' },
+      { id: 2, user: 'tech_artist', userAddress: '0xf6g7h8...9i0j', text: 'Masterpiece! 🔥', timestamp: '45m ago' }
     ]
   },
   {
@@ -84,9 +85,9 @@ const mockNFTs = [
     description: 'A masterful blend of traditional samurai culture with futuristic cyberpunk elements, creating a unique digital warrior.',
     mintEndTime: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // ended 1 hour ago
     comments: [
-      { id: 1, user: 'samurai_soul', text: 'Epic blend of traditional and futuristic!', timestamp: '15m ago' },
-      { id: 2, user: 'cyber_punk', text: 'This belongs in a museum', timestamp: '20m ago' },
-      { id: 3, user: 'warrior_fan', text: 'The detail on the armor is insane', timestamp: '25m ago' }
+      { id: 1, user: 'samurai_soul', userAddress: '0xz1x2c3...4v5b', text: 'Epic blend of traditional and futuristic!', timestamp: '15m ago' },
+      { id: 2, user: 'cyber_punk', userAddress: '0xn6m7l8...9k0j', text: 'This belongs in a museum', timestamp: '20m ago' },
+      { id: 3, user: 'warrior_fan', userAddress: '0xh1g2f3...4e5d', text: 'The detail on the armor is insane', timestamp: '25m ago' }
     ]
   },
   {
@@ -104,7 +105,7 @@ const mockNFTs = [
     description: 'Deep underwater photography revealing the mysterious beauty of ocean depths and marine life.',
     mintEndTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now
     comments: [
-      { id: 1, user: 'ocean_explorer', text: 'Makes me want to dive right in!', timestamp: '3h ago' }
+      { id: 1, user: 'ocean_explorer', userAddress: '0xc1b2a3...4z5y', text: 'Makes me want to dive right in!', timestamp: '3h ago' }
     ]
   },
   {
@@ -122,8 +123,8 @@ const mockNFTs = [
     description: 'Breathtaking mountain landscape captured during golden hour, showcasing majestic peaks and natural grandeur.',
     mintEndTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
     comments: [
-      { id: 1, user: 'mountain_climber', text: 'Breathtaking view! Which peak is this?', timestamp: '1h ago' },
-      { id: 2, user: 'nature_lover', text: 'Perfect golden hour lighting', timestamp: '1.5h ago' }
+      { id: 1, user: 'mountain_climber', userAddress: '0xw1v2u3...4t5s', text: 'Breathtaking view! Which peak is this?', timestamp: '1h ago' },
+      { id: 2, user: 'nature_lover', userAddress: '0xr1q2p3...4o5n', text: 'Perfect golden hour lighting', timestamp: '1.5h ago' }
     ]
   }
 ]
@@ -404,9 +405,11 @@ export default function ExplorePage() {
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2 mb-1">
-                                      <span className="text-sm font-medium text-text-primary truncate">
-                                        {comment.user}
-                                      </span>
+                                      <UserLink
+                                        address={comment.userAddress}
+                                        username={comment.user}
+                                        className="text-sm font-medium text-text-primary hover:text-purple-primary truncate"
+                                      />
                                       <span className="text-xs text-text-secondary">
                                         {comment.timestamp}
                                       </span>

@@ -178,7 +178,7 @@ export default function TrendingPage() {
                   
                   <div className="p-4">
                     <h3 className="font-semibold text-text-primary mb-1">{nft.title}</h3>
-                    <p className="text-text-secondary text-sm mb-3">
+                    <p className="text-text-secondary text-sm mb-2">
                       by{' '}
                       <UserLink
                         address={nft.creatorAddress}
@@ -186,6 +186,18 @@ export default function TrendingPage() {
                         className="text-text-secondary hover:text-purple-primary"
                       />
                     </p>
+                    
+                    {/* Network Display */}
+                    <div className="flex items-center gap-1 mb-3">
+                      <Image
+                        src={getNetworkLogo(nft.networkId)}
+                        alt={getNetworkName(nft.networkId)}
+                        width={16}
+                        height={16}
+                        className="rounded-full"
+                      />
+                      <span className="text-xs text-text-secondary">{getNetworkName(nft.networkId)}</span>
+                    </div>
                     
                     <div className="grid grid-cols-2 gap-4 text-sm">
                       <div>

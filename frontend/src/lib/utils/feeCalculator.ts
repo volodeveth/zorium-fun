@@ -139,5 +139,5 @@ export function extractReferralFromUrl(url?: string): string | undefined {
     : new URLSearchParams(window.location.search)
   
   const referral = searchParams.get('ref')
-  return isValidReferral(referral) ? referral : undefined
+  return isValidReferral(referral || '') ? referral || undefined : undefined
 }

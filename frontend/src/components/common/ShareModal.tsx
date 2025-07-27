@@ -11,9 +11,10 @@ interface ShareModalProps {
   nftId: string | number
   nftTitle: string
   userOwnsNFT?: boolean
+  shareType?: 'nft' | 'collection'
 }
 
-export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsNFT = false }: ShareModalProps) {
+export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsNFT = false, shareType = 'nft' }: ShareModalProps) {
   const [copied, setCopied] = useState(false)
   const { shareToTwitter, shareToTelegram, shareToFarcaster, copyReferralLink } = useReferral()
 
@@ -46,7 +47,9 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsN
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-background-secondary rounded-2xl p-6 w-full max-w-md">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-text-primary">Share NFT</h3>
+          <h3 className="text-xl font-semibold text-text-primary">
+            {shareType === 'collection' ? 'Share Collection' : 'Share NFT'}
+          </h3>
           <button
             onClick={onClose}
             className="w-8 h-8 bg-background-tertiary rounded-lg flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
@@ -59,9 +62,11 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsN
           <div className="text-center mb-6">
             <div className="text-lg font-medium text-text-primary mb-2">{nftTitle}</div>
             <div className="text-text-secondary text-sm">
-              {userOwnsNFT 
-                ? "Share this NFT and earn referral rewards when someone mints!"
-                : "Share this NFT with others!"
+              {shareType === 'collection' 
+                ? "Share this collection with others!"
+                : userOwnsNFT 
+                  ? "Share this NFT and earn referral rewards when someone mints!"
+                  : "Share this NFT with others!"
               }
             </div>
           </div>
@@ -109,8 +114,8 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsN
             </button>
           </div>
 
-          {/* Referral Info - only show if user owns NFT */}
-          {userOwnsNFT && (
+          {/* Referral Info - only show if user owns NFT and it's NFT sharing */}
+          {userOwnsNFT && shareType === 'nft' && (
             <div className="bg-purple-primary/10 border border-purple-primary/20 rounded-xl p-4">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 bg-purple-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">

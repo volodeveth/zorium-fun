@@ -334,6 +334,7 @@ export default function CollectionDetail({ params }: CollectionDetailProps) {
         nftId={collection.id}
         nftTitle={collection.title}
         userOwnsNFT={isOwner}
+        shareType="collection"
       />
 
       {/* Image Upload Modal - Simple placeholder for now */}

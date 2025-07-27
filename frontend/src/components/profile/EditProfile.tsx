@@ -345,9 +345,13 @@ export default function EditProfile() {
           {/* Farcaster */}
           <div>
             <label className="block text-text-primary font-medium mb-3 flex items-center gap-2">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
-              </svg>
+              <img 
+                src="/images/farcaster-grey.png" 
+                alt="Farcaster"
+                width="16" 
+                height="16"
+                className="flex-shrink-0"
+              />
               Farcaster
             </label>
             
@@ -356,9 +360,13 @@ export default function EditProfile() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                        <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
-                      </svg>
+                      <img 
+                        src="/images/farcaster-grey.png" 
+                        alt="Farcaster"
+                        width="20" 
+                        height="20"
+                        className="brightness-0 invert"
+                      />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -397,9 +405,13 @@ export default function EditProfile() {
                     </>
                   ) : (
                     <>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
-                      </svg>
+                      <img 
+                        src="/images/farcaster-grey.png" 
+                        alt="Farcaster"
+                        width="16" 
+                        height="16"
+                        className="flex-shrink-0"
+                      />
                       Connect Farcaster Account
                     </>
                   )}

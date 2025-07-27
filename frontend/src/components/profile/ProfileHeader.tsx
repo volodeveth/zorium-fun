@@ -192,9 +192,13 @@ export default function ProfileHeader({ profile, isOwnProfile = true, currentUse
                       rel="noopener noreferrer"
                       className="flex items-center gap-2 text-text-secondary hover:text-purple-primary transition-colors"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23.2 12c0-1.36-.67-2.57-1.7-3.31V5.5c0-.83-.67-1.5-1.5-1.5h-4c-.83 0-1.5.67-1.5 1.5v3.19c-1.03.74-1.7 1.95-1.7 3.31s.67 2.57 1.7 3.31V18.5c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-3.19c1.03-.74 1.7-1.95 1.7-3.31zM3.5 4C2.67 4 2 4.67 2 5.5v13c0 .83.67 1.5 1.5 1.5h4c.83 0 1.5-.67 1.5-1.5v-13C9 4.67 8.33 4 7.5 4h-4z"/>
-                      </svg>
+                      <img 
+                        src="/images/farcaster-grey.png" 
+                        alt="Farcaster"
+                        width="16" 
+                        height="16"
+                        className="flex-shrink-0"
+                      />
                       <span className="text-sm">@{profile.farcaster.username}</span>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="#10B981" className="flex-shrink-0">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>

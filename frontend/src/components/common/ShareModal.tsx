@@ -109,7 +109,11 @@ export default function ShareModal({ isOpen, onClose, nftId, nftTitle, userOwnsN
               onClick={handleFarcasterShare}
               className="flex flex-col items-center gap-2 p-4 bg-background-tertiary hover:bg-background-tertiary/80 rounded-xl transition-colors"
             >
-              <Zap size={24} className="text-purple-400" />
+              <img 
+                src="/images/farcaster-logo.png" 
+                alt="Farcaster"
+                className="w-6 h-6"
+              />
               <span className="text-text-primary text-sm font-medium">Farcaster</span>
             </button>
           </div>

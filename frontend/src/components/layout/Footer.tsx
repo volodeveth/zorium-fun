@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { Github, MessageCircle } from 'lucide-react'
 
 export default function Footer() {
   return (
@@ -25,16 +24,19 @@ export default function Footer() {
               Create & Discover NFTs on Zora Network with integrated social features and ZORIUM token utility.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="text-text-secondary hover:text-text-primary transition-colors">
+              <a href="https://twitter.com/zoriumfun" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
               </a>
-              <a href="#" className="text-text-secondary hover:text-text-primary transition-colors">
-                <MessageCircle size={20} />
-              </a>
-              <a href="#" className="text-text-secondary hover:text-text-primary transition-colors">
-                <Github size={20} />
+              <a href="https://warpcast.com/zoriumfun" target="_blank" rel="noopener noreferrer" className="text-text-secondary hover:text-text-primary transition-colors">
+                <Image 
+                  src="/images/farcaster-grey.png" 
+                  alt="Farcaster" 
+                  width={20} 
+                  height={20}
+                  className="opacity-60 hover:opacity-100 transition-opacity"
+                />
               </a>
             </div>
           </div>
@@ -48,9 +50,6 @@ export default function Footer() {
               </Link>
               <Link href="/trending" className="text-text-secondary hover:text-text-primary block transition-colors">
                 Trending
-              </Link>
-              <Link href="/collections" className="text-text-secondary hover:text-text-primary block transition-colors">
-                Collections
               </Link>
             </div>
           </div>

@@ -10,12 +10,61 @@ frontend/out/
 frontend/build
 frontend/dist
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# ==========================================
+# SECURITY - SENSITIVE INFORMATION
+# ==========================================
+
+# Environment variables (ALL VARIANTS)
+.env*
+!.env.example
+
+# API Keys and secrets
+*api*.txt
+*secret*.txt
+*key*.txt
+*keys*.txt
+*token*.txt
+*password*.txt
+*pass*.txt
+*creds*.txt
+*credentials*.txt
+pinata_api.txt
+
+# Private keys
+*.pem
+*.key
+*.p12
+*.pfx
+
+# SSH keys
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519
+
+# Deployment scripts with secrets
+deploy-*.sh
+deploy-*.bat
+deploy.sh
+deploy.bat
+deploy-prod.bat
+!deploy-example.sh
+
+# Setup scripts with tokens
+backend/setup-email-env.bat
+**/setup-*-env.bat
+
+# Documentation files with sensitive data (project-specific)
+DEPLOYMENT.md
+імплементація*.txt
+Детальний*.txt
+База*.txt
+загальне*.txt
+структура.txt
+**/logs/*.txt
+
+# Test files with hardcoded credentials
+**/*smtp.production.test.ts
 
 # IDE/Editor
 .vscode/

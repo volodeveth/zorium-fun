@@ -5,7 +5,9 @@
  */
 export function formatZoriumBalance(balance: number): string {
   if (balance < 10000) {
-    return balance.toString()
+    // For numbers under 10K, show max 2 decimal places
+    const rounded = Math.round(balance * 100) / 100
+    return rounded.toString()
   }
   
   if (balance < 1000000) {
@@ -48,19 +50,22 @@ export function formatZoriumBalance(balance: number): string {
 }
 
 /**
- * Mock function to get user's ZRM balance
- * In real implementation, this would call a smart contract or API
+ * Get user's ZRM balance from backend API
  */
 export async function getZoriumBalance(address: string): Promise<number> {
-  // Mock implementation - replace with actual contract call
-  // This simulates different balance ranges for demo
-  const mockBalances: Record<string, number> = {
-    // Example addresses with different balance ranges
-    default: Math.floor(Math.random() * 999999) + 1000 // Random balance between 1K-1M
+  try {
+    const response = await fetch(`https://backend-cs8j6qxir-volodeveths-projects.vercel.app/api/v1/users/balance/${address}`)
+    
+    if (!response.ok) {
+      console.error('Failed to fetch ZRM balance:', response.status)
+      return 0
+    }
+    
+    const data = await response.json()
+    return data.balance || 0
+    
+  } catch (error) {
+    console.error('Error fetching ZRM balance:', error)
+    return 0
   }
-  
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000))
-  
-  return mockBalances[address] || mockBalances.default
 }

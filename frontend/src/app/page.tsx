@@ -1,112 +1,27 @@
 'use client'
 
 import Link from 'next/link'
-import { TrendingUp, Users, DollarSign, Zap, ChevronLeft, ChevronRight } from 'lucide-react'
+import { TrendingUp, Users, DollarSign, Zap, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import NFTCard from '@/components/nft/NFTCard'
 import { useState, useEffect, useCallback } from 'react'
+import { api } from '@/lib/api'
 
-// Generate mock NFTs for demo
-const generateMockNFT = (id: number) => ({
-  id,
-  title: `NFT #${id}`,
-  creator: `creator_${id}`,
-  creatorAddress: `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`,
-  image: '/images/placeholder-nft.jpg',
-  price: '0.000111',
-  promoted: false, // Regular NFTs are not promoted
-  likes: Math.floor(Math.random() * 50) + 1,
-  mints: Math.floor(Math.random() * 30) + 1,
-  networkId: [8453, 7777777, 1, 137][Math.floor(Math.random() * 4)],
-  contractAddress: `0x${Math.random().toString(16).substr(2, 40)}`,
-  tokenId: Math.floor(Math.random() * 10000).toString()
+// Transform backend NFT to frontend format
+const transformNFT = (nft: any, promoted: boolean = false) => ({
+  id: nft.id,
+  title: nft.name,
+  creator: nft.creator?.username || nft.creator?.displayName || `${nft.creator?.address?.slice(0, 6)}...${nft.creator?.address?.slice(-4)}`,
+  creatorAddress: nft.creator?.address || '0x0000...0000',
+  image: nft.image || '/images/placeholder-nft.jpg',
+  price: nft.price?.toString() || '0.000111',
+  promoted,
+  likes: nft.likeCount || 0,
+  mints: Math.floor(Math.random() * 30) + 1, // Random for demo
+  networkId: 8453, // Default to Base
+  contractAddress: nft.contractAddress || `0x${Math.random().toString(16).substr(2, 40)}`,
+  tokenId: nft.tokenId || Math.floor(Math.random() * 10000).toString()
 })
 
-const allFeaturedNFTs = [
-  {
-    id: 1,
-    title: 'Aurora',
-    creator: 'artisan_01',
-    creatorAddress: '0x1234...5678',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 24,
-    mints: 12,
-    networkId: 8453,
-    contractAddress: '0xa1b2c3d4e5f6789012345678901234567890abcd',
-    tokenId: '1'
-  },
-  {
-    id: 2,
-    title: 'Digital Wave', 
-    creator: 'cryptoart',
-    creatorAddress: '0xabcd...efgh',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 18,
-    mints: 8,
-    networkId: 7777777,
-    contractAddress: '0xb2c3d4e5f6789012345678901234567890abcdef',
-    tokenId: '42'
-  },
-  {
-    id: 3,
-    title: 'Neon Glow',
-    creator: 'pixelmaster',
-    creatorAddress: '0x9876...5432',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 35,
-    mints: 19,
-    networkId: 1,
-    contractAddress: '0xc3d4e5f6789012345678901234567890abcdef12',
-    tokenId: '123'
-  },
-  {
-    id: 4,
-    title: 'Cyber Samurai',
-    creator: 'futuristic',
-    creatorAddress: '0x5555...6666',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 42,
-    mints: 23,
-    networkId: 137,
-    contractAddress: '0xd4e5f6789012345678901234567890abcdef1234',
-    tokenId: '777'
-  },
-  {
-    id: 5,
-    title: 'Quantum Dreams',
-    creator: 'dreamweaver',
-    creatorAddress: '0x7777...8888',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 28,
-    mints: 15,
-    networkId: 8453,
-    contractAddress: '0xe5f6789012345678901234567890abcdef123456',
-    tokenId: '999'
-  },
-  {
-    id: 6,
-    title: 'Electric Storm',
-    creator: 'stormcaster',
-    creatorAddress: '0x9999...0000',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 51,
-    mints: 31,
-    networkId: 1,
-    contractAddress: '0xf6789012345678901234567890abcdef1234567890',
-    tokenId: '2024'
-  }
-]
 
 // Shuffle array function
 function shuffleArray<T>(array: T[]): T[] {
@@ -118,112 +33,120 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled
 }
 
-const mockStats = {
-  totalNFTs: 15420,
-  activeUsers: 8650,
-  volume24h: 1234.56,
-  volume7d: 8901.23
+interface PlatformStats {
+  totalNFTs: number
+  activeUsers: number
+  volume24h: number
+  volume7d: number
 }
 
 export default function HomePage() {
   const [latestNFTs, setLatestNFTs] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
-  const [hasMore, setHasMore] = useState(true)
-  const [page, setPage] = useState(0)
   const [featuredNFTs, setFeaturedNFTs] = useState<any[]>([])
   const [currentCarouselIndex, setCurrentCarouselIndex] = useState(0)
-  const [usedPromotedIds, setUsedPromotedIds] = useState<Set<number>>(new Set())
+  const [stats, setStats] = useState<PlatformStats>({
+    totalNFTs: 0,
+    activeUsers: 0,
+    volume24h: 0,
+    volume7d: 0
+  })
+  const [error, setError] = useState<string | null>(null)
+  const [initialLoading, setInitialLoading] = useState(true)
 
-  // Initialize featured NFTs with random shuffle
+  // Load data on component mount
   useEffect(() => {
-    const shuffled = shuffleArray(allFeaturedNFTs)
-    setFeaturedNFTs(shuffled)
+    fetchInitialData()
   }, [])
 
-  // Load initial NFTs
-  useEffect(() => {
-    loadMoreNFTs()
-  }, [])
+  const fetchInitialData = async () => {
+    try {
+      setInitialLoading(true)
+      setError(null)
+      
+      // Fetch NFTs and stats in parallel
+      const [nftsResponse, statsResponse] = await Promise.all([
+        api.nfts.getAll(),
+        api.analytics.getStats()
+      ])
+      
+      // Process NFTs
+      if (nftsResponse.ok) {
+        const nftsData = await nftsResponse.json()
+        const allNFTs = nftsData.nfts || []
+        
+        // Separate featured (first 6) and latest NFTs
+        const featuredData = allNFTs.slice(0, 6).map((nft: any) => transformNFT(nft, true))
+        const latestData = allNFTs.slice(6, 26).map((nft: any) => transformNFT(nft, false))
+        
+        setFeaturedNFTs(shuffleArray(featuredData))
+        setLatestNFTs(latestData)
+      } else {
+        setError('Failed to load NFTs')
+      }
+      
+      // Process stats
+      if (statsResponse.ok) {
+        const statsData = await statsResponse.json()
+        setStats({
+          totalNFTs: statsData.totalNFTs || 0,
+          activeUsers: statsData.activeUsers || 0,
+          volume24h: statsData.volume24h || 0,
+          volume7d: statsData.volume7d || 0
+        })
+      } else {
+        // Use default stats if API fails
+        setStats({
+          totalNFTs: 150,
+          activeUsers: 85,
+          volume24h: 12.34,
+          volume7d: 89.01
+        })
+      }
+      
+    } catch (err) {
+      console.error('Error fetching data:', err)
+      setError('Error connecting to backend')
+      
+      // Set default stats on error
+      setStats({
+        totalNFTs: 150,
+        activeUsers: 85,
+        volume24h: 12.34,
+        volume7d: 89.01
+      })
+    } finally {
+      setInitialLoading(false)
+    }
+  }
 
   const loadMoreNFTs = useCallback(async () => {
     if (loading) return
     
     setLoading(true)
     
-    // Simulate API call
-    setTimeout(() => {
-      // Get available promoted NFTs (not yet used)
-      const availablePromoted = allFeaturedNFTs.filter(nft => !usedPromotedIds.has(nft.id))
+    try {
+      // Fetch more NFTs from API 
+      const response = await api.nfts.getAll()
       
-      // If we've used all promoted NFTs, reset and start over
-      let promotedToUse = availablePromoted
-      let shouldResetUsed = false
-      
-      if (availablePromoted.length < 3 && allFeaturedNFTs.length >= 3) {
-        // If we don't have enough unused promoted NFTs, but we have enough in total, reset
-        promotedToUse = allFeaturedNFTs
-        shouldResetUsed = true
-      }
-      
-      // Calculate how many promoted NFTs we can use (max 3 or whatever we have available)
-      const promotedCount = Math.min(3, promotedToUse.length)
-      
-      // Generate regular NFTs (20 total minus promoted count)
-      const regularCount = 20 - promotedCount
-      const regularNFTs = Array.from({ length: regularCount }, (_, i) => 
-        generateMockNFT(page * 20 + i + 100)
-      )
-      
-      // Select random promoted NFTs from available pool
-      const shuffledPromoted = shuffleArray(promotedToUse)
-      const selectedPromoted = shuffledPromoted.slice(0, promotedCount)
-      
-      // Update used promoted IDs
-      const newUsedIds = new Set(shouldResetUsed ? [] : Array.from(usedPromotedIds))
-      selectedPromoted.forEach(nft => newUsedIds.add(nft.id))
-      setUsedPromotedIds(newUsedIds)
-      
-      // Create final promoted NFTs with unique IDs for this batch
-      const finalPromoted = selectedPromoted.map((nft, i) => ({
-        ...nft,
-        id: page * 1000 + nft.id + i // Ensure unique IDs for each batch
-      }))
-      
-      // Create array of 20 positions
-      const positions = Array.from({ length: 20 }, (_, i) => i)
-      const shuffledPositions = shuffleArray(positions)
-      
-      // Select random positions for promoted NFTs (based on how many we actually have)
-      const promotedPositions = shuffledPositions.slice(0, promotedCount).sort((a, b) => a - b)
-      
-      // Create final array with promoted NFTs at random positions
-      const finalNFTs: any[] = []
-      let regularIndex = 0
-      let promotedIndex = 0
-      
-      // Calculate how many regular NFTs we need (20 total minus promoted count)
-      const regularNeeded = 20 - promotedCount
-      
-      for (let i = 0; i < 20; i++) {
-        if (promotedPositions.includes(i) && promotedIndex < finalPromoted.length) {
-          finalNFTs.push(finalPromoted[promotedIndex])
-          promotedIndex++
-        } else if (regularIndex < regularNeeded && regularIndex < regularNFTs.length) {
-          finalNFTs.push(regularNFTs[regularIndex])
-          regularIndex++
+      if (response.ok) {
+        const data = await response.json()
+        const allNFTs = data.nfts || []
+        
+        // Get next batch of NFTs (skip already loaded ones)
+        const startIndex = latestNFTs.length + 6 // +6 for featured NFTs
+        const newNFTs = allNFTs.slice(startIndex, startIndex + 20).map((nft: any) => transformNFT(nft, false))
+        
+        if (newNFTs.length > 0) {
+          setLatestNFTs(prev => [...prev, ...newNFTs])
         }
       }
-      
-      setLatestNFTs(prev => [...prev, ...finalNFTs])
-      setPage(prev => prev + 1)
+    } catch (err) {
+      console.error('Error loading more NFTs:', err)
+    } finally {
       setLoading(false)
-      
-      // Stop loading after 5 pages for demo
-      if (page >= 4) {
-        setHasMore(false)
-      }
-    }, 500)
-  }, [page, loading])
+    }
+  }, [loading, latestNFTs.length])
 
   // Infinite scroll handler
   useEffect(() => {
@@ -232,7 +155,7 @@ export default function HomePage() {
         window.innerHeight + document.documentElement.scrollTop + 1000 >=
         document.documentElement.scrollHeight
       ) {
-        if (hasMore && !loading) {
+        if (!loading) {
           loadMoreNFTs()
         }
       }
@@ -240,7 +163,7 @@ export default function HomePage() {
 
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [hasMore, loading, loadMoreNFTs])
+  }, [loading, loadMoreNFTs])
 
   // Carousel navigation functions
   const nextSlide = () => {
@@ -261,8 +184,32 @@ export default function HomePage() {
     return featuredNFTs.slice(currentCarouselIndex, currentCarouselIndex + 2)
   }
 
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-12 w-12 text-purple-primary mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-text-primary mb-2">Loading Zorium.fun...</h2>
+          <p className="text-text-secondary">Fetching the latest NFTs and platform data</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen">
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-3">
+          <div className="max-w-7xl mx-auto flex items-center gap-2">
+            <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs">!</span>
+            </div>
+            <p className="text-yellow-700 dark:text-yellow-300 text-sm">{error}</p>
+          </div>
+        </div>
+      )}
+
       {/* Hero Section - Split Layout */}
       <section className="relative py-12 px-4">
         <div className="max-w-7xl mx-auto">
@@ -309,13 +256,24 @@ export default function HomePage() {
                   </button>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {getCurrentNFTPair().map((nft, index) => (
-                  <div key={`${nft.id}-${currentCarouselIndex}`}>
-                    <NFTCard nft={nft} />
+              {featuredNFTs.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {getCurrentNFTPair().map((nft, index) => (
+                    <div key={`${nft.id}-${currentCarouselIndex}`}>
+                      <NFTCard nft={nft} />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="aspect-square bg-background-secondary rounded-xl border border-border flex items-center justify-center">
+                    <p className="text-text-secondary">No featured NFTs available</p>
                   </div>
-                ))}
-              </div>
+                  <div className="aspect-square bg-background-secondary rounded-xl border border-border flex items-center justify-center">
+                    <p className="text-text-secondary">Loading featured content...</p>
+                  </div>
+                </div>
+              )}
               {featuredNFTs.length > 2 && (
                 <div className="flex justify-center mt-4 gap-2">
                   {Array.from({ length: Math.max(1, featuredNFTs.length - 1) }).map((_, index) => (
@@ -344,7 +302,7 @@ export default function HomePage() {
               <div className="flex justify-center mb-1">
                 <Zap className="text-purple-primary" size={24} />
               </div>
-              <div className="text-xl font-bold text-text-primary">15,420</div>
+              <div className="text-xl font-bold text-text-primary">{stats.totalNFTs.toLocaleString()}</div>
               <div className="text-text-secondary text-sm">Total NFTs</div>
             </div>
 
@@ -352,7 +310,7 @@ export default function HomePage() {
               <div className="flex justify-center mb-1">
                 <Users className="text-purple-primary" size={24} />
               </div>
-              <div className="text-xl font-bold text-text-primary">8,650</div>
+              <div className="text-xl font-bold text-text-primary">{stats.activeUsers.toLocaleString()}</div>
               <div className="text-text-secondary text-sm">Active Users</div>
             </div>
 
@@ -360,7 +318,7 @@ export default function HomePage() {
               <div className="flex justify-center mb-1">
                 <DollarSign className="text-purple-primary" size={24} />
               </div>
-              <div className="text-xl font-bold text-text-primary">{mockStats.volume24h} ETH</div>
+              <div className="text-xl font-bold text-text-primary">{stats.volume24h} ETH</div>
               <div className="text-text-secondary text-sm">24h Volume</div>
             </div>
 
@@ -368,7 +326,7 @@ export default function HomePage() {
               <div className="flex justify-center mb-1">
                 <TrendingUp className="text-purple-primary" size={24} />
               </div>
-              <div className="text-xl font-bold text-text-primary">{mockStats.volume7d} ETH</div>
+              <div className="text-xl font-bold text-text-primary">{stats.volume7d} ETH</div>
               <div className="text-text-secondary text-sm">7d Volume</div>
             </div>
           </div>
@@ -401,10 +359,12 @@ export default function HomePage() {
             </div>
           )}
           
-          {/* End of content indicator */}
-          {!hasMore && latestNFTs.length > 0 && (
-            <div className="text-center mt-8 text-text-secondary">
-              No more NFTs to load
+          {/* Empty state */}
+          {!loading && latestNFTs.length === 0 && (
+            <div className="text-center py-12">
+              <Zap className="h-16 w-16 text-text-secondary mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-text-primary mb-2">No NFTs Available</h3>
+              <p className="text-text-secondary">Check back later for new content</p>
             </div>
           )}
         </div>

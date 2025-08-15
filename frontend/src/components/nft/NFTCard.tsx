@@ -7,21 +7,34 @@ import { getNetworkLogo, getNetworkName } from '@/lib/utils/networkHelpers'
 import { useReferral } from '@/hooks/useReferral'
 
 interface NFT {
-  id: number
-  title: string
+  id: string | number
+  title?: string
+  name?: string // ERC-1155 name field
   creator: string
   creatorAddress?: string
   image: string
   price: string
   promoted?: boolean
   likes: number
-  mints: number
+  mints?: number
+  totalMinted?: number // ERC-1155 field
   networkId?: number
   totalSupply?: number
   isDefaultPrice?: boolean
+  isCustomPrice?: boolean // ERC-1155 field
   mintEndTime?: string
   contractAddress?: string
   tokenId?: string
+  // ERC-1155 Collection fields
+  collection?: {
+    id: string
+    name: string
+    symbol: string
+    contractAddress: string
+    isPersonal: boolean
+  }
+  // Token status for ERC-1155
+  status?: 'Created' | 'Active' | 'FinalCountdown' | 'Ended'
 }
 
 interface NFTCardProps {
@@ -37,11 +50,13 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
   const [timeLeft, setTimeLeft] = useState<string | null>(null)
   const [isUrgent, setIsUrgent] = useState(false)
 
-  // Timer logic for NFT cards
+  // Timer logic for NFT cards (ERC-1155 compatible)
   useEffect(() => {
     const triggerSupply = 1000
-    if (nft.isDefaultPrice && nft.mints < triggerSupply) {
-      // Default price, no timer until trigger supply (1000)
+    const currentMints = nft.totalMinted || nft.mints || 0
+    
+    // For default price NFTs, no timer until 1000 mints trigger
+    if (nft.isDefaultPrice && !nft.isCustomPrice && currentMints < triggerSupply) {
       setTimeLeft(null)
       return
     }
@@ -97,10 +112,19 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
 
   // Generate NFT link with referral if user owns it
   const getNFTLink = () => {
-    if (addReferralToLink) {
-      return generateReferralLink(`/nft/${nft.id}`)
+    // For ERC-1155 tokens, use collection address and token ID
+    let linkPath = `/nft/${nft.id}`
+    
+    if (nft.collection && nft.tokenId) {
+      linkPath = `/nft/${nft.collection.contractAddress}/${nft.tokenId}`
+    } else if (nft.contractAddress && nft.tokenId) {
+      linkPath = `/nft/${nft.contractAddress}/${nft.tokenId}`
     }
-    return `/nft/${nft.id}`
+    
+    if (addReferralToLink) {
+      return generateReferralLink(linkPath)
+    }
+    return linkPath
   }
 
   return (
@@ -115,6 +139,19 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
         {nft.promoted && (
           <div className="absolute top-3 left-3 bg-purple-primary text-white text-xs px-2 py-1 rounded-full">
             Promoted
+          </div>
+        )}
+        
+        {/* Status Badge for ERC-1155 */}
+        {nft.status && nft.status !== 'Active' && (
+          <div className={`absolute top-3 ${nft.promoted ? 'left-20' : 'left-3'} text-white text-xs px-2 py-1 rounded-full ${
+            nft.status === 'Created' ? 'bg-blue-500' :
+            nft.status === 'FinalCountdown' ? 'bg-orange-500' :
+            nft.status === 'Ended' ? 'bg-red-500' : 'bg-gray-500'
+          }`}>
+            {nft.status === 'Created' ? 'New' :
+             nft.status === 'FinalCountdown' ? 'Final Hours' :
+             nft.status === 'Ended' ? 'Ended' : nft.status}
           </div>
         )}
 
@@ -152,27 +189,34 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
       {/* Content */}
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
-          <h3 className="text-text-primary font-semibold truncate">{nft.title}</h3>
+          <h3 className="text-text-primary font-semibold truncate">{nft.name || nft.title}</h3>
           <button className="text-text-secondary hover:text-purple-primary transition-colors">
             <Heart size={18} />
           </button>
         </div>
         
-        <p className="text-text-secondary text-sm mb-3">
-          by{' '}
-          <UserLink
-            address={nft.creatorAddress || `0x${nft.creator}`}
-            username={nft.creator}
-            className="text-text-secondary hover:text-purple-primary"
-          />
-        </p>
+        <div className="mb-3 space-y-1">
+          <p className="text-text-secondary text-sm">
+            by{' '}
+            <UserLink
+              address={nft.creatorAddress || `0x${nft.creator}`}
+              username={nft.creator}
+              className="text-text-secondary hover:text-purple-primary"
+            />
+          </p>
+          {nft.collection && (
+            <p className="text-text-tertiary text-xs">
+              {nft.collection.isPersonal ? '🏠' : '📚'} {nft.collection.name}
+            </p>
+          )}
+        </div>
         
         <div className="flex justify-between items-center">
           <div className="text-text-primary font-medium">
             {nft.price} ETH
           </div>
           <div className="text-text-secondary text-sm">
-            {nft.mints} mints
+            {nft.totalMinted || nft.mints || 0} mints
           </div>
         </div>
         
@@ -197,7 +241,7 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
               ? 'bg-red-500/20 text-red-400'
               : isUrgent 
                 ? 'bg-orange-500/20 text-orange-400'
-                : nft.isDefaultPrice && nft.mints >= (nft.totalSupply || 1000)
+                : nft.isDefaultPrice && (nft.mints || 0) >= (nft.totalSupply || 1000)
                   ? 'bg-blue-500/20 text-blue-400'
                   : 'bg-purple-500/20 text-purple-400'
           }`}>
@@ -206,7 +250,7 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
                 <Clock size={10} />
                 <span>Ended</span>
               </>
-            ) : nft.isDefaultPrice && nft.mints >= 1000 ? (
+            ) : nft.isDefaultPrice && (nft.mints || 0) >= 1000 ? (
               <>
                 <Zap size={10} />
                 <span>Final {timeLeft}</span>
@@ -221,7 +265,7 @@ export default function NFTCard({ nft, showEditButton = false, onEdit, addReferr
         )}
 
         {/* No timer badge for default price under 1000 mints */}
-        {nft.isDefaultPrice && nft.mints < 1000 && (
+        {nft.isDefaultPrice && (nft.mints || 0) < 1000 && (
           <div className="mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-green-500/20 text-green-400">
             <Zap size={10} />
             <span>No time limit</span>

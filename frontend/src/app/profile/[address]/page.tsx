@@ -1,129 +1,194 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Edit, ExternalLink } from 'lucide-react'
+import { Edit, ExternalLink, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileTabs from '@/components/profile/ProfileTabs'
 import NFTCard from '@/components/nft/NFTCard'
 import NFTManageModal from '@/components/nft/NFTManageModal'
+import { api } from '@/lib/api'
 
-const mockProfile = {
-  address: '0x123...abc',
-  username: 'Golum Dexter',
-  bio: 'Digital artist exploring the boundaries of blockchain art. Creating unique NFTs with ZORIUM features.',
-  avatar: '/images/avatar-placeholder.jpg',
-  followers: 1247,
-  following: 389,
-  website: 'https://golumdexter.art',
-  twitter: {
-    id: 'tw_789012',
-    username: 'golumdexter',
-    isVerified: true,
-    connectedAt: '2025-01-15T10:30:00Z',
-    profileUrl: 'https://x.com/golumdexter'
-  },
-  farcaster: {
-    id: 'fc_345678',
-    username: 'golumdexter',
-    isVerified: true,
-    connectedAt: '2025-01-20T14:15:00Z',
-    profileUrl: 'https://warpcast.com/golumdexter'
+interface UserProfile {
+  address: string
+  username?: string
+  displayName?: string
+  bio?: string
+  avatar?: string
+  email?: string
+  emailVerified: boolean
+  createdAt: string
+  followers?: number
+  following?: number
+  website?: string
+  twitter?: {
+    id: string
+    username: string
+    isVerified: boolean
+    connectedAt: string
+    profileUrl: string
+  }
+  farcaster?: {
+    id: string
+    username: string
+    isVerified: boolean
+    connectedAt: string
+    profileUrl: string
   }
 }
 
-const mockNFTs = [
-  {
-    id: 1,
-    title: 'Aurora',
-    creator: 'golumdexter',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: false,
-    likes: 24,
-    mints: 12
-  },
-  {
-    id: 2,
-    title: 'Digital Wave',
-    creator: 'golumdexter', 
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: false,
-    likes: 18,
-    mints: 8
-  },
-  {
-    id: 3,
-    title: 'Afterlife',
-    creator: 'golumdexter',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: false,
-    likes: 35,
-    mints: 19
+interface ProfileNFT {
+  id: string
+  name: string
+  description?: string
+  image: string
+  price?: string
+  isListed: boolean
+  likeCount: number
+  viewCount: number
+  createdAt: string
+  creator: {
+    address: string
+    username?: string
+    displayName?: string
   }
-]
+}
 
-const mockMintedNFTs = [
-  {
-    id: 4,
-    title: 'Cosmic Dreams',
-    creator: 'artist123',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: false,
-    likes: 42,
-    mints: 23
-  },
-  {
-    id: 5,
-    title: 'Digital Horizon',
-    creator: 'creator456',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: false,
-    likes: 31,
-    mints: 15
-  }
-]
 
-const mockCollections = [
-  {
-    id: 'digital-art-series',
-    title: 'Digital Art Series',
-    description: 'A collection of abstract digital artworks',
-    itemCount: 8,
-    floorPrice: '0.000111',
-    totalVolume: '2.34',
-    image: '/images/placeholder-collection.jpg'
-  },
-  {
-    id: 'cyberpunk-dreams',
-    title: 'Cyberpunk Dreams',
-    description: 'Futuristic cyberpunk inspired digital art',
-    itemCount: 12,
-    floorPrice: '0.000222',
-    totalVolume: '5.67',
-    image: '/images/placeholder-collection.jpg'
-  },
-  {
-    id: 'nature-vibes',
-    title: 'Nature Vibes',
-    description: 'Beautiful nature-inspired NFT collection',
-    itemCount: 15,
-    floorPrice: '0.000099',
-    totalVolume: '1.89',
-    image: '/images/placeholder-collection.jpg'
-  }
-]
 
 export default function ProfilePage({ params }: { params: { address: string } }) {
   const [activeTab, setActiveTab] = useState('created')
   const [selectedNFT, setSelectedNFT] = useState<any>(null)
   const [isManageModalOpen, setIsManageModalOpen] = useState(false)
-  const [nfts, setNfts] = useState(mockNFTs)
+  
+  // Real data states
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [createdNFTs, setCreatedNFTs] = useState<ProfileNFT[]>([])
+  const [mintedNFTs, setMintedNFTs] = useState<ProfileNFT[]>([])
+  const [collections, setCollections] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch user profile and data
+  useEffect(() => {
+    fetchUserProfile()
+  }, [params.address])
+
+  const fetchUserProfile = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Get user balance and basic info
+      const response = await api.users.getZrmBalance(params.address)
+      
+      if (response.ok) {
+        const data = await response.json()
+        
+        if (data.user) {
+          // Transform backend user data to profile format
+          setProfile({
+            address: params.address,
+            username: data.user.username || data.user.displayName,
+            displayName: data.user.displayName,
+            bio: data.user.bio || `Digital creator on Zorium. ZRM Balance: ${data.balance} ZRM`,
+            avatar: data.user.avatar,
+            email: data.user.email,
+            emailVerified: data.user.emailVerified || false,
+            createdAt: data.user.createdAt,
+            followers: 0, // TODO: Implement followers/following system
+            following: 0,
+            website: data.user.website
+          })
+        } else {
+          // User not found in backend, create basic profile
+          setProfile({
+            address: params.address,
+            username: `${params.address.slice(0, 6)}...${params.address.slice(-4)}`,
+            bio: 'Web3 user on Zorium platform',
+            emailVerified: false,
+            createdAt: new Date().toISOString(),
+            followers: 0,
+            following: 0
+          })
+        }
+      } else {
+        setError('Could not load user profile')
+      }
+      
+      // Fetch user's created NFTs
+      await fetchUserNFTs()
+      
+    } catch (err) {
+      console.error('Error fetching profile:', err)
+      setError('Error connecting to backend')
+      
+      // Fallback profile
+      setProfile({
+        address: params.address,
+        username: `${params.address.slice(0, 6)}...${params.address.slice(-4)}`,
+        bio: 'Web3 user on Zorium platform',
+        emailVerified: false,
+        createdAt: new Date().toISOString(),
+        followers: 0,
+        following: 0
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchUserNFTs = async () => {
+    try {
+      // Get all NFTs and filter by creator
+      const response = await api.nfts.getAll()
+      
+      if (response.ok) {
+        const data = await response.json()
+        const allNFTs = data.nfts || []
+        
+        // Filter NFTs created by this user
+        const userCreatedNFTs = allNFTs
+          .filter((nft: any) => nft.creator?.address?.toLowerCase() === params.address.toLowerCase())
+          .map((nft: any) => ({
+            id: nft.id,
+            name: nft.name,
+            description: nft.description,
+            image: nft.image || '/images/placeholder-nft.jpg',
+            price: nft.price?.toString(),
+            isListed: nft.isListed,
+            likeCount: nft.likeCount || 0,
+            viewCount: nft.viewCount || 0,
+            createdAt: nft.createdAt,
+            creator: nft.creator
+          }))
+        
+        setCreatedNFTs(userCreatedNFTs)
+        
+        // Filter NFTs owned by this user (minted/bought)
+        const userMintedNFTs = allNFTs
+          .filter((nft: any) => nft.owner?.address?.toLowerCase() === params.address.toLowerCase() && 
+                               nft.creator?.address?.toLowerCase() !== params.address.toLowerCase())
+          .map((nft: any) => ({
+            id: nft.id,
+            name: nft.name,
+            description: nft.description,
+            image: nft.image || '/images/placeholder-nft.jpg',
+            price: nft.price?.toString(),
+            isListed: nft.isListed,
+            likeCount: nft.likeCount || 0,
+            viewCount: nft.viewCount || 0,
+            createdAt: nft.createdAt,
+            creator: nft.creator
+          }))
+        
+        setMintedNFTs(userMintedNFTs)
+      }
+    } catch (err) {
+      console.error('Error fetching user NFTs:', err)
+    }
+  }
 
   const handleEditNFT = (nft: any) => {
     setSelectedNFT(nft)
@@ -131,15 +196,59 @@ export default function ProfilePage({ params }: { params: { address: string } })
   }
 
   const handleUpdateNFT = (updatedNFT: any) => {
-    setNfts(prev => prev.map(nft => nft.id === updatedNFT.id ? updatedNFT : nft))
+    setCreatedNFTs(prev => prev.map(nft => nft.id === updatedNFT.id ? updatedNFT : nft))
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 text-purple-primary mx-auto mb-4" />
+          <p className="text-text-secondary">Loading profile...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-text-primary mb-2">Profile Not Found</h2>
+          <p className="text-text-secondary">Could not load profile for this address</p>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4">
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">!</span>
+              </div>
+              <p className="text-yellow-700 dark:text-yellow-300 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
         {/* Profile Header */}
         <ProfileHeader 
-          profile={mockProfile} 
+          profile={{
+            address: profile.address,
+            username: profile.username || profile.displayName || `${profile.address.slice(0, 6)}...${profile.address.slice(-4)}`,
+            bio: profile.bio || 'Web3 user on Zorium platform',
+            avatar: profile.avatar || '',
+            followers: profile.followers || 0,
+            following: profile.following || 0,
+            website: profile.website,
+            twitter: profile.twitter,
+            farcaster: profile.farcaster
+          }}
           isOwnProfile={true} 
           currentUserId="current-user-id"
         />
@@ -149,9 +258,9 @@ export default function ProfilePage({ params }: { params: { address: string } })
           activeTab={activeTab}
           setActiveTab={setActiveTab}
           stats={{
-            created: nfts.length,
-            minted: mockMintedNFTs.length,
-            collections: mockCollections.length
+            created: createdNFTs.length,
+            minted: mintedNFTs.length,
+            collections: collections.length
           }}
         />
 
@@ -167,27 +276,43 @@ export default function ProfilePage({ params }: { params: { address: string } })
                 <h2 className="text-2xl font-bold text-text-primary">Created NFTs</h2>
               </div>
               
-              {nfts.length > 0 ? (
+              {createdNFTs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {nfts.map((nft, index) => (
-                    <motion.div
-                      key={nft.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 * index }}
-                    >
-                      <NFTCard 
-                        nft={nft} 
-                        showEditButton={true}
-                        onEdit={handleEditNFT}
-                      />
-                    </motion.div>
-                  ))}
+                  {createdNFTs.map((nft, index) => {
+                    // Transform to NFTCard format
+                    const cardNFT = {
+                      id: nft.id,
+                      title: nft.name,
+                      creator: nft.creator?.username || nft.creator?.displayName || `${nft.creator?.address?.slice(0, 6)}...${nft.creator?.address?.slice(-4)}`,
+                      creatorAddress: nft.creator?.address,
+                      image: nft.image,
+                      price: nft.price || '0.001',
+                      promoted: false,
+                      likes: nft.likeCount,
+                      mints: 1,
+                      networkId: 8453
+                    }
+                    
+                    return (
+                      <motion.div
+                        key={nft.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                      >
+                        <NFTCard 
+                          nft={cardNFT} 
+                          showEditButton={true}
+                          onEdit={handleEditNFT}
+                        />
+                      </motion.div>
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <div className="text-text-secondary mb-4">No NFTs created yet</div>
-                  <button className="btn-primary">Create Your First NFT</button>
+                  <Link href="/create" className="btn-primary">Create Your First NFT</Link>
                 </div>
               )}
             </motion.div>
@@ -202,30 +327,46 @@ export default function ProfilePage({ params }: { params: { address: string } })
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-text-primary">Minted NFTs</h2>
                 <div className="text-text-secondary">
-                  {mockMintedNFTs.length} items collected
+                  {mintedNFTs.length} items collected
                 </div>
               </div>
               
-              {mockMintedNFTs.length > 0 ? (
+              {mintedNFTs.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {mockMintedNFTs.map((nft, index) => (
-                    <motion.div
-                      key={nft.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 * index }}
-                    >
-                      <NFTCard 
-                        nft={nft} 
-                        addReferralToLink={true}
-                      />
-                    </motion.div>
-                  ))}
+                  {mintedNFTs.map((nft, index) => {
+                    // Transform to NFTCard format
+                    const cardNFT = {
+                      id: nft.id,
+                      title: nft.name,
+                      creator: nft.creator?.username || nft.creator?.displayName || `${nft.creator?.address?.slice(0, 6)}...${nft.creator?.address?.slice(-4)}`,
+                      creatorAddress: nft.creator?.address,
+                      image: nft.image,
+                      price: nft.price || '0.001',
+                      promoted: false,
+                      likes: nft.likeCount,
+                      mints: 1,
+                      networkId: 8453
+                    }
+                    
+                    return (
+                      <motion.div
+                        key={nft.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 * index }}
+                      >
+                        <NFTCard 
+                          nft={cardNFT} 
+                          addReferralToLink={true}
+                        />
+                      </motion.div>
+                    )
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">
                   <div className="text-text-secondary mb-4">No NFTs collected yet</div>
-                  <button className="btn-primary">Explore NFTs</button>
+                  <Link href="/explore" className="btn-primary">Explore NFTs</Link>
                 </div>
               )}
             </motion.div>
@@ -242,9 +383,9 @@ export default function ProfilePage({ params }: { params: { address: string } })
                 <button className="btn-primary">Create Collection</button>
               </div>
               
-              {mockCollections.length > 0 ? (
+              {collections.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {mockCollections.map((collection, index) => (
+                  {collections.map((collection, index) => (
                     <motion.div
                       key={collection.id}
                       initial={{ opacity: 0, y: 20 }}
@@ -264,28 +405,28 @@ export default function ProfilePage({ params }: { params: { address: string } })
                           {/* Collection Info */}
                           <div className="p-6">
                             <h3 className="text-text-primary font-semibold mb-2 group-hover:text-purple-primary transition-colors">
-                              {collection.title}
+                              {collection.name}
                             </h3>
                             <p className="text-text-secondary text-sm mb-4 line-clamp-2">
-                              {collection.description}
+                              {collection.description || 'NFT Collection'}
                             </p>
                             
                             {/* Collection Stats */}
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
                                 <span className="text-text-secondary">Items:</span>
-                                <div className="font-semibold text-text-primary">{collection.itemCount}</div>
+                                <div className="font-semibold text-text-primary">{collection.itemCount || 0}</div>
                               </div>
                               <div>
                                 <span className="text-text-secondary">Floor:</span>
-                                <div className="font-semibold text-purple-primary">{collection.floorPrice} ETH</div>
+                                <div className="font-semibold text-purple-primary">{collection.floorPrice || '0.001'} ETH</div>
                               </div>
                             </div>
                             
                             <div className="mt-3 pt-3 border-t border-border">
                               <div className="flex justify-between items-center">
                                 <span className="text-text-secondary text-xs">Total Volume</span>
-                                <span className="font-semibold text-text-primary text-sm">{collection.totalVolume} ETH</span>
+                                <span className="font-semibold text-text-primary text-sm">{collection.totalVolume || '0.0'} ETH</span>
                               </div>
                             </div>
                           </div>
@@ -297,7 +438,7 @@ export default function ProfilePage({ params }: { params: { address: string } })
               ) : (
                 <div className="text-center py-12">
                   <div className="text-text-secondary mb-4">No collections created yet</div>
-                  <button className="btn-primary">Create Your First Collection</button>
+                  <Link href="/create" className="btn-primary">Create Your First Collection</Link>
                 </div>
               )}
             </motion.div>

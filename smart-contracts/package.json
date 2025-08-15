@@ -1,0 +1,52 @@
+{
+  "name": "zorium-smart-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Zorium.fun platform",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy": "hardhat run scripts/deploy.js",
+    "deploy:upgradeable": "hardhat run scripts/deploy-upgradeable.js",
+    "deploy:base": "hardhat run scripts/deploy-upgradeable.js --network base",
+    "deploy:base-testnet": "hardhat run scripts/deploy-upgradeable.js --network baseSepolia",
+    "deploy:zora": "hardhat run scripts/deploy-upgradeable.js --network zora",
+    "deploy:zora-testnet": "hardhat run scripts/deploy-upgradeable.js --network zoraSepolia",
+    "verify": "hardhat run scripts/verify.ts",
+    "node": "hardhat node"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.0.0",
+    "@typechain/ethers-v6": "^0.5.0",
+    "@typechain/hardhat": "^9.0.0",
+    "@types/chai": "^4.3.16",
+    "@types/mocha": "^10.0.7",
+    "@types/node": "^20.14.10",
+    "chai": "^4.4.1",
+    "ethers": "^6.4.0",
+    "hardhat": "^2.22.6",
+    "hardhat-gas-reporter": "^1.0.8",
+    "solidity-coverage": "^0.8.0",
+    "ts-node": "^10.9.2",
+    "typechain": "^8.3.0",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.6",
+    "@openzeppelin/contracts-upgradeable": "^4.9.6"
+  },
+  "keywords": [
+    "ethereum",
+    "zora",
+    "nft",
+    "smart-contracts",
+    "solidity"
+  ],
+  "author": "Zorium.fun",
+  "license": "MIT"
+}

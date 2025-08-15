@@ -1,15 +1,18 @@
 import { useState } from 'react'
-import { Plus, X, ChevronDown } from 'lucide-react'
-import { SUPPORTED_NETWORKS, DEFAULT_MINT_PRICE, DEFAULT_FEE_BREAKDOWN, CUSTOM_FEE_BREAKDOWN } from '@/lib/web3/wagmi'
+import { Plus, X, ChevronDown, Info, Clock, Users } from 'lucide-react'
+import { getSupportedChainIds, getNetworkConfig, CONTRACT_CONSTANTS } from '@/lib/web3/contracts'
+
+type CreationType = 'collection' | 'personal' | 'token'
 
 interface MetadataFormProps {
   formData: any
   updateFormData: (field: string, value: any) => void
   onNext: () => void
   onBack: () => void
+  creationType: CreationType
 }
 
-export default function MetadataForm({ formData, updateFormData, onNext, onBack }: MetadataFormProps) {
+export default function MetadataForm({ formData, updateFormData, onNext, onBack, creationType }: MetadataFormProps) {
   const [newTag, setNewTag] = useState('')
 
   const addTag = () => {
@@ -30,19 +33,165 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
     }
   }
 
-  const canProceed = formData.title.trim() && formData.collection.trim() && 
-    ((!formData.price || formData.price === '' || formData.price === DEFAULT_MINT_PRICE) || 
-     (formData.price && formData.price !== '' && formData.price !== DEFAULT_MINT_PRICE && formData.mintDuration))
+  const supportedChainIds = getSupportedChainIds()
+  const selectedNetwork = getNetworkConfig(formData.networkId || 8453)
+
+  // Validation logic based on creation type
+  const getValidationRules = () => {
+    const baseRules = {
+      title: formData.title.trim(),
+      networkId: formData.networkId
+    }
+
+    switch (creationType) {
+      case 'collection':
+        return {
+          ...baseRules,
+          collectionName: formData.collectionName?.trim(),
+          collectionSymbol: formData.collectionSymbol?.trim()
+        }
+      case 'personal':
+        return baseRules
+      case 'token':
+        return {
+          ...baseRules,
+          existingCollection: formData.existingCollection?.trim()
+        }
+      default:
+        return baseRules
+    }
+  }
+
+  const validationRules = getValidationRules()
+  const canProceed = Object.values(validationRules).every(Boolean) && 
+    (!formData.isCustomPrice || formData.mintEndTime)
+
+  const renderCollectionFields = () => {
+    if (creationType !== 'collection') return null
+
+    return (
+      <>
+        {/* Collection Name */}
+        <div>
+          <label className="block text-text-primary font-medium mb-2">
+            Collection Name *
+          </label>
+          <input
+            type="text"
+            value={formData.collectionName || ''}
+            onChange={(e) => updateFormData('collectionName', e.target.value)}
+            placeholder="My Amazing Collection"
+            className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary focus:outline-none focus:border-purple-primary transition-colors"
+          />
+          <p className="text-text-secondary text-xs mt-1">
+            This will be the name of your collection that can hold multiple NFTs
+          </p>
+        </div>
+
+        {/* Collection Symbol */}
+        <div>
+          <label className="block text-text-primary font-medium mb-2">
+            Collection Symbol *
+          </label>
+          <input
+            type="text"
+            value={formData.collectionSymbol || ''}
+            onChange={(e) => updateFormData('collectionSymbol', e.target.value.toUpperCase())}
+            placeholder="MAC"
+            maxLength={10}
+            className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary focus:outline-none focus:border-purple-primary transition-colors"
+          />
+          <p className="text-text-secondary text-xs mt-1">
+            Short symbol for your collection (max 10 characters)
+          </p>
+        </div>
+
+        {/* Collection Description */}
+        <div>
+          <label className="block text-text-primary font-medium mb-2">
+            Collection Description
+          </label>
+          <textarea
+            value={formData.collectionDescription || ''}
+            onChange={(e) => updateFormData('collectionDescription', e.target.value)}
+            placeholder="Describe your collection and what makes it special"
+            rows={3}
+            className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary focus:outline-none focus:border-purple-primary transition-colors resize-none"
+          />
+        </div>
+      </>
+    )
+  }
+
+  const renderTokenFields = () => {
+    if (creationType !== 'token') return null
+
+    return (
+      <div>
+        <label className="block text-text-primary font-medium mb-2">
+          Select Collection *
+        </label>
+        <div className="relative">
+          <select
+            value={formData.existingCollection || ''}
+            onChange={(e) => updateFormData('existingCollection', e.target.value)}
+            className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary focus:outline-none focus:border-purple-primary transition-colors appearance-none"
+          >
+            <option value="">Select a collection...</option>
+            {/* TODO: Load user's collections dynamically */}
+            <option value="collection1">My First Collection</option>
+            <option value="collection2">Digital Art Series</option>
+          </select>
+          <ChevronDown 
+            size={16} 
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary pointer-events-none" 
+          />
+        </div>
+        <p className="text-text-secondary text-xs mt-1">
+          Choose which collection to add this NFT to
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="bg-background-secondary rounded-xl border border-border p-8">
-      <h2 className="text-2xl font-bold text-text-primary mb-6">Add Details</h2>
+      <h2 className="text-2xl font-bold text-text-primary mb-6">
+        {creationType === 'collection' ? 'Collection & NFT Details' :
+         creationType === 'personal' ? 'Personal NFT Details' :
+         'NFT Token Details'}
+      </h2>
       
       <div className="space-y-6">
-        {/* Title */}
+        {/* Creation Type Info */}
+        <div className="bg-background-tertiary rounded-lg p-4 border border-border">
+          <div className="flex items-center gap-2 mb-2">
+            <Info size={16} className="text-blue-primary" />
+            <span className="text-text-primary font-medium">
+              {creationType === 'collection' ? 'Creating New Collection' :
+               creationType === 'personal' ? 'Creating Personal NFT' :
+               'Adding to Existing Collection'}
+            </span>
+          </div>
+          <p className="text-text-secondary text-sm">
+            {creationType === 'collection' ? 
+              'This will create a new collection contract that can hold multiple NFT tokens. You\'ll mint the first NFT in this collection.' :
+             creationType === 'personal' ? 
+              'This will create a personal collection with just one NFT. Perfect for single artworks.' :
+              'This will add a new NFT token to your selected existing collection.'}
+          </p>
+        </div>
+
+        {/* Collection-specific fields */}
+        {renderCollectionFields()}
+
+        {/* Token-specific fields */}
+        {renderTokenFields()}
+
+        {/* NFT Title */}
         <div>
           <label className="block text-text-primary font-medium mb-2">
-            Title *
+            {creationType === 'collection' ? 'First NFT Title *' : 'NFT Title *'}
           </label>
           <input
             type="text"
@@ -53,10 +202,10 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
           />
         </div>
 
-        {/* Description */}
+        {/* NFT Description */}
         <div>
           <label className="block text-text-primary font-medium mb-2">
-            Optional Description
+            NFT Description
           </label>
           <textarea
             value={formData.description}
@@ -70,63 +219,33 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
         {/* Network Selection */}
         <div>
           <label className="block text-text-primary font-medium mb-2">
-            Network *
+            Blockchain Network *
           </label>
           <div className="relative">
             <select
-              value={formData.networkId || 8453} // Default to Base
+              value={formData.networkId || 8453}
               onChange={(e) => updateFormData('networkId', parseInt(e.target.value))}
               className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary focus:outline-none focus:border-purple-primary transition-colors appearance-none"
             >
-              {SUPPORTED_NETWORKS.map((network) => (
-                <option key={network.id} value={network.id}>
-                  {network.name} ({network.symbol})
-                  {network.isDefault ? ' - Default' : ''}
-                </option>
-              ))}
+              {supportedChainIds.map((chainId) => {
+                const network = getNetworkConfig(chainId)
+                return (
+                  <option key={chainId} value={chainId}>
+                    {network.name} - {network.isMainNetwork ? 'Mainnet' : 'Testnet'}
+                  </option>
+                )
+              })}
             </select>
             <ChevronDown 
               size={16} 
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary pointer-events-none" 
             />
           </div>
-          <p className="text-text-secondary text-sm mt-1">
-            Select the blockchain network to deploy your NFT on
-          </p>
-          
-          {/* Gas fee hint */}
-          {formData.networkId && (
-            <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-              <p className="text-blue-400 text-xs">
-                ⚡ Estimated gas cost: {SUPPORTED_NETWORKS.find(n => n.id === formData.networkId)?.estimatedGas || '~$0.01'}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Collection */}
-        <div>
-          <label className="block text-text-primary font-medium mb-2">
-            Collection *
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={formData.collection}
-              onChange={(e) => updateFormData('collection', e.target.value)}
-              placeholder="Choose or create new"
-              className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary focus:outline-none focus:border-purple-primary transition-colors"
-            />
-            <button 
-              type="button"
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-text-secondary hover:text-purple-primary transition-colors"
-            >
-              <ChevronDown size={16} />
-            </button>
+          <div className="mt-2 p-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <p className="text-blue-400 text-xs">
+              ⚡ Selected: {selectedNetwork.name} | Block Explorer: {selectedNetwork.blockExplorer}
+            </p>
           </div>
-          <p className="text-text-secondary text-sm mt-1">
-            Create new collection or select existing one
-          </p>
         </div>
 
         {/* Tags */}
@@ -172,242 +291,158 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
           )}
         </div>
 
-        {/* Mint Price */}
+        {/* Pricing Options */}
         <div>
-          <label className="block text-text-primary font-medium mb-2">
-            Mint Price (ETH)
-          </label>
-          <input
-            type="text"
-            value={formData.price || ''}
-            onChange={(e) => updateFormData('price', e.target.value)}
-            placeholder={DEFAULT_MINT_PRICE}
-            className="w-full bg-background-tertiary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary focus:outline-none focus:border-purple-primary transition-colors"
-          />
-          <p className="text-text-secondary text-sm mt-1">
-            Leave empty = default {DEFAULT_MINT_PRICE} ETH
-          </p>
-          
-          <div className="mt-3 p-3 bg-background-tertiary rounded-lg">
-            {(!formData.price || formData.price === '' || formData.price === DEFAULT_MINT_PRICE) ? (
-              // Default fee structure
-              <div className="text-text-secondary text-sm space-y-1">
-                <div className="text-text-primary font-medium mb-2">Default fee structure ({DEFAULT_MINT_PRICE} ETH):</div>
-                <div className="flex justify-between">
-                  <span>Creator fee:</span>
-                  <span>{DEFAULT_FEE_BREAKDOWN.CREATOR} ETH (50%)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>First minter reward:</span>
-                  <span>{DEFAULT_FEE_BREAKDOWN.FIRST_MINTER} ETH (10%)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Referral fee:</span>
-                  <span>{DEFAULT_FEE_BREAKDOWN.REFERRAL} ETH (20%)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Platform fee:</span>
-                  <span>{DEFAULT_FEE_BREAKDOWN.PLATFORM} ETH (20%)</span>
-                </div>
-              </div>
-            ) : (
-              // Custom price fee structure
-              <div className="text-text-secondary text-sm space-y-1">
-                <div className="text-text-primary font-medium mb-2">Custom price fee structure:</div>
-                <div className="flex justify-between">
-                  <span>Creator fee:</span>
-                  <span>{(parseFloat(formData.price || '0') * CUSTOM_FEE_BREAKDOWN.CREATOR_PERCENTAGE).toFixed(6)} ETH (95%)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Platform fee:</span>
-                  <span>{(parseFloat(formData.price || '0') * CUSTOM_FEE_BREAKDOWN.PLATFORM_PERCENTAGE).toFixed(6)} ETH (5%)</span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Mint Duration */}
-        <div>
-          <label className="block text-text-primary font-medium mb-2">
-            Mint Duration
+          <label className="block text-text-primary font-medium mb-3">
+            Pricing Model
           </label>
           
-          {(!formData.price || formData.price === '' || formData.price === DEFAULT_MINT_PRICE) ? (
-            // Default price duration info
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-              <div className="text-text-primary font-medium mb-2">Default Mint Duration:</div>
-              <div className="text-text-secondary text-sm space-y-1">
-                <div>• No time limit until 1000 NFTs are minted</div>
-                <div>• After reaching 1000 mints: 48-hour final countdown starts</div>
-                <div>• During final 48 hours: unlimited minting (no supply cap)</div>
-              </div>
-            </div>
-          ) : (
-            // Custom price duration selection
-            <div className="space-y-3">
-              <p className="text-text-secondary text-sm">
-                Choose how long users can mint your NFT:
-              </p>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {[
-                  { value: '1d', label: '1 Day', hours: 24 },
-                  { value: '3d', label: '3 Days', hours: 72 },
-                  { value: '7d', label: '7 Days', hours: 168 },
-                  { value: '30d', label: '30 Days', hours: 720 },
-                  { value: '180d', label: '180 Days', hours: 4320 },
-                  { value: '1y', label: '1 Year', hours: 8760 },
-                ].map((duration) => (
-                  <label 
-                    key={duration.value}
-                    className="flex items-center p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors"
-                  >
-                    <input
-                      type="radio"
-                      name="mintDuration"
-                      value={duration.value}
-                      checked={formData.mintDuration === duration.value}
-                      onChange={(e) => updateFormData('mintDuration', e.target.value)}
-                      className="w-4 h-4 text-purple-primary"
-                    />
-                    <div className="ml-3 flex-1">
-                      <div className="flex justify-between items-center">
-                        <span className="text-text-primary font-medium">{duration.label}</span>
-                        <span className="text-text-secondary text-sm">{duration.hours}h</span>
-                      </div>
-                    </div>
-                  </label>
-                ))}
-              </div>
-              
-              {!formData.mintDuration && (
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-                  <p className="text-yellow-400 text-sm">
-                    Please select a mint duration for custom priced NFTs
-                  </p>
+          <div className="space-y-3">
+            {/* Default Pricing */}
+            <label className="flex items-start p-4 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
+              <input
+                type="radio"
+                name="pricingModel"
+                checked={!formData.isCustomPrice}
+                onChange={() => {
+                  updateFormData('isCustomPrice', false)
+                  updateFormData('price', '')
+                  updateFormData('mintEndTime', '')
+                }}
+                className="w-4 h-4 text-purple-primary mt-1"
+              />
+              <div className="ml-3 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-text-primary font-medium">Default Price</span>
+                  <span className="bg-green-primary/20 text-green-primary px-2 py-0.5 rounded text-xs">Recommended</span>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
+                <p className="text-text-secondary text-sm mb-2">
+                  {(BigInt(CONTRACT_CONSTANTS.DEFAULT_MINT_PRICE) / BigInt(10**18)).toString()} ETH per mint
+                </p>
+                <div className="bg-background-primary rounded p-3">
+                  <p className="text-text-secondary text-xs mb-2">Fee Distribution:</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>• Creator: 50%</div>
+                    <div>• First Minter: 10%</div>
+                    <div>• Referral: 20%</div>
+                    <div>• Platform: 20%</div>
+                  </div>
+                  <div className="flex items-center gap-1 mt-2 text-green-400">
+                    <Clock size={12} />
+                    <span className="text-xs">Timer Logic: 1000 mints → 48h countdown</span>
+                  </div>
+                </div>
+              </div>
+            </label>
 
-        {/* NFT Promotion */}
-        <div className="space-y-4">
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="promote"
-              checked={formData.promotionEnabled || false}
-              onChange={(e) => updateFormData('promotionEnabled', e.target.checked)}
-              className="w-4 h-4 text-purple-primary bg-background-tertiary border-border rounded focus:ring-purple-primary focus:ring-2"
-            />
-            <label htmlFor="promote" className="ml-3 text-text-primary font-medium">
-              Promote NFT (requires ZRM tokens)
+            {/* Custom Pricing */}
+            <label className="flex items-start p-4 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
+              <input
+                type="radio"
+                name="pricingModel"
+                checked={formData.isCustomPrice}
+                onChange={() => updateFormData('isCustomPrice', true)}
+                className="w-4 h-4 text-purple-primary mt-1"
+              />
+              <div className="ml-3 flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-text-primary font-medium">Custom Price</span>
+                  <span className="bg-purple-primary/20 text-purple-primary px-2 py-0.5 rounded text-xs">Advanced</span>
+                </div>
+                <p className="text-text-secondary text-sm mb-2">
+                  Set your own price and time duration
+                </p>
+                <div className="bg-background-primary rounded p-3">
+                  <p className="text-text-secondary text-xs mb-2">Fee Distribution:</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>• Creator: 95%</div>
+                    <div>• Platform: 5%</div>
+                  </div>
+                  <div className="flex items-center gap-1 mt-2 text-orange-400">
+                    <Users size={12} />
+                    <span className="text-xs">No first minter rewards or referral system</span>
+                  </div>
+                </div>
+              </div>
             </label>
           </div>
-          
-          {formData.promotionEnabled && (
-            <div className="ml-7 space-y-3">
-              <p className="text-text-secondary text-sm">
-                Choose promotion duration. You'll need to approve ZRM tokens for promotion.
-              </p>
-              
-              <div className="space-y-2">
-                <label className="flex items-center p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
-                  <input
-                    type="radio"
-                    name="promotionDuration"
-                    value="12h"
-                    checked={formData.promotionDuration === '12h'}
-                    onChange={(e) => updateFormData('promotionDuration', e.target.value)}
-                    className="w-4 h-4 text-purple-primary"
-                  />
-                  <div className="ml-3 flex-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-primary font-medium">12 Hours</span>
-                      <span className="text-purple-primary font-bold">10,000 ZRM</span>
-                    </div>
-                  </div>
+
+          {/* Custom Price Fields */}
+          {formData.isCustomPrice && (
+            <div className="mt-4 space-y-4 p-4 bg-background-tertiary rounded-lg border border-purple-primary/20">
+              <div>
+                <label className="block text-text-primary font-medium mb-2">
+                  Custom Price (ETH) *
                 </label>
-                
-                <label className="flex items-center p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
-                  <input
-                    type="radio"
-                    name="promotionDuration"
-                    value="1d"
-                    checked={formData.promotionDuration === '1d'}
-                    onChange={(e) => updateFormData('promotionDuration', e.target.value)}
-                    className="w-4 h-4 text-purple-primary"
-                  />
-                  <div className="ml-3 flex-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-primary font-medium">1 Day</span>
-                      <span className="text-purple-primary font-bold">18,000 ZRM</span>
-                    </div>
-                  </div>
-                </label>
-                
-                <label className="flex items-center p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
-                  <input
-                    type="radio"
-                    name="promotionDuration"
-                    value="3d"
-                    checked={formData.promotionDuration === '3d'}
-                    onChange={(e) => updateFormData('promotionDuration', e.target.value)}
-                    className="w-4 h-4 text-purple-primary"
-                  />
-                  <div className="ml-3 flex-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-primary font-medium">3 Days</span>
-                      <span className="text-purple-primary font-bold">50,000 ZRM</span>
-                    </div>
-                  </div>
-                </label>
-                
-                <label className="flex items-center p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
-                  <input
-                    type="radio"
-                    name="promotionDuration"
-                    value="5d"
-                    checked={formData.promotionDuration === '5d'}
-                    onChange={(e) => updateFormData('promotionDuration', e.target.value)}
-                    className="w-4 h-4 text-purple-primary"
-                  />
-                  <div className="ml-3 flex-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-primary font-medium">5 Days</span>
-                      <span className="text-purple-primary font-bold">80,000 ZRM</span>
-                    </div>
-                  </div>
-                </label>
-                
-                <label className="flex items-center p-3 bg-background-tertiary rounded-lg border cursor-pointer hover:border-purple-primary transition-colors">
-                  <input
-                    type="radio"
-                    name="promotionDuration"
-                    value="7d"
-                    checked={formData.promotionDuration === '7d'}
-                    onChange={(e) => updateFormData('promotionDuration', e.target.value)}
-                    className="w-4 h-4 text-purple-primary"
-                  />
-                  <div className="ml-3 flex-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-text-primary font-medium">7 Days</span>
-                      <span className="text-purple-primary font-bold">100,000 ZRM</span>
-                    </div>
-                  </div>
-                </label>
+                <input
+                  type="number"
+                  step="0.000001"
+                  min="0"
+                  value={formData.price || ''}
+                  onChange={(e) => updateFormData('price', e.target.value)}
+                  placeholder="0.001"
+                  className="w-full bg-background-primary border border-border rounded-lg px-4 py-3 text-text-primary placeholder-text-secondary focus:outline-none focus:border-purple-primary transition-colors"
+                />
               </div>
-              
-              <div className="bg-purple-primary/10 border border-purple-primary/20 rounded-lg p-3">
-                <p className="text-purple-primary text-sm">
-                  <strong>Note:</strong> ZRM tokens will be deducted from your approved balance when the NFT is created. 
-                  Make sure to approve sufficient ZRM tokens in your wallet first.
-                </p>
+
+              <div>
+                <label className="block text-text-primary font-medium mb-2">
+                  Mint Duration *
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {[
+                    { value: '86400', label: '1 Day' },
+                    { value: '259200', label: '3 Days' },
+                    { value: '604800', label: '7 Days' },
+                    { value: '2592000', label: '30 Days' },
+                    { value: '15552000', label: '180 Days' },
+                    { value: '31536000', label: '1 Year' }
+                  ].map((duration) => (
+                    <label 
+                      key={duration.value}
+                      className="flex items-center p-2 bg-background-primary rounded border cursor-pointer hover:border-purple-primary transition-colors"
+                    >
+                      <input
+                        type="radio"
+                        name="mintEndTime"
+                        value={duration.value}
+                        checked={formData.mintEndTime === duration.value}
+                        onChange={(e) => updateFormData('mintEndTime', e.target.value)}
+                        className="w-3 h-3 text-purple-primary"
+                      />
+                      <span className="ml-2 text-text-primary text-sm">{duration.label}</span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           )}
+        </div>
+
+        {/* ERC-1155 Features Info */}
+        <div className="bg-gradient-to-r from-purple-primary/10 to-blue-primary/10 rounded-lg p-4 border border-purple-primary/20">
+          <h4 className="text-text-primary font-medium mb-2 flex items-center gap-2">
+            <span className="bg-purple-primary/20 text-purple-primary px-2 py-1 rounded text-xs">ERC-1155</span>
+            Advanced Features
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+              <span className="text-text-secondary">Multi-quantity support</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+              <span className="text-text-secondary">Gas optimized</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+              <span className="text-text-secondary">First minter rewards</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+              <span className="text-text-secondary">Built-in marketplace</span>
+            </div>
+          </div>
         </div>
 
         {/* Actions */}
@@ -425,7 +460,7 @@ export default function MetadataForm({ formData, updateFormData, onNext, onBack 
               !canProceed ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
-            Preview NFT
+            Preview & Create
           </button>
         </div>
       </div>

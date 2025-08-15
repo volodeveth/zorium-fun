@@ -120,47 +120,10 @@ export default function NFTDetail() {
   const [userHasNFT, setUserHasNFT] = useState(true) // Mock: user has minted this NFT
   const [hasCreatorMinted, setHasCreatorMinted] = useState(false) // Mock: track if creator has minted
 
-  // Mock data - in real app, this would come from API
-  const [nftData, setNftData] = useState<NFTData>({
-    id: nftId,
-    title: "Cosmic Journey #" + nftId,
-    description: "A beautiful representation of space exploration and cosmic wonder. This NFT captures the essence of interstellar travel through vibrant colors and dynamic composition.",
-    creator: {
-      address: "0x1234...5678",
-      username: "cosmicartist",
-      avatar: "/avatars/artist1.jpg"
-    },
-    owner: {
-      address: "0x1234...5678",
-      username: "cosmicartist"
-    },
-    image: "/nfts/cosmic-" + nftId + ".jpg",
-    price: "0.000111",
-    totalSupply: 1000,
-    mintedSupply: 42,
-    likes: 156,
-    isLiked: false,
-    views: 0, // Will be updated by useViewTracking
-    royalties: "5%",
-    contractAddress: "0x538D6F4fb9598dC74e15e6974049B109ae0AbC6a",
-    tokenId: nftId,
-    blockchain: "Zora",
-    networkId: 7777777,
-    tokenStandard: "ERC-721",
-    mintPrice: "0.000111",
-    isForSale: false,
-    isDefaultPrice: true,
-    mintEndTime: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), // 3 days from now for demo
-    attributes: [
-      { trait_type: "Background", value: "Cosmic Purple" },
-      { trait_type: "Style", value: "Abstract" },
-      { trait_type: "Rarity", value: "Rare" },
-      { trait_type: "Energy", value: "High" }
-    ],
-    createdAt: "2024-01-15T10:30:00Z",
-    mintedAt: "2024-01-16T14:20:00Z",
-    hasCreatorMinted: false
-  })
+  // Real NFT data - fetch from API
+  const [nftData, setNftData] = useState<NFTData | null>(null)
+  const [isDataLoading, setIsDataLoading] = useState(true)
+  const [dataError, setDataError] = useState<string | null>(null)
 
   const [activities] = useState<Activity[]>([
     {
@@ -236,9 +199,91 @@ export default function NFTDetail() {
     }
   ])
 
+  // Fetch NFT data from API
   useEffect(() => {
-    setIsLiked(nftData.isLiked)
-    setLikesCount(nftData.likes)
+    const fetchNFTData = async () => {
+      try {
+        setIsDataLoading(true)
+        setDataError(null)
+        
+        console.log('Fetching NFT data for ID:', nftId)
+        
+        const response = await fetch(`/api/nft/${nftId}`)
+        
+        if (!response.ok) {
+          if (response.status === 404) {
+            throw new Error('NFT not found')
+          }
+          throw new Error(`Failed to fetch NFT data: ${response.status}`)
+        }
+        
+        const result = await response.json()
+        console.log('NFT API response:', result)
+        
+        if (result.nft) {
+          // Transform backend data to frontend format
+          const transformedData: NFTData = {
+            id: result.nft.id,
+            title: result.nft.name,
+            description: result.nft.description || '',
+            creator: {
+              address: result.nft.creator.address,
+              username: result.nft.creator.username || result.nft.creator.displayName || 'Unknown',
+              avatar: result.nft.creator.avatar
+            },
+            owner: {
+              address: result.nft.owner.address,
+              username: result.nft.owner.username || result.nft.owner.displayName || 'Unknown'
+            },
+            image: result.nft.image,
+            price: result.nft.price?.toString() || "0.000111",
+            totalSupply: 1000, // Default for now
+            mintedSupply: 1, // Default for now
+            likes: result.nft.likeCount || 0,
+            isLiked: result.nft.isLiked || false,
+            views: result.nft.viewCount || 0,
+            royalties: "2.5%",
+            contractAddress: result.nft.contractAddress || "0x538D6F4fb9598dC74e15e6974049B109ae0AbC6a",
+            tokenId: result.nft.tokenId?.toString() || nftId,
+            blockchain: "Base", // Default for now
+            networkId: 8453, // Default to Base
+            tokenStandard: "ERC-721",
+            mintPrice: result.nft.price?.toString() || "0.000111",
+            isForSale: result.nft.isForSale || false,
+            salePrice: result.nft.price?.toString(),
+            isDefaultPrice: true,
+            mintEndTime: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+            attributes: result.nft.attributes || [],
+            createdAt: result.nft.createdAt,
+            mintedAt: result.nft.updatedAt,
+            hasCreatorMinted: false // Default for now
+          }
+          
+          setNftData(transformedData)
+          setIsLiked(transformedData.isLiked)
+          setLikesCount(transformedData.likes)
+        } else {
+          throw new Error('Invalid NFT data received')
+        }
+        
+      } catch (error) {
+        console.error('Error fetching NFT data:', error)
+        setDataError(error instanceof Error ? error.message : 'Failed to load NFT data')
+      } finally {
+        setIsDataLoading(false)
+      }
+    }
+    
+    if (nftId) {
+      fetchNFTData()
+    }
+  }, [nftId])
+
+  useEffect(() => {
+    if (nftData) {
+      setIsLiked(nftData.isLiked)
+      setLikesCount(nftData.likes)
+    }
   }, [nftData])
 
   const handleLike = () => {
@@ -264,11 +309,11 @@ export default function NFTDetail() {
     await new Promise(resolve => setTimeout(resolve, 2000))
     
     // Update NFT data and creator mint status
-    setNftData(prev => ({ 
+    setNftData(prev => prev ? ({ 
       ...prev, 
       mintedSupply: prev.mintedSupply + mintQuantity,
       hasCreatorMinted: isUserCreator ? true : prev.hasCreatorMinted
-    }))
+    }) : prev)
     
     setIsLoading(false)
   }
@@ -301,13 +346,54 @@ export default function NFTDetail() {
   }
 
   // Determine if current user is creator and calculate pricing
-  const isUserCreator = currentUserAddress.toLowerCase() === nftData.creator.address.toLowerCase()
-  const isFirstCreatorMint = isCreatorFirstMint(currentUserAddress, nftData.creator.address, nftData.hasCreatorMinted || false)
+  const isUserCreator = nftData ? currentUserAddress.toLowerCase() === nftData.creator.address.toLowerCase() : false
+  const isFirstCreatorMint = nftData ? isCreatorFirstMint(currentUserAddress, nftData.creator.address, nftData.hasCreatorMinted || false) : false
   
   // Calculate fee breakdown based on user type
   const feeBreakdown = calculateFeeBreakdown(!!referralAddress, undefined, isFirstCreatorMint)
-  const displayPrice = isFirstCreatorMint ? '0.000000' : nftData.mintPrice
-  const totalMintCost = isFirstCreatorMint ? '0.000000' : (parseFloat(nftData.mintPrice) * mintQuantity).toFixed(6)
+  const displayPrice = isFirstCreatorMint ? '0.000000' : (nftData?.mintPrice || '0.000111')
+  const totalMintCost = isFirstCreatorMint ? '0.000000' : (parseFloat(nftData?.mintPrice || '0.000111') * mintQuantity).toFixed(6)
+
+  // Loading state
+  if (isDataLoading) {
+    return (
+      <div className="min-h-screen bg-background-primary">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-primary mx-auto mb-4"></div>
+              <p className="text-text-secondary">Loading NFT data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (dataError || !nftData) {
+    return (
+      <div className="min-h-screen bg-background-primary">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="text-6xl mb-4">❌</div>
+              <h2 className="text-2xl font-bold text-text-primary mb-2">NFT Not Found</h2>
+              <p className="text-text-secondary mb-6">
+                {dataError || 'The NFT you are looking for does not exist.'}
+              </p>
+              <Button
+                onClick={() => window.history.back()}
+                variant="ghost"
+              >
+                Go Back
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background-primary">
@@ -316,10 +402,26 @@ export default function NFTDetail() {
           {/* NFT Image */}
           <div className="relative">
             <div className="aspect-square bg-gradient-to-br from-purple-primary/20 to-blue-500/20 rounded-2xl overflow-hidden">
-              <div className="w-full h-full flex items-center justify-center glass-effect">
+              {nftData.image ? (
+                <img 
+                  src={nftData.image} 
+                  alt={nftData.title}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    // Fallback to placeholder on image load error
+                    console.log('Image failed to load:', nftData.image)
+                    ;(e.target as HTMLImageElement).style.display = 'none'
+                    ;(e.target as HTMLImageElement).nextElementSibling!.classList.remove('hidden')
+                  }}
+                />
+              ) : null}
+              <div className={`w-full h-full flex items-center justify-center glass-effect ${nftData.image ? 'hidden' : ''}`}>
                 <div className="text-center">
                   <div className="text-6xl mb-4">🎨</div>
-                  <div className="text-text-secondary">NFT #{nftId}</div>
+                  <div className="text-text-secondary">NFT #{nftData.tokenId}</div>
+                  {nftData.image && (
+                    <div className="text-xs text-text-secondary mt-2">Image failed to load</div>
+                  )}
                 </div>
               </div>
             </div>

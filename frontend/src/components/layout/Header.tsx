@@ -2,18 +2,29 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
-import { Menu, X, Bell, Search } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Menu, X, Bell, Search, Gift } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import ConnectWallet from '@/components/web3/ConnectWallet'
 import SearchModal from '@/components/common/SearchModal'
 import ThemeToggle from '@/components/common/ThemeToggle'
 import ZoriumBalance from '@/components/common/ZoriumBalance'
+import { useEarlyBirdNotification } from '@/hooks/useEarlyBirdNotification'
 
 export default function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const router = useRouter()
+  
+  // Early Bird functionality
+  const { 
+    earlyBirdStatus 
+  } = useEarlyBirdNotification()
+
+  // Log Early Bird status changes for debugging
+  useEffect(() => {
+    console.log('🎗️ Header: Early Bird status changed:', earlyBirdStatus)
+  }, [earlyBirdStatus])
 
   const handleMobileNavClick = (href: string) => {
     setIsMobileMenuOpen(false)
@@ -49,6 +60,9 @@ export default function Header() {
             <Link href="/trending" className="text-text-secondary hover:text-text-primary transition-colors">
               Trending
             </Link>
+            <Link href="/wheel" className="text-text-secondary hover:text-text-primary transition-colors flex items-center gap-1">
+              🎰 Wheel
+            </Link>
             <Link href="/create" className="text-text-secondary hover:text-text-primary transition-colors">
               Create
             </Link>
@@ -74,6 +88,22 @@ export default function Header() {
             <div className="hidden sm:block">
               <ZoriumBalance />
             </div>
+            
+            {/* Early Bird Bonus - Show only if eligible */}
+            {earlyBirdStatus.isEligible && !earlyBirdStatus.hasReceived && (
+              <button 
+                onClick={() => {
+                  console.log('🎯 Desktop Early Bird button clicked')
+                  window.dispatchEvent(new Event('earlybird-show'))
+                }}
+                className="hidden sm:flex items-center gap-1 px-3 py-1 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 transition-colors rounded-lg border border-yellow-500/20"
+                title="Claim your Early Bird bonus!"
+              >
+                <Gift size={16} />
+                <span className="text-sm font-medium">Early Bird</span>
+                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+              </button>
+            )}
             
             {/* Notifications - Hidden on mobile */}
             <Link href="/notifications" className="hidden sm:block p-2 text-text-secondary hover:text-text-primary transition-colors relative">
@@ -119,11 +149,33 @@ export default function Header() {
                 Trending
               </button>
               <button
+                onClick={() => handleMobileNavClick('/wheel')}
+                className="text-left text-text-secondary hover:text-text-primary transition-colors"
+              >
+                🎰 Wheel
+              </button>
+              <button
                 onClick={() => handleMobileNavClick('/create')}
                 className="text-left text-text-secondary hover:text-text-primary transition-colors"
               >
                 Create
               </button>
+              
+              {/* Early Bird Bonus - Mobile */}
+              {earlyBirdStatus.isEligible && !earlyBirdStatus.hasReceived && (
+                <button 
+                  onClick={() => {
+                    console.log('🎯 Mobile Early Bird button clicked')
+                    setIsMobileMenuOpen(false)
+                    window.dispatchEvent(new Event('earlybird-show'))
+                  }}
+                  className="flex items-center gap-2 w-full p-3 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 transition-colors rounded-lg border border-yellow-500/20"
+                >
+                  <Gift size={18} />
+                  <span className="font-medium">Claim Early Bird Bonus (10,000 ZRM)</span>
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse ml-auto"></div>
+                </button>
+              )}
               
               {/* Mobile-only actions */}
               <div className="pt-4 border-t border-border space-y-4">
@@ -170,6 +222,7 @@ export default function Header() {
         isOpen={isSearchModalOpen} 
         onClose={() => setIsSearchModalOpen(false)} 
       />
+      
     </header>
   )
 }

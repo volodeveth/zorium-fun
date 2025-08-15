@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
 import { Upload, X, FileImage, FileVideo, Image, Camera } from 'lucide-react'
 
+type CreationType = 'collection' | 'personal' | 'token'
+
 interface MediaUploadProps {
   formData: any
   updateFormData: (field: string, value: any) => void
   onNext: () => void
+  creationType: CreationType
 }
 
-export default function MediaUpload({ formData, updateFormData, onNext }: MediaUploadProps) {
+export default function MediaUpload({ formData, updateFormData, onNext, creationType }: MediaUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [thumbnailDragging, setThumbnailDragging] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -219,7 +222,11 @@ export default function MediaUpload({ formData, updateFormData, onNext }: MediaU
 
   return (
     <div className="bg-background-secondary rounded-xl border border-border p-8">
-      <h2 className="text-2xl font-bold text-text-primary mb-6">Upload Media</h2>
+      <h2 className="text-2xl font-bold text-text-primary mb-6">
+        {creationType === 'collection' ? 'Upload First NFT Media' :
+         creationType === 'personal' ? 'Upload NFT Media' :
+         'Upload Token Media'}
+      </h2>
       
       {!formData.file ? (
         <div
@@ -236,10 +243,16 @@ export default function MediaUpload({ formData, updateFormData, onNext }: MediaU
             <Upload size={48} className="text-text-secondary mx-auto" />
           </div>
           <h3 className="text-xl font-semibold text-text-primary mb-2">
-            Upload media (image, video, gif)
+            {creationType === 'collection' ? 'Upload first token media' :
+             creationType === 'personal' ? 'Upload your NFT media' :
+             'Upload token media'}
           </h3>
           <p className="text-text-secondary mb-6">
-            Drag and drop your file here, or click to browse
+            {creationType === 'collection' ? 
+              'Upload the media for the first NFT in your new collection' :
+             creationType === 'personal' ? 
+              'Upload the media for your personal NFT' :
+              'Upload the media for the new token to add to your collection'}
           </p>
           <button
             onClick={() => fileInputRef.current?.click()}

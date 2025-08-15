@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "alias": ["zorium.fun", "www.zorium.fun"],
+  "env": {
+    "NEXT_PUBLIC_API_URL": "https://backend-p2swyx0ma-volodeveths-projects.vercel.app",
+    "NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID": "your-walletconnect-project-id",
+    "NEXT_PUBLIC_ALCHEMY_ID": "your-alchemy-id",
+    "NEXT_PUBLIC_FRONTEND_URL": "https://frontend-beuolr5mm-volodeveths-projects.vercel.app"
+  }
+}

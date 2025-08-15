@@ -1,0 +1,21 @@
+{
+  "network": "base",
+  "deployer": "0xe894a9E110ef27320Ae58F1E4A70ACfD07DE3705",
+  "deployedAt": "2025-08-03T09:17:31.482Z",
+  "contracts": {
+    "ZoriumNFT": {
+      "proxy": "0xF422E7F6DF90e7296813eE12Bd3eBc631aA8FFde",
+      "implementation": "0xB98deFCA7a5FE909d80918637dF656D2be7841a3",
+      "name": "Zorium NFT",
+      "symbol": "ZRNFT"
+    },
+    "ZoriumMarketplace": {
+      "proxy": "0x8044F0C974A2F67f7C4F3B416B849a4B25b76C5E",
+      "implementation": "0x11E32d4e20C9b817d27f09b8448808901F95985C"
+    }
+  },
+  "config": {
+    "platformAdmin": "0xe894a9E110ef27320Ae58F1E4A70ACfD07DE3705",
+    "zrmToken": "0x538D6F4fb9598dC74e15e6974049B109ae0AbC6a"
+  }
+}

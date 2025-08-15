@@ -1,0 +1,9 @@
+{
+  "name": "Test NFT",
+  "description": "Testing IPFS upload",
+  "imageFile": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+  "creatorAddress": "0x1234567890123456789012345678901234567890",
+  "attributes": [
+    { "trait_type": "Test", "value": "True" }
+  ]
+}

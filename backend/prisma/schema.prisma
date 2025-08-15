@@ -1,0 +1,521 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  address         String    @unique
+  email           String?   @unique
+  username        String?   @unique
+  displayName     String?
+  bio             String?
+  avatar          String?
+  banner          String?
+  website         String?
+  
+  // Social media
+  twitterId       String?   @unique
+  twitterUsername String?
+  farcasterFid    String?
+  
+  // Platform data
+  zrmBalance      Decimal   @default(0) @db.Decimal(18, 6)
+  isVerified      Boolean   @default(false)
+  isEarlyBird     Boolean   @default(false)
+  earlyBirdNumber Int?      @unique
+  earlyBirdTransactionHash String? @unique
+  
+  // Email verification
+  emailVerified   Boolean   @default(false)
+  emailVerifiedAt DateTime?
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastActiveAt    DateTime  @default(now())
+  
+  // Relations
+  createdNFTs     NFT[]     @relation("CreatedNFTs")
+  ownedNFTs       NFT[]     @relation("OwnedNFTs")
+  collections     Collection[]
+  transactions    Transaction[]
+  promotions      Promotion[]
+  notifications   Notification[]
+  comments        Comment[]
+  likes           Like[]
+  follows         Follow[]  @relation("UserFollows")
+  followers       Follow[]  @relation("UserFollowers")
+  emailVerificationTokens EmailVerificationToken[]
+  
+  @@map("users")
+}
+
+model NFT {
+  id              String    @id @default(cuid())
+  tokenId         String
+  contractAddress String
+  chainId         Int
+  
+  // Metadata
+  name            String
+  description     String?
+  image           String
+  animationUrl    String?
+  externalUrl     String?
+  attributes      Json?
+  
+  // Ownership
+  creatorId       String
+  creator         User      @relation("CreatedNFTs", fields: [creatorId], references: [id])
+  ownerId         String
+  owner           User      @relation("OwnedNFTs", fields: [ownerId], references: [id])
+  
+  // Collection
+  collectionId    String?
+  collection      Collection? @relation(fields: [collectionId], references: [id])
+  
+  // Marketplace
+  isListed        Boolean   @default(false)
+  price           Decimal?  @db.Decimal(18, 6)
+  currency        String?   // ETH, WETH, etc.
+  
+  // Platform data
+  viewCount       Int       @default(0)
+  likeCount       Int       @default(0)
+  isPromoted      Boolean   @default(false)
+  promotionEnds   DateTime?
+  
+  // Mint data
+  mintPrice       Decimal?  @db.Decimal(18, 6)
+  maxSupply       Int?
+  currentSupply   Int       @default(1)
+  hasCreatorMinted Boolean  @default(false)
+  firstMinterAddress String?
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  transactions    Transaction[]
+  promotions      Promotion[]
+  comments        Comment[]
+  likes           Like[]
+  
+  @@unique([contractAddress, tokenId])
+  @@map("nfts")
+}
+
+// Updated Collection model for Factory + Collection v2.0
+model Collection {
+  id              String    @id @default(cuid())
+  
+  // Contract info (new for v2.0)
+  contractAddress String?   @unique
+  creatorAddress  String?   // Direct Ethereum address instead of FK
+  chainId         Int?
+  
+  // Metadata
+  name            String
+  symbol          String    @default("ZORIUM")
+  description     String?
+  image           String?
+  banner          String?
+  
+  // Collection type (new for v2.0)
+  isPersonal      Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  
+  // Legacy creator relation (kept for backward compatibility)  
+  creatorId       String?
+  creator         User?     @relation(fields: [creatorId], references: [id])
+  
+  // Social metadata
+  website         String?
+  discord         String?
+  twitter         String?
+  
+  // Stats
+  floorPrice      Decimal?  @db.Decimal(18, 6)
+  volume          Decimal   @default(0) @db.Decimal(18, 6)
+  itemCount       Int       @default(0)
+  ownerCount      Int       @default(0)
+  totalNFTs       Int       @default(0)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  nfts            NFT[]
+  nftTokens       NFTToken[] // New relation for ERC-1155 tokens
+  
+  @@map("collections")
+}
+
+// New NFTToken model for ERC-1155 tokens (v2.0)
+model NFTToken {
+  id              String    @id @default(cuid())
+  tokenId         String    // Token ID within collection
+  
+  // Collection reference
+  collectionId    String
+  collection      Collection @relation(fields: [collectionId], references: [id])
+  contractAddress String    // Collection contract address
+  chainId         Int
+  
+  // Token metadata
+  name            String
+  description     String?
+  tokenURI        String
+  image           String?
+  animationUrl    String?
+  attributes      Json?
+  
+  // Creator info
+  creatorAddress  String    // Direct Ethereum address
+  firstMinter     String?   // First minter address
+  referrer        String?   // First minter's referrer
+  
+  // Pricing and minting
+  mintPrice       Decimal   @db.Decimal(18, 6)
+  isCustomPrice   Boolean   @default(false)
+  mintEndTime     BigInt?   // Custom price end time (timestamp)
+  
+  // Supply and status
+  totalMinted     Int       @default(0)
+  maxSupply       Int?      // Optional max supply
+  status          TokenStatus @default(Created)
+  
+  // Timer logic (for default price)
+  finalCountdownStart BigInt? // When 48h countdown started
+  
+  // Stats
+  viewCount       Int       @default(0)
+  likeCount       Int       @default(0)
+  
+  // Marketplace
+  isListed        Boolean   @default(false)
+  floorPrice      Decimal?  @db.Decimal(18, 6)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  // Relations
+  transactions    Transaction[]
+  comments        Comment[]
+  likes           Like[]
+  listings        Listing[]
+  
+  @@unique([collectionId, tokenId])
+  @@unique([contractAddress, tokenId])
+  @@map("nft_tokens")
+}
+
+// Marketplace listings for ERC-1155 tokens
+model Listing {
+  id              String    @id @default(cuid())
+  listingId       String    @unique // On-chain listing ID
+  
+  // Token reference
+  nftTokenId      String
+  nftToken        NFTToken  @relation(fields: [nftTokenId], references: [id])
+  contractAddress String
+  tokenId         String
+  
+  // Seller info
+  sellerAddress   String
+  
+  // Listing details
+  amount          Int       // Amount of tokens listed
+  pricePerToken   Decimal   @db.Decimal(18, 6)
+  totalPrice      Decimal   @db.Decimal(18, 6)
+  
+  // Status
+  isActive        Boolean   @default(true)
+  soldAmount      Int       @default(0)
+  
+  // Timestamps
+  listedAt        DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("listings")
+}
+
+// Token status enum for ERC-1155 tokens
+enum TokenStatus {
+  Created         // Creator's free mint done
+  FirstMinted     // First paid mint done
+  CountdownActive // 48-hour countdown active (for default price)
+  Finalized       // Minting finished
+}
+
+model Transaction {
+  id              String    @id @default(cuid())
+  hash            String    @unique
+  blockNumber     Int
+  chainId         Int
+  
+  // Transaction data
+  type            TransactionType
+  from            String
+  to              String
+  value           Decimal   @db.Decimal(18, 6)
+  gasUsed         Decimal   @db.Decimal(18, 6)
+  gasPrice        Decimal   @db.Decimal(18, 6)
+  
+  // NFT data (updated for v2.0)
+  nftId           String?   // Legacy NFT relation
+  nft             NFT?      @relation(fields: [nftId], references: [id])
+  nftTokenId      String?   // New ERC-1155 token relation
+  nftToken        NFTToken? @relation(fields: [nftTokenId], references: [id])
+  tokenId         String?
+  contractAddress String?
+  
+  // Collection reference (v2.0)
+  collectionAddress String?
+  collectionId    String?
+  
+  // Fee breakdown (updated for new economic model)
+  creatorFee      Decimal?  @db.Decimal(18, 6)
+  platformFee     Decimal?  @db.Decimal(18, 6)
+  referralFee     Decimal?  @db.Decimal(18, 6)
+  firstMinterFee  Decimal?  @db.Decimal(18, 6)
+  referralAddress String?
+  firstMinterAddress String?
+  
+  // Additional v2.0 fields
+  amount          Int?      // Amount of tokens (for ERC-1155)
+  isCustomPrice   Boolean   @default(false)
+  hasReferrer     Boolean   @default(false)
+  
+  // User relation
+  userId          String?
+  user            User?     @relation(fields: [userId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  
+  @@map("transactions")
+}
+
+model Promotion {
+  id              String    @id @default(cuid())
+  
+  // NFT being promoted
+  nftId           String
+  nft             NFT       @relation(fields: [nftId], references: [id])
+  
+  // User who paid for promotion
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  
+  // Promotion details
+  cost            Decimal   @db.Decimal(18, 6)
+  duration        Int       // hours
+  startTime       DateTime
+  endTime         DateTime
+  isActive        Boolean   @default(true)
+  
+  // Analytics
+  impressions     Int       @default(0)
+  clicks          Int       @default(0)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("promotions")
+}
+
+model Notification {
+  id              String    @id @default(cuid())
+  
+  // Recipient
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  
+  // Notification data
+  type            NotificationType
+  title           String
+  message         String
+  data            Json?     // Additional data
+  
+  // Status
+  isRead          Boolean   @default(false)
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  
+  @@map("notifications")
+}
+
+model Comment {
+  id              String    @id @default(cuid())
+  
+  // NFT being commented on (updated for v2.0)
+  nftId           String?   // Legacy NFT relation
+  nft             NFT?      @relation(fields: [nftId], references: [id])
+  nftTokenId      String?   // New ERC-1155 token relation
+  nftToken        NFTToken? @relation(fields: [nftTokenId], references: [id])
+  
+  // Author
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  
+  // Comment data
+  content         String
+  
+  // Threading
+  parentId        String?
+  parent          Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
+  replies         Comment[] @relation("CommentReplies")
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  @@map("comments")
+}
+
+model Like {
+  id              String    @id @default(cuid())
+  
+  // User who liked
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  
+  // NFT being liked (updated for v2.0)
+  nftId           String?   // Legacy NFT relation
+  nft             NFT?      @relation(fields: [nftId], references: [id])
+  nftTokenId      String?   // New ERC-1155 token relation
+  nftToken        NFTToken? @relation(fields: [nftTokenId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  
+  @@unique([userId, nftId])
+  @@unique([userId, nftTokenId])
+  @@map("likes")
+}
+
+model Follow {
+  id              String    @id @default(cuid())
+  
+  // Follower
+  followerId      String
+  follower        User      @relation("UserFollows", fields: [followerId], references: [id])
+  
+  // Following
+  followingId     String
+  following       User      @relation("UserFollowers", fields: [followingId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model EarlyBirdReward {
+  id              String    @id @default(cuid())
+  
+  // User data
+  userAddress     String    @unique
+  userNumber      Int       @unique
+  amount          Decimal   @db.Decimal(18, 6)
+  
+  // Status
+  claimed         Boolean   @default(false)
+  claimedAt       DateTime?
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  
+  @@map("early_bird_rewards")
+}
+
+model PlatformStats {
+  id              String    @id @default(cuid())
+  
+  // Revenue
+  totalFees       Decimal   @db.Decimal(18, 6) @default(0)
+  platformFees    Decimal   @db.Decimal(18, 6) @default(0)
+  creatorFees     Decimal   @db.Decimal(18, 6) @default(0)
+  
+  // ZRM
+  zrmTotalSupply  Decimal   @db.Decimal(18, 6) @default(0)
+  zrmCirculating  Decimal   @db.Decimal(18, 6) @default(0)
+  zrmTreasury     Decimal   @db.Decimal(18, 6) @default(0)
+  
+  // Users
+  totalUsers      Int       @default(0)
+  verifiedUsers   Int       @default(0)
+  activeUsers     Int       @default(0)
+  
+  // NFTs
+  totalNFTs       Int       @default(0)
+  totalMints      Int       @default(0)
+  totalSales      Int       @default(0)
+  
+  // Date
+  date            DateTime  @unique @default(now())
+  
+  @@map("platform_stats")
+}
+
+enum TransactionType {
+  MINT
+  TRANSFER
+  SALE
+  LIST
+  DELIST
+  PROMOTION
+  PROMOTION_PAYMENT    // Users paying ZRM for promotions
+  ZRM_ALLOCATION       // Admin allocating ZRM to users
+  ZRM_DEPOSIT         // Admin depositing ZRM from blockchain
+  WHEEL_REWARD        // Daily wheel rewards
+  FEE_COLLECTION
+  
+  // New v2.0 transaction types
+  COLLECTION_CREATED   // Collection creation via factory
+  TOKEN_CREATED       // Token creation within collection
+  FIRST_MINT          // First paid mint (sets first minter)
+  COUNTDOWN_ACTIVATED // When 1000 mint trigger activates countdown
+  TOKEN_FINALIZED     // When minting period ends
+  FEE_WITHDRAWAL      // When users withdraw accumulated fees
+}
+
+enum NotificationType {
+  FOLLOW
+  LIKE
+  COMMENT
+  SALE
+  OFFER
+  PROMOTION_START
+  PROMOTION_END
+  EARLY_BIRD_REWARD
+  ZRM_ALLOCATION
+  WHEEL_REWARD
+  EMAIL_VERIFICATION
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  email     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  usedAt    DateTime?
+  
+  @@map("email_verification_tokens")
+}

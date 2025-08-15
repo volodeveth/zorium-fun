@@ -1,0 +1,19 @@
+{
+  "network": "base",
+  "chainId": "8453",
+  "deployer": "0xe894a9E110ef27320Ae58F1E4A70ACfD07DE3705",
+  "timestamp": "2025-08-05T10:29:53.067Z",
+  "contracts": {
+    "ZoriumFactory": {
+      "proxy": "0x8ec96033C74Eec29a4D45bA86986922Ede69C27d",
+      "implementation": "0xbF5Fa37C912C70D2B523028E4bF6D9872233Aa96"
+    },
+    "ZoriumCollectionTemplate": "0x96b1692A40EaDa0efDA957be62AF520541b3B5df"
+  },
+  "configuration": {
+    "platformFeeRecipient": "0xe894a9E110ef27320Ae58F1E4A70ACfD07DE3705",
+    "defaultMintPrice": "0.000111",
+    "triggerSupply": "1000",
+    "countdownDuration": "48 hours"
+  }
+}

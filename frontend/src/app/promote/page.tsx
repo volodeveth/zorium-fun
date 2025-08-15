@@ -1,35 +1,75 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useReadContract, useWriteContract } from 'wagmi'
-import { Coins, CheckCircle, AlertCircle, Loader2 } from 'lucide-react'
+import { Coins, CheckCircle, AlertCircle, Loader2, Send } from 'lucide-react'
 import { ZORIUM_TOKEN_ADDRESS } from '@/lib/web3/wagmi'
+import { useZRMContract } from '@/hooks/useZRMContract'
+import { toast } from 'sonner'
 
 export default function Promote() {
   const { address, isConnected } = useAccount()
   const [approvalAmount, setApprovalAmount] = useState('100000')
   const [isApproving, setIsApproving] = useState(false)
   const [approvalStatus, setApprovalStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [forceUpdate, setForceUpdate] = useState(0)
+  const [hasShownToast, setHasShownToast] = useState(false)
   const { writeContract } = useWriteContract()
+  
+  // Add ZRM contract integration
+  const { 
+    userZRMBalance, 
+    allocatedBalance, 
+    allowance, 
+    depositUserZRM, 
+    isLoading: contractLoading,
+    isWaitingForApproval,
+    isWaitingForDeposit
+  } = useZRMContract()
 
-  // Read current allowance (if needed for display)
-  const { data: currentAllowance } = useReadContract({
-    address: ZORIUM_TOKEN_ADDRESS as `0x${string}`,
-    abi: [
-      {
-        inputs: [
-          { name: 'owner', type: 'address' },
-          { name: 'spender', type: 'address' }
-        ],
-        name: 'allowance',
-        outputs: [{ name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function'
-      }
-    ],
-    functionName: 'allowance',
-    args: [address || '0x0', ZORIUM_TOKEN_ADDRESS as `0x${string}`]
-  })
+  // Force rerender function
+  const triggerRerender = useCallback(() => {
+    console.log('🔄 Forcing component rerender...')
+    setForceUpdate(prev => prev + 1)
+  }, [])
+
+  // Calculate if user has enough allowance to deposit the approval amount
+  const hasAllowance = allowance && approvalAmount && parseFloat(allowance) >= parseFloat(approvalAmount)
+  const canDeposit = hasAllowance && parseFloat(approvalAmount) > 0
+
+  // Watch for allowance changes and show toast when ready to deposit
+  useEffect(() => {
+    console.log('🔍 Allowance changed:', allowance)
+    if (allowance && parseFloat(allowance) >= parseFloat(approvalAmount) && approvalAmount && !hasShownToast) {
+      console.log('💚 Allowance sufficient for deposit!')
+      triggerRerender()
+      
+      // Show toast notification only once
+      toast.success('Ready to Deposit!', {
+        description: `${parseFloat(allowance).toLocaleString()} ZRM approved. Click the green button to deposit.`,
+        duration: 4000,
+      })
+      
+      setHasShownToast(true)
+    }
+  }, [allowance, approvalAmount, triggerRerender, hasShownToast])
+
+  // Reset toast flag when approval amount changes
+  useEffect(() => {
+    setHasShownToast(false)
+  }, [approvalAmount])
+
+
+  const handleDepositApprovedTokens = async () => {
+    if (!approvalAmount || isNaN(Number(approvalAmount))) return
+    
+    try {
+      await depositUserZRM(approvalAmount)
+      setApprovalStatus('idle') // Reset after successful deposit
+    } catch (error) {
+      console.error('Deposit failed:', error)
+    }
+  }
 
   const handleApproval = async () => {
     if (!isConnected || !address) {
@@ -56,7 +96,7 @@ export default function Promote() {
           }
         ],
         functionName: 'approve',
-        args: [ZORIUM_TOKEN_ADDRESS as `0x${string}`, BigInt(approvalAmount) * BigInt(10**18)]
+        args: ['0x1B2221E8c1AEdf3a6Db7929453A253739dC64f3c' as `0x${string}`, BigInt(approvalAmount) * BigInt(10**18)]
       })
       
       setApprovalStatus('success')
@@ -83,12 +123,34 @@ export default function Promote() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div key={`promote-${forceUpdate}-${allowance}`} className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-text-primary mb-2">NFT Promotion</h1>
         <p className="text-text-secondary">
-          Manage your ZRM token approvals for NFT promotions. You need to approve ZRM tokens to promote your NFTs.
+          Manage your ZRM tokens for NFT promotions. The button will automatically change from "Approve" to "Deposit" after approval.
         </p>
+      </div>
+
+      {/* Account Balance Overview */}
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-background-secondary rounded-xl border border-border p-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-primary mb-1">{parseFloat(userZRMBalance).toLocaleString()}</div>
+            <div className="text-text-secondary text-sm">ZRM in Wallet</div>
+          </div>
+        </div>
+        <div className="bg-background-secondary rounded-xl border border-border p-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-500 mb-1">{parseFloat(allocatedBalance).toLocaleString()}</div>
+            <div className="text-text-secondary text-sm">ZRM on Platform</div>
+          </div>
+        </div>
+        <div className="bg-background-secondary rounded-xl border border-border p-6">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-500 mb-1">{parseFloat(allowance).toLocaleString()}</div>
+            <div className="text-text-secondary text-sm">Current Allowance</div>
+          </div>
+        </div>
       </div>
 
       {/* ZRM Token Approval Section */}
@@ -102,10 +164,10 @@ export default function Promote() {
           <div className="bg-purple-primary/10 border border-purple-primary/20 rounded-lg p-4">
             <h3 className="text-purple-primary font-semibold mb-2">How it works</h3>
             <ul className="text-text-secondary text-sm space-y-1 list-disc list-inside">
-              <li>Approve ZRM tokens to enable NFT promotions</li>
-              <li>Approved tokens can be used for any of your NFTs</li>
-              <li>Tokens are only deducted when you actually promote an NFT</li>
-              <li>You can approve more tokens at any time</li>
+              <li>Step 1: Approve ZRM tokens (purple button)</li>
+              <li>Step 2: Deposit approved tokens (green button appears)</li>
+              <li>Step 3: Use deposited tokens to promote your NFTs</li>
+              <li>Tokens are only spent when you actually promote an NFT</li>
             </ul>
           </div>
 
@@ -132,25 +194,34 @@ export default function Promote() {
               </label>
               <div className="bg-background-tertiary border border-border rounded-lg px-4 py-3">
                 <span className="text-text-primary">
-                  {currentAllowance ? (Number(currentAllowance) / 10**18).toLocaleString() : '0'} ZRM
+                  {parseFloat(allowance).toLocaleString()} ZRM
                 </span>
               </div>
             </div>
           </div>
 
           <button
-            onClick={handleApproval}
-            disabled={isApproving || !approvalAmount || Number(approvalAmount) <= 0}
-            className={`w-full bg-purple-primary hover:bg-purple-hover text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 ${
-              isApproving || !approvalAmount || Number(approvalAmount) <= 0
+            onClick={canDeposit ? handleDepositApprovedTokens : handleApproval}
+            disabled={(isApproving || contractLoading || isWaitingForApproval || isWaitingForDeposit) || !approvalAmount || Number(approvalAmount) <= 0}
+            className={`w-full font-medium py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+              canDeposit 
+                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                : 'bg-purple-primary hover:bg-purple-hover text-white'
+            } ${
+              (isApproving || contractLoading || isWaitingForApproval || isWaitingForDeposit) || !approvalAmount || Number(approvalAmount) <= 0
                 ? 'opacity-50 cursor-not-allowed'
                 : ''
             }`}
           >
-            {isApproving ? (
+            {isApproving || contractLoading || isWaitingForApproval || isWaitingForDeposit ? (
               <>
                 <Loader2 size={20} className="animate-spin" />
-                Approving...
+                {isWaitingForApproval ? 'Waiting for approval...' : isWaitingForDeposit ? 'Depositing...' : canDeposit ? 'Depositing...' : 'Approving...'}
+              </>
+            ) : canDeposit ? (
+              <>
+                <Send size={20} />
+                Deposit {Number(approvalAmount).toLocaleString()} ZRM
               </>
             ) : (
               <>
@@ -160,17 +231,42 @@ export default function Promote() {
             )}
           </button>
 
-          {approvalStatus === 'success' && (
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+          {isWaitingForApproval && (
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
               <div className="flex items-center gap-2">
-                <CheckCircle size={20} className="text-green-500" />
-                <span className="text-green-400 font-medium">Approval Successful!</span>
+                <Loader2 size={20} className="text-blue-500 animate-spin" />
+                <span className="text-blue-400 font-medium">Confirming Approval...</span>
               </div>
               <p className="text-text-secondary text-sm mt-1">
-                You can now use ZRM tokens to promote your NFTs during creation or through the manage panel.
+                Waiting for your approval transaction to be confirmed on the blockchain...
               </p>
             </div>
           )}
+
+          {isWaitingForDeposit && (
+            <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <Loader2 size={20} className="text-orange-500 animate-spin" />
+                <span className="text-orange-400 font-medium">Processing Deposit...</span>
+              </div>
+              <p className="text-text-secondary text-sm mt-1">
+                Your deposit is being processed. Please wait for confirmation...
+              </p>
+            </div>
+          )}
+
+          {canDeposit && !isWaitingForApproval && !isWaitingForDeposit && (
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <CheckCircle size={20} className="text-green-500" />
+                <span className="text-green-400 font-medium">Ready to Deposit!</span>
+              </div>
+              <p className="text-text-secondary text-sm mt-1">
+                Your tokens are approved. Click the green "Deposit" button above to transfer them to your platform account.
+              </p>
+            </div>
+          )}
+
 
           {approvalStatus === 'error' && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">

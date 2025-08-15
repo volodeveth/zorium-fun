@@ -8,126 +8,40 @@ import CategoryFilter from '@/components/explore/CategoryFilter'
 import NFTCard from '@/components/nft/NFTCard'
 import NFTCardExpanded from '@/components/nft/NFTCardExpanded'
 import UserLink from '@/components/common/UserLink'
-import { Filter, LayoutGrid, LayoutList } from 'lucide-react'
+import { Filter, LayoutGrid, LayoutList, Loader2 } from 'lucide-react'
+import { api } from '@/lib/api'
 
-// Mock data - in real app this would come from API
-const mockNFTs = [
-  {
-    id: 1,
-    title: 'Aurora Dreams',
-    creator: 'artisan_01',
-    creatorAddress: '0x1234...5678',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 24,
-    mints: 12,
-    networkId: 8453,
-    category: 'Art',
-    description: 'A mesmerizing digital artwork that captures the essence of aurora borealis with vibrant colors and ethereal beauty.',
-    mintEndTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2 hours from now
-    comments: [
-      { id: 1, user: 'crypto_fan', userAddress: '0xc1a2b3...4d5e', text: 'Amazing artwork! Love the colors 🎨', timestamp: '2m ago' },
-      { id: 2, user: 'nft_collector', userAddress: '0xf6g7h8...9i0j', text: 'This is going straight to my collection!', timestamp: '5m ago' },
-      { id: 3, user: 'artist_pro', userAddress: '0xk1l2m3...4n5o', text: 'Incredible detail work', timestamp: '10m ago' }
-    ]
-  },
-  {
-    id: 2,
-    title: 'Digital Waves',
-    creator: 'cryptoart',
-    creatorAddress: '0xabcd...efgh',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000222',
-    promoted: false,
-    likes: 18,
-    mints: 8,
-    networkId: 7777777,
-    category: 'Photography',
-    description: 'Stunning ocean waves captured at the perfect moment, showcasing the raw power and beauty of nature.',
-    mintEndTime: new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString(), // 23 hours from now
-    comments: [
-      { id: 1, user: 'wave_rider', userAddress: '0xp1q2r3...4s5t', text: 'Perfect timing on this shot!', timestamp: '1h ago' },
-      { id: 2, user: 'photo_lover', userAddress: '0xu6v7w8...9x0y', text: 'The composition is stunning', timestamp: '2h ago' }
-    ]
-  },
-  {
-    id: 3,
-    title: 'Neon Glow',
-    creator: 'pixelmaster',
-    creatorAddress: '0x9876...5432',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000111',
-    promoted: true,
-    likes: 35,
-    mints: 19,
-    networkId: 1,
-    category: 'Art',
-    description: 'An electrifying neon artwork that glows with futuristic energy and cyberpunk aesthetics.',
-    mintEndTime: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(), // 6 days from now
-    comments: [
-      { id: 1, user: 'neon_fan', userAddress: '0xa1b2c3...4d5e', text: 'The glow effect is incredible! How did you achieve this?', timestamp: '30m ago' },
-      { id: 2, user: 'tech_artist', userAddress: '0xf6g7h8...9i0j', text: 'Masterpiece! 🔥', timestamp: '45m ago' }
-    ]
-  },
-  {
-    id: 4,
-    title: 'Cyber Samurai',
-    creator: 'futuristic',
-    creatorAddress: '0x5555...6666',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000333',
-    promoted: false,
-    likes: 42,
-    mints: 23,
-    networkId: 137,
-    category: 'Art',
-    description: 'A masterful blend of traditional samurai culture with futuristic cyberpunk elements, creating a unique digital warrior.',
-    mintEndTime: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // ended 1 hour ago
-    comments: [
-      { id: 1, user: 'samurai_soul', userAddress: '0xz1x2c3...4v5b', text: 'Epic blend of traditional and futuristic!', timestamp: '15m ago' },
-      { id: 2, user: 'cyber_punk', userAddress: '0xn6m7l8...9k0j', text: 'This belongs in a museum', timestamp: '20m ago' },
-      { id: 3, user: 'warrior_fan', userAddress: '0xh1g2f3...4e5d', text: 'The detail on the armor is insane', timestamp: '25m ago' }
-    ]
-  },
-  {
-    id: 5,
-    title: 'Ocean Depths',
-    creator: 'naturephoto',
-    creatorAddress: '0x7777...8888',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000150',
-    promoted: false,
-    likes: 31,
-    mints: 15,
-    networkId: 10,
-    category: 'Photography',
-    description: 'Deep underwater photography revealing the mysterious beauty of ocean depths and marine life.',
-    mintEndTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes from now
-    comments: [
-      { id: 1, user: 'ocean_explorer', userAddress: '0xc1b2a3...4z5y', text: 'Makes me want to dive right in!', timestamp: '3h ago' }
-    ]
-  },
-  {
-    id: 6,
-    title: 'Mountain Peak',
-    creator: 'landscape_pro',
-    creatorAddress: '0x9999...aaaa',
-    image: '/images/placeholder-nft.jpg',
-    price: '0.000180',
-    promoted: false,
-    likes: 28,
-    mints: 11,
-    networkId: 42161,
-    category: 'Photography',
-    description: 'Breathtaking mountain landscape captured during golden hour, showcasing majestic peaks and natural grandeur.',
-    mintEndTime: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days from now
-    comments: [
-      { id: 1, user: 'mountain_climber', userAddress: '0xw1v2u3...4t5s', text: 'Breathtaking view! Which peak is this?', timestamp: '1h ago' },
-      { id: 2, user: 'nature_lover', userAddress: '0xr1q2p3...4o5n', text: 'Perfect golden hour lighting', timestamp: '1.5h ago' }
-    ]
+interface NFT {
+  id: string
+  name: string
+  description?: string
+  image: string
+  animationUrl?: string
+  price?: string
+  currency?: string
+  isListed: boolean
+  viewCount: number
+  likeCount: number
+  isPromoted: boolean
+  createdAt: string
+  creator: {
+    address: string
+    username?: string
+    displayName?: string
+    avatar?: string
   }
-]
+  owner: {
+    address: string
+    username?: string
+    displayName?: string
+    avatar?: string
+  }
+  collection?: {
+    id: string
+    name: string
+    image?: string
+  }
+}
 
 export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -139,6 +53,56 @@ export default function ExplorePage() {
   const [onlyPromoted, setOnlyPromoted] = useState(false)
   const [selectedNetwork, setSelectedNetwork] = useState<string | number>('all')
   const [timeRemaining, setTimeRemaining] = useState('all')
+  
+  // Backend data states
+  const [nfts, setNfts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // Fetch NFTs from backend
+  const fetchNFTs = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const response = await api.nfts.getAll()
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Transform backend NFT data to match frontend format
+        const transformedNFTs = data.nfts?.map((nft: any) => ({
+          id: nft.id,
+          title: nft.name,
+          creator: nft.creator?.username || nft.creator?.displayName || `${nft.creator?.address?.slice(0, 6)}...${nft.creator?.address?.slice(-4)}`,
+          creatorAddress: nft.creator?.address || '0x0000...0000',
+          image: nft.image || '/images/placeholder-nft.jpg',
+          price: nft.price?.toString() || '0.000111',
+          promoted: nft.isPromoted || false,
+          likes: nft.likeCount || 0,
+          mints: 1, // Default mint count
+          networkId: 1, // Default to Ethereum
+          category: 'Art', // Default category
+          description: nft.description || 'No description available',
+          mintEndTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default 24h
+          comments: [] // Comments will be loaded separately
+        })) || []
+        
+        setNfts(transformedNFTs)
+      } else {
+        setError('Failed to load NFTs from backend')
+      }
+    } catch (err) {
+      console.error('Error fetching NFTs:', err)
+      setError('Error connecting to backend')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Load NFTs on component mount
+  useEffect(() => {
+    fetchNFTs()
+  }, [])
 
   // Close filters on mobile when clicking outside or on escape
   useEffect(() => {
@@ -175,7 +139,7 @@ export default function ExplorePage() {
   }
 
   // Filter and sort NFTs based on current filters
-  const filteredNFTs = mockNFTs
+  const filteredNFTs = nfts
     .filter(nft => {
       // Search filter
       if (searchQuery && !nft.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
@@ -238,7 +202,7 @@ export default function ExplorePage() {
           return b.mints - a.mints
         case 'newest':
         default:
-          return b.id - a.id
+          return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
       }
     })
 
@@ -371,8 +335,26 @@ export default function ExplorePage() {
               />
             </div>
 
+            {/* Error Banner */}
+            {error && (
+              <div className="mb-6 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs">!</span>
+                  </div>
+                  <p className="text-yellow-700 dark:text-yellow-300 text-sm">{error}</p>
+                </div>
+              </div>
+            )}
+
             {/* NFTs Grid */}
-            {filteredNFTs.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12">
+                <Loader2 className="mx-auto mb-4 animate-spin text-purple-primary" size={48} />
+                <h3 className="text-xl font-semibold text-text-primary mb-2">Loading NFTs...</h3>
+                <p className="text-text-secondary">Fetching the latest digital assets</p>
+              </div>
+            ) : filteredNFTs.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-text-secondary mb-4">
                   <Filter size={48} className="mx-auto opacity-50" />
@@ -396,7 +378,7 @@ export default function ExplorePage() {
                           <div className="border-t border-border p-6">
                             <h4 className="text-lg font-semibold text-text-primary mb-4">Comments</h4>
                             <div className="space-y-4">
-                              {nft.comments.slice(0, 2).map((comment) => (
+                              {nft.comments.slice(0, 2).map((comment: any) => (
                                 <div key={comment.id} className="flex gap-3">
                                   <div className="w-10 h-10 bg-purple-primary/20 rounded-full flex items-center justify-center flex-shrink-0">
                                     <span className="text-sm font-semibold text-purple-primary">

@@ -7,7 +7,7 @@ import FollowSuggestionsModal from './FollowSuggestionsModal'
 import { CheckCircle, Mail, Clock, Users } from 'lucide-react'
 
 export default function AuthenticationFlow() {
-  // TEMPORARY: Disable authentication flow
+  // Temporarily disable email flow - skip registration modal
   const ENABLE_AUTH_FLOW = false
   
   if (!ENABLE_AUTH_FLOW) {

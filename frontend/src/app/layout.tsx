@@ -4,6 +4,7 @@ import './globals.css'
 import Header from '@/components/layout/Header'
 import Footer from '@/components/layout/Footer'
 import AuthenticationFlow from '@/components/auth/AuthenticationFlow'
+import EarlyBirdWrapper from '@/components/notifications/EarlyBirdWrapper'
 import Providers from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -45,6 +46,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           <AuthenticationFlow />
+          <EarlyBirdWrapper />
           <main className="min-h-screen">
             {children}
           </main>

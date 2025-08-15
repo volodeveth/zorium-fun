@@ -1,47 +1,129 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
-import { Wallet, DollarSign, TrendingUp, Download, AlertCircle } from 'lucide-react'
+import { Wallet, DollarSign, TrendingUp, Download, AlertCircle, Loader2 } from 'lucide-react'
 import { SUPPORTED_NETWORKS } from '@/lib/web3/wagmi'
+import { api } from '@/lib/api'
 
-// Mock data - це буде замінено реальними API викликами
-const mockUserData = {
-  8453: { // Base
-    collections: [
-      { id: 1, name: 'My Art Collection', nftCount: 12, totalEarnings: '0.0245' },
-      { id: 2, name: 'Digital Creations', nftCount: 8, totalEarnings: '0.0189' }
-    ],
-    nfts: [
-      { id: 1, title: 'Abstract #001', collection: 'My Art Collection', mints: 15, earnings: '0.0167' },
-      { id: 2, title: 'Digital Dreams', collection: 'My Art Collection', mints: 8, earnings: '0.0089' },
-      { id: 3, title: 'Neon City', collection: 'Digital Creations', mints: 22, earnings: '0.0244' }
-    ],
-    totalEarnings: '0.0434',
-    pendingWithdrawal: '0.0434'
-  },
-  7777777: { // Zora
-    collections: [
-      { id: 3, name: 'Zora Specials', nftCount: 5, totalEarnings: '0.0078' }
-    ],
-    nfts: [
-      { id: 4, title: 'Zora Genesis', collection: 'Zora Specials', mints: 12, earnings: '0.0078' }
-    ],
-    totalEarnings: '0.0078',
-    pendingWithdrawal: '0.0078'
-  },
-  1: { // Ethereum
-    collections: [],
-    nfts: [],
-    totalEarnings: '0',
-    pendingWithdrawal: '0'
-  }
+interface UserNFT {
+  id: string
+  name: string
+  description?: string
+  image: string
+  price?: string
+  isListed: boolean
+  likeCount: number
+  viewCount: number
+  createdAt: string
+  earnings?: string
+  mints?: number
+  collection?: string
+}
+
+interface UserCollection {
+  id: string
+  name: string
+  description?: string
+  nftCount: number
+  totalEarnings: string
+  floorPrice?: string
+  totalVolume?: string
+}
+
+interface NetworkData {
+  collections: UserCollection[]
+  nfts: UserNFT[]
+  totalEarnings: string
+  pendingWithdrawal: string
 }
 
 export default function Dashboard() {
   const { address, isConnected } = useAccount()
   const [activeNetwork, setActiveNetwork] = useState(8453) // Base за замовчуванням
   const [withdrawing, setWithdrawing] = useState<number | null>(null)
+  
+  // Data states
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [userNFTs, setUserNFTs] = useState<UserNFT[]>([])
+  const [userCollections, setUserCollections] = useState<UserCollection[]>([])
+  const [zrmBalance, setZrmBalance] = useState('0')
+  const [totalEarnings, setTotalEarnings] = useState(0)
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    if (isConnected && address) {
+      fetchUserData()
+    }
+  }, [isConnected, address])
+
+  const fetchUserData = async () => {
+    if (!address) return
+    
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Fetch user's ZRM balance
+      const balanceResponse = await api.users.getZrmBalance(address)
+      if (balanceResponse.ok) {
+        const balanceData = await balanceResponse.json()
+        setZrmBalance(balanceData.balance || '0')
+      }
+      
+      // Fetch user's NFTs
+      const nftsResponse = await api.nfts.getAll()
+      if (nftsResponse.ok) {
+        const nftsData = await nftsResponse.json()
+        const allNFTs = nftsData.nfts || []
+        
+        // Filter NFTs created by this user
+        const createdNFTs = allNFTs
+          .filter((nft: any) => nft.creator?.address?.toLowerCase() === address.toLowerCase())
+          .map((nft: any) => ({
+            id: nft.id,
+            name: nft.name,
+            description: nft.description,
+            image: nft.image || '/images/placeholder-nft.jpg',
+            price: nft.price?.toString() || '0.001',
+            isListed: nft.isListed,
+            likeCount: nft.likeCount || 0,
+            viewCount: nft.viewCount || 0,
+            createdAt: nft.createdAt,
+            earnings: (parseFloat(nft.price || '0') * (nft.mints || 1) * 0.1).toFixed(4), // Mock 10% royalty
+            mints: nft.mints || 1,
+            collection: nft.collection?.name || 'General'
+          }))
+        
+        setUserNFTs(createdNFTs)
+        
+        // Calculate total earnings
+        const earnings = createdNFTs.reduce((sum: number, nft: UserNFT) => sum + parseFloat(nft.earnings || '0'), 0)
+        setTotalEarnings(earnings)
+      }
+      
+      // Mock collections data (since collections system is not fully implemented)
+      const mockCollections: UserCollection[] = [
+        {
+          id: '1',
+          name: 'My Collection',
+          description: 'Personal NFT collection',
+          nftCount: userNFTs.length,
+          totalEarnings: totalEarnings.toFixed(4),
+          floorPrice: '0.001',
+          totalVolume: (totalEarnings * 1.5).toFixed(4)
+        }
+      ]
+      setUserCollections(mockCollections)
+      
+    } catch (err) {
+      console.error('Error fetching user data:', err)
+      setError('Failed to load dashboard data')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleWithdraw = async (networkId: number) => {
     setWithdrawing(networkId)
@@ -67,17 +149,27 @@ export default function Dashboard() {
       </div>
     )
   }
-
-  const activeNetworkData = mockUserData[activeNetwork as keyof typeof mockUserData] || {
-    collections: [],
-    nfts: [],
-    totalEarnings: '0',
-    pendingWithdrawal: '0'
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="animate-spin h-8 w-8 text-purple-primary mx-auto mb-4" />
+          <p className="text-text-secondary">Loading dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
-  const totalEarningsAllNetworks = Object.values(mockUserData).reduce(
-    (sum, data) => sum + parseFloat(data.totalEarnings), 0
-  )
+  // Create network data based on real data
+  const activeNetworkData: NetworkData = {
+    collections: userCollections,
+    nfts: userNFTs,
+    totalEarnings: totalEarnings.toFixed(4),
+    pendingWithdrawal: (totalEarnings * 0.1).toFixed(4) // Mock 10% pending
+  }
+
+  const totalEarningsAllNetworks = totalEarnings
 
   return (
     <div className="min-h-screen py-8">
@@ -90,8 +182,20 @@ export default function Dashboard() {
           </p>
         </div>
 
+        {/* Error Banner */}
+        {error && (
+          <div className="mb-6 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">!</span>
+              </div>
+              <p className="text-yellow-700 dark:text-yellow-300 text-sm">{error}</p>
+            </div>
+          </div>
+        )}
+
         {/* Total Earnings Summary */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-background-secondary rounded-xl border border-border p-6">
             <div className="flex items-center gap-3 mb-2">
               <DollarSign size={20} className="text-green-500" />
@@ -101,17 +205,17 @@ export default function Dashboard() {
               {totalEarningsAllNetworks.toFixed(4)} ETH
             </div>
             <div className="text-text-secondary text-sm mt-1">
-              Across all networks
+              From NFT sales
             </div>
           </div>
 
           <div className="bg-background-secondary rounded-xl border border-border p-6">
             <div className="flex items-center gap-3 mb-2">
               <TrendingUp size={20} className="text-blue-500" />
-              <span className="text-text-secondary text-sm">Total Collections</span>
+              <span className="text-text-secondary text-sm">Collections</span>
             </div>
             <div className="text-2xl font-bold text-text-primary">
-              {Object.values(mockUserData).reduce((sum, data) => sum + data.collections.length, 0)}
+              {userCollections.length}
             </div>
             <div className="text-text-secondary text-sm mt-1">
               Active collections
@@ -121,13 +225,26 @@ export default function Dashboard() {
           <div className="bg-background-secondary rounded-xl border border-border p-6">
             <div className="flex items-center gap-3 mb-2">
               <Wallet size={20} className="text-purple-primary" />
-              <span className="text-text-secondary text-sm">Total NFTs</span>
+              <span className="text-text-secondary text-sm">NFTs Created</span>
             </div>
             <div className="text-2xl font-bold text-text-primary">
-              {Object.values(mockUserData).reduce((sum, data) => sum + data.nfts.length, 0)}
+              {userNFTs.length}
             </div>
             <div className="text-text-secondary text-sm mt-1">
               Minted by you
+            </div>
+          </div>
+
+          <div className="bg-background-secondary rounded-xl border border-border p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="text-lg font-bold text-purple-primary">ZRM</span>
+              <span className="text-text-secondary text-sm">Balance</span>
+            </div>
+            <div className="text-2xl font-bold text-text-primary">
+              {parseFloat(zrmBalance).toFixed(2)}
+            </div>
+            <div className="text-text-secondary text-sm mt-1">
+              Zorium tokens
             </div>
           </div>
         </div>
@@ -148,10 +265,9 @@ export default function Dashboard() {
                   }`}
                 >
                   {network.name}
-                  {mockUserData[network.id as keyof typeof mockUserData] && 
-                   parseFloat(mockUserData[network.id as keyof typeof mockUserData].totalEarnings) > 0 && (
+                  {network.id === activeNetwork && totalEarnings > 0 && (
                     <span className="ml-2 px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-                      {parseFloat(mockUserData[network.id as keyof typeof mockUserData].totalEarnings).toFixed(4)} {network.symbol}
+                      {totalEarnings.toFixed(4)} {network.symbol}
                     </span>
                   )}
                 </button>
@@ -213,6 +329,12 @@ export default function Dashboard() {
                             {collection.totalEarnings} {SUPPORTED_NETWORKS.find(n => n.id === activeNetwork)?.symbol}
                           </span>
                         </div>
+                        <div className="flex justify-between">
+                          <span className="text-text-secondary">Floor:</span>
+                          <span className="text-text-primary">
+                            {collection.floorPrice} {SUPPORTED_NETWORKS.find(n => n.id === activeNetwork)?.symbol}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -228,9 +350,13 @@ export default function Dashboard() {
                   {activeNetworkData.nfts.map((nft) => (
                     <div key={nft.id} className="bg-background-tertiary rounded-lg border border-border p-4">
                       <div className="flex justify-between items-start">
-                        <div>
-                          <h5 className="font-semibold text-text-primary">{nft.title}</h5>
+                        <div className="flex-1">
+                          <h5 className="font-semibold text-text-primary">{nft.name}</h5>
                           <p className="text-text-secondary text-sm">{nft.collection}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-text-secondary">
+                            <span>❤️ {nft.likeCount} likes</span>
+                            <span>👁️ {nft.viewCount} views</span>
+                          </div>
                         </div>
                         <div className="text-right">
                           <div className="text-green-500 font-semibold">
@@ -238,6 +364,9 @@ export default function Dashboard() {
                           </div>
                           <div className="text-text-secondary text-sm">
                             {nft.mints} mints
+                          </div>
+                          <div className="text-purple-primary text-sm font-medium mt-1">
+                            {nft.price} {SUPPORTED_NETWORKS.find(n => n.id === activeNetwork)?.symbol}
                           </div>
                         </div>
                       </div>
